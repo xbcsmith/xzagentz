@@ -1,0 +1,41 @@
+[package]
+name = "xzagentz"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.70"
+authors = ["xzagentz contributors"]
+description = "A CLI tool for managing AI agent development guidelines and project templates"
+license = "MIT"
+repository = "https://github.com/xbcsmith/xzagentz"
+keywords = ["cli", "templates", "agents", "guidelines"]
+categories = ["command-line-utilities", "development-tools"]
+
+[dependencies]
+clap = { version = "4.4", features = ["derive", "cargo", "env"] }
+toml = "0.8"
+serde = { version = "1.0", features = ["derive"] }
+thiserror = "1.0"
+anyhow = "1.0"
+walkdir = "2.4"
+dirs = "5.0"
+chrono = { version = "0.4", features = ["serde"] }
+regex = "1.10"
+
+[dev-dependencies]
+tempfile = "3.8"
+assert_cmd = "2.0"
+predicates = "3.0"
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+strip = true
+
+[profile.dev]
+opt-level = 0
+debug = true
+
+[[bin]]
+name = "xzagentz"
+path = "src/main.rs"

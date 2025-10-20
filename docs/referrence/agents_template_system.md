@@ -2,7 +2,7 @@
 
 A component-based system for building project-specific AGENTS.md files using Rust.
 
-This document explains a component-based system for building project-specific AGENTS.md using Rust. 
+This document explains a component-based system for building project-specific AGENTS.md using Rust.
 
 ## Directory Structure
 
@@ -33,7 +33,7 @@ xzagentz/
 │   ├── rust_binary.toml              # Rust binary project recipe
 │   ├── golang_service.toml           # Go microservice recipe
 │   ├── npm_webapp.toml               # NPM web app recipe
-│   └── bash_scripts.toml             # Bash tooling recipe                         
+│   └── bash_scripts.toml             # Bash tooling recipe
 ├── src/
 │   ├── templates/                    # Rust Templates code
 │   └── agents/                     # Rust Agents logic code for create, update, add functionality

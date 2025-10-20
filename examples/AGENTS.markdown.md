@@ -69,7 +69,7 @@ docs/
 - **Example code:** Include code examples within your doc comments
 - **Internal documentation:** Use `#` comments for internal implementation details
 - **MARKDOWN**
-    - **Filenames:** ALL MARKDOWN file names should be lower case except for the README.md. 
+    - **Filenames:** ALL MARKDOWN file names should be lower case except for the README.md.
     - **DO NOT USE EMOJIs**
     - **Markdownlint:** Use the rules .markdownlint.json
 - **Centralized documentation:** All documentation lives in `docs/` directory with Diataxis structure
