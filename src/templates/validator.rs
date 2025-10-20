@@ -155,7 +155,7 @@ impl TemplateValidator {
     /// ```
     pub fn validate_components(&self, template: &Template) -> Result<()> {
         let loader = self.component_loader.as_ref().ok_or_else(|| {
-            Error::Validation("Component validation requires a component loader".to_string())
+            Error::ValidationError("Component validation requires a component loader".to_string())
         })?;
 
         for component in &template.components {
@@ -261,7 +261,7 @@ impl TemplateValidator {
 
         for window in orders.windows(2) {
             if window[0] == window[1] {
-                return Err(Error::Validation(format!(
+                return Err(Error::ValidationError(format!(
                     "Duplicate component order value: {}",
                     window[0]
                 )));
@@ -305,7 +305,7 @@ impl TemplateValidator {
         let required_count = template.components.iter().filter(|c| c.required).count();
 
         if required_count == 0 {
-            return Err(Error::Validation(
+            return Err(Error::ValidationError(
                 "Template must have at least one required component".to_string(),
             ));
         }
@@ -394,7 +394,7 @@ mod tests {
         let result = validator.validate_components(&template);
 
         assert!(result.is_err());
-        assert!(matches!(result, Err(Error::Validation(_))));
+        assert!(matches!(result, Err(Error::ValidationError(_))));
     }
 
     #[test]

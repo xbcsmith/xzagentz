@@ -35,6 +35,10 @@ pub enum Error {
     #[error("Component validation failed: {reason}")]
     ComponentValidation { reason: String },
 
+    /// Component load error
+    #[error("Component load error: {0}")]
+    ComponentLoadError(String),
+
     /// Template not found error
     #[error("Template not found: {0}")]
     TemplateNotFound(String),
@@ -133,7 +137,11 @@ pub enum Error {
 
     /// Validation error
     #[error("Validation error: {0}")]
-    Validation(String),
+    ValidationError(String),
+
+    /// Feature not implemented
+    #[error("Not implemented: {0}")]
+    NotImplemented(String),
 
     /// Regex error
     #[error("Regex error: {source}")]

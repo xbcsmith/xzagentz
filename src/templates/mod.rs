@@ -436,19 +436,19 @@ impl Template {
     /// ```
     pub fn validate(&self) -> crate::Result<()> {
         if self.name.trim().is_empty() {
-            return Err(crate::Error::Validation(
+            return Err(crate::Error::ValidationError(
                 "Template name cannot be empty".to_string(),
             ));
         }
 
         if self.description.trim().is_empty() {
-            return Err(crate::Error::Validation(
+            return Err(crate::Error::ValidationError(
                 "Template description cannot be empty".to_string(),
             ));
         }
 
         if self.components.is_empty() {
-            return Err(crate::Error::Validation(
+            return Err(crate::Error::ValidationError(
                 "Template must have at least one component".to_string(),
             ));
         }
