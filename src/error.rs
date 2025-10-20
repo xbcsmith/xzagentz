@@ -36,16 +36,16 @@ pub enum Error {
     ComponentValidation { reason: String },
 
     /// Template not found error
-    #[error("Template not found: {name}")]
-    TemplateNotFound { name: String },
+    #[error("Template not found: {0}")]
+    TemplateNotFound(String),
 
     /// Template parsing error
-    #[error("Failed to parse template '{name}': {reason}")]
-    TemplateParse { name: String, reason: String },
+    #[error("Template parse error: {0}")]
+    TemplateParse(String),
 
     /// Template validation error
-    #[error("Template validation failed for '{name}': {reason}")]
-    TemplateValidation { name: String, reason: String },
+    #[error("Template validation error: {0}")]
+    TemplateValidation(String),
 
     /// Configuration error
     #[error("Configuration error: {reason}")]
@@ -89,16 +89,16 @@ pub enum Error {
     },
 
     /// Placeholder error
-    #[error("Placeholder error: {reason}")]
-    Placeholder { reason: String },
+    #[error("Placeholder error: {0}")]
+    Placeholder(String),
 
     /// Missing required placeholder
-    #[error("Missing required placeholder: {name}")]
-    MissingPlaceholder { name: String },
+    #[error("Placeholder not found: {0}")]
+    PlaceholderNotFound(String),
 
     /// Invalid placeholder format
-    #[error("Invalid placeholder format: {format}")]
-    InvalidPlaceholder { format: String },
+    #[error("Invalid placeholder format: {0}")]
+    InvalidPlaceholder(String),
 
     /// Plan parsing error
     #[error("Failed to parse plan '{name}': {reason}")]
@@ -121,11 +121,19 @@ pub enum Error {
     CommandFailed { command: String },
 
     /// Generic I/O error
+    #[error("I/O error: {0}")]
+    Io(String),
+
+    /// Standard library I/O error
     #[error("I/O error: {source}")]
-    Io {
+    StdIo {
         #[from]
         source: std::io::Error,
     },
+
+    /// Validation error
+    #[error("Validation error: {0}")]
+    Validation(String),
 
     /// Regex error
     #[error("Regex error: {source}")]
@@ -165,7 +173,7 @@ impl Error {
     /// assert!(err.to_string().contains("rust_binary"));
     /// ```
     pub fn template_not_found(name: impl Into<String>) -> Self {
-        Self::TemplateNotFound { name: name.into() }
+        Self::TemplateNotFound(name.into())
     }
 
     /// Creates a TemplateParse error
@@ -179,10 +187,7 @@ impl Error {
     /// assert!(err.to_string().contains("config.toml"));
     /// ```
     pub fn template_parse(name: impl Into<String>, reason: impl Into<String>) -> Self {
-        Self::TemplateParse {
-            name: name.into(),
-            reason: reason.into(),
-        }
+        Self::TemplateParse(format!("{}: {}", name.into(), reason.into()))
     }
 
     /// Creates a Configuration error
@@ -284,13 +289,8 @@ mod tests {
 
     #[test]
     fn test_missing_placeholder_error() {
-        let err = Error::MissingPlaceholder {
-            name: "project_name".to_string(),
-        };
-        assert_eq!(
-            err.to_string(),
-            "Missing required placeholder: project_name"
-        );
+        let err = Error::PlaceholderNotFound("project_name".to_string());
+        assert_eq!(err.to_string(), "Placeholder not found: project_name");
     }
 
     #[test]
@@ -337,10 +337,10 @@ mod tests {
         assert!(matches!(err1, Error::ComponentNotFound { .. }));
 
         let err2 = Error::template_not_found("test");
-        assert!(matches!(err2, Error::TemplateNotFound { .. }));
+        assert!(matches!(err2, Error::TemplateNotFound(_)));
 
         let err3 = Error::template_parse("test", "reason");
-        assert!(matches!(err3, Error::TemplateParse { .. }));
+        assert!(matches!(err3, Error::TemplateParse(_)));
 
         let err4 = Error::configuration("reason");
         assert!(matches!(err4, Error::Configuration { .. }));

@@ -34,6 +34,7 @@
 pub mod components;
 pub mod core;
 pub mod error;
+pub mod templates;
 
 // Re-export commonly used types
 pub use error::{Error, Result};
