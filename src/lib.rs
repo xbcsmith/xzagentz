@@ -33,8 +33,12 @@
 
 pub mod cli;
 pub mod components;
+pub mod config;
 pub mod core;
 pub mod error;
+pub mod parser;
+pub mod plans;
+pub mod prompts;
 pub mod templates;
 
 // Re-export commonly used types

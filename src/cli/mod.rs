@@ -9,8 +9,12 @@
 //! - `Commands` enum for subcommands (list, validate, create, etc.)
 //! - Each command has its own implementation module
 
+pub mod add;
+pub mod create;
 pub mod list;
 pub mod output;
+pub mod prompt;
+pub mod update;
 pub mod validate;
 
 use clap::{Parser, Subcommand, ValueEnum};
@@ -129,6 +133,9 @@ pub enum Commands {
         #[arg(short, long, default_value = "bottom")]
         position: String,
     },
+
+    /// Prompt generation and management commands
+    Prompt(prompt::PromptArgs),
 }
 
 /// List command targets

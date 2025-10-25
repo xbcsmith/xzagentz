@@ -78,6 +78,14 @@ pub enum Error {
     #[error("Directory not found: {path}")]
     DirectoryNotFound { path: PathBuf },
 
+    /// File already exists
+    #[error("File already exists: {path}")]
+    FileAlreadyExists { path: PathBuf },
+
+    /// File creation error
+    #[error("Failed to create file '{path}': {reason}")]
+    FileCreateError { path: PathBuf, reason: String },
+
     /// TOML parsing error
     #[error("Failed to parse TOML: {source}")]
     TomlParse {
@@ -244,6 +252,84 @@ impl Error {
         Self::Other {
             message: message.into(),
         }
+    }
+
+    /// Creates a FileAlreadyExists error
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use xzagentz::error::Error;
+    /// use std::path::PathBuf;
+    ///
+    /// let err = Error::file_already_exists(PathBuf::from("AGENTS.md"));
+    /// assert!(err.to_string().contains("AGENTS.md"));
+    /// ```
+    pub fn file_already_exists(path: PathBuf) -> Self {
+        Self::FileAlreadyExists { path }
+    }
+
+    /// Creates a FileCreateError
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use xzagentz::error::Error;
+    /// use std::path::PathBuf;
+    ///
+    /// let err = Error::file_create_error(PathBuf::from("AGENTS.md"), "Permission denied");
+    /// assert!(err.to_string().contains("AGENTS.md"));
+    /// assert!(err.to_string().contains("Permission denied"));
+    /// ```
+    pub fn file_create_error(path: PathBuf, reason: impl Into<String>) -> Self {
+        Self::FileCreateError {
+            path,
+            reason: reason.into(),
+        }
+    }
+
+    /// Creates a ValidationError
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use xzagentz::error::Error;
+    ///
+    /// let err = Error::validation_error("Invalid input");
+    /// assert!(err.to_string().contains("Invalid input"));
+    /// ```
+    pub fn validation_error(message: impl Into<String>) -> Self {
+        Self::ValidationError(message.into())
+    }
+
+    /// Creates a ConfigError
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use xzagentz::error::Error;
+    ///
+    /// let err = Error::config_error("Missing required field");
+    /// assert!(err.to_string().contains("Missing required field"));
+    /// ```
+    pub fn config_error(reason: impl Into<String>) -> Self {
+        Self::Configuration {
+            reason: reason.into(),
+        }
+    }
+
+    /// Creates a SectionNotFound error
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use xzagentz::error::Error;
+    ///
+    /// let err = Error::section_not_found("Quick Reference");
+    /// assert!(err.to_string().contains("Quick Reference"));
+    /// ```
+    pub fn section_not_found(section: impl Into<String>) -> Self {
+        Self::other(format!("Section not found: {}", section.into()))
     }
 }
 

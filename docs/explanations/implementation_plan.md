@@ -299,6 +299,7 @@ fn test_error_chain_preserves_context()
 - `components/core/learning_resources.md`
 - `components/languages/rust.md`
 - `components/languages/python.md`
+- `components/languages/golang.md`
 - `components/tools/git.md`
 - `components/tools/markdown.md`
 - `components/general/development.md`
@@ -1268,51 +1269,662 @@ fn test_configuration_options()
 
 ### 7.5 Prompt Generation System
 
+**Overview**:
+
+The Prompt Generation System converts implementation plan sections into structured prompts for AI agents. Each prompt includes context from the architecture plan, relevant AGENTS.md rules, specific tasks to complete, and validation checklists. The system supports both batch generation (all prompts at once) and interactive generation (prompt-by-prompt with preview).
+
 **Tasks**:
 
-1. Implement prompt template system
-2. Implement prompt generator orchestrator
-3. Generate individual section prompts
-4. Batch generate all prompts
-5. Interactive generation mode
-6. Write prompt generator tests
+1. Implement prompt template data structures with metadata
+2. Create prompt template renderer with placeholder support
+3. Implement prompt generator orchestrator for batch operations
+4. Build interactive generation workflow with preview
+5. Add overwrite protection and backup functionality
+6. Support custom output directories and naming schemes
+7. Integrate with embedded template system
+8. Write comprehensive prompt generator tests
 
 **Deliverables**:
 
-- `src/prompts/mod.rs` - Module declaration
-- `src/prompts/template.rs` - Prompt template rendering
+- `src/prompts/mod.rs` - Public prompt API and re-exports
+- `src/prompts/template.rs` - Prompt template structures and rendering
 - `src/prompts/generator.rs` - Prompt generation orchestrator
-- `PromptTemplate` struct
-- `PromptGenerator` struct
-- Batch generation functionality
-- Interactive generation mode
+- `src/prompts/context.rs` - Context extraction from plans
+- `templates/prompts/phase_prompt.md` - Embedded phase-level prompt template
+- `templates/prompts/section_prompt.md` - Embedded section-level prompt template
+- `templates/prompts/task_prompt.md` - Embedded task-level prompt template
+- CLI integration in `src/cli/prompt.rs`
+- Generated prompts output to `prompts/` directory
+
+**Data Structures**:
+
+```rust
+/// Prompt template with metadata and content
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct PromptTemplate {
+    /// Template name (e.g., "section_prompt")
+    pub name: String,
+    /// Template version
+    pub version: String,
+    /// Template description
+    pub description: String,
+    /// Template content with placeholders
+    pub content: String,
+    /// Required context variables
+    pub required_context: Vec<String>,
+    /// Optional context variables
+    pub optional_context: Vec<String>,
+}
+
+/// Context for generating a prompt
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct PromptContext {
+    /// Project metadata
+    pub project_name: String,
+    pub project_type: String,
+    pub project_description: String,
+
+    /// Phase information
+    pub phase_number: usize,
+    pub phase_title: String,
+    pub phase_goal: String,
+
+    /// Section information
+    pub section_number: String,
+    pub section_title: String,
+    pub section_tasks: Vec<String>,
+    pub section_deliverables: Vec<String>,
+    pub section_acceptance_criteria: Vec<String>,
+
+    /// Architecture context
+    pub architecture_overview: String,
+    pub related_components: Vec<String>,
+    pub dependencies: Vec<String>,
+
+    /// AGENTS.md rules (relevant to this section)
+    pub relevant_rules: Vec<String>,
+
+    /// File paths and structure
+    pub output_files: Vec<String>,
+    pub test_files: Vec<String>,
+}
+
+/// Prompt generator configuration
+#[derive(Debug, Clone)]
+pub struct PromptGeneratorConfig {
+    /// Output directory for generated prompts
+    pub output_dir: PathBuf,
+    /// Template directory (custom templates)
+    pub template_dir: Option<PathBuf>,
+    /// Overwrite existing prompts without asking
+    pub force_overwrite: bool,
+    /// Create backup before overwriting
+    pub create_backup: bool,
+    /// Prompt naming scheme
+    pub naming_scheme: PromptNamingScheme,
+    /// Include full architecture in context
+    pub include_full_architecture: bool,
+    /// Include all AGENTS.md rules or only relevant ones
+    pub include_all_rules: bool,
+}
+
+/// Naming scheme for generated prompts
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum PromptNamingScheme {
+    /// prompt_1_1.md, prompt_1_2.md, etc.
+    PhaseSection,
+    /// prompt_phase1_section1.md, etc.
+    Descriptive,
+    /// phase_1_project_foundation.md, etc.
+    Readable,
+}
+
+/// Main prompt generator
+pub struct PromptGenerator {
+    config: PromptGeneratorConfig,
+    templates: HashMap<String, PromptTemplate>,
+    embedded_templates: EmbeddedTemplates,
+}
+
+impl PromptGenerator {
+    /// Create new prompt generator with configuration
+    pub fn new(config: PromptGeneratorConfig) -> Result<Self>;
+
+    /// Generate all prompts from implementation plan
+    pub fn generate_all(
+        &self,
+        impl_plan: &ImplementationPlan,
+        arch_plan: &ArchitecturePlan,
+    ) -> Result<Vec<PathBuf>>;
+
+    /// Generate prompt for specific section
+    pub fn generate_section(
+        &self,
+        context: &PromptContext,
+    ) -> Result<PathBuf>;
+
+    /// Interactive generation with preview
+    pub fn generate_interactive(
+        &self,
+        impl_plan: &ImplementationPlan,
+        arch_plan: &ArchitecturePlan,
+    ) -> Result<Vec<PathBuf>>;
+
+    /// Render prompt from template and context
+    fn render_prompt(
+        &self,
+        template: &PromptTemplate,
+        context: &PromptContext,
+    ) -> Result<String>;
+
+    /// Check if prompt file exists and handle overwrite
+    fn handle_existing_file(&self, path: &Path) -> Result<bool>;
+
+    /// Create backup of existing file
+    fn create_backup(&self, path: &Path) -> Result<PathBuf>;
+
+    /// Format prompt filename from context
+    fn format_filename(&self, context: &PromptContext) -> String;
+}
+```
+
+**Prompt Template Format**:
+
+```markdown
+# Phase {{phase_number}}: {{phase_title}}
+
+## Section {{section_number}}: {{section_title}}
+
+## Context
+
+You are implementing {{section_title}} as part of the {{project_name}} project.
+
+### Project Overview
+
+{{project_description}}
+
+### Architecture Context
+
+{{architecture_overview}}
+
+### Related Components
+
+{{#each related_components}}
+
+- {{this}}
+  {{/each}}
+
+### Dependencies
+
+{{#each dependencies}}
+
+- {{this}}
+  {{/each}}
+
+## Critical Rules from AGENTS.md
+
+{{#each relevant_rules}}
+
+### {{this.title}}
+
+{{this.content}}
+{{/each}}
+
+## Tasks
+
+Your goal is to complete the following tasks:
+
+{{#each section_tasks}}
+{{@index}}. {{this}}
+{{/each}}
+
+## Deliverables
+
+You must create the following files:
+
+{{#each section_deliverables}}
+
+- {{this}}
+  {{/each}}
+
+### Expected Files
+
+{{#each output_files}}
+
+- `{{this}}`
+  {{/each}}
+
+### Test Files
+
+{{#each test_files}}
+
+- `{{this}}`
+  {{/each}}
+
+## Acceptance Criteria
+
+Your implementation will be validated against these criteria:
+
+{{#each section_acceptance_criteria}}
+
+- [ ] {{this}}
+      {{/each}}
+
+## Quality Checklist
+
+Before completing this section, verify:
+
+- [ ] `cargo fmt --all` applied successfully
+- [ ] `cargo check --all-targets --all-features` passes with zero errors
+- [ ] `cargo clippy --all-targets --all-features -- -D warnings` shows zero warnings
+- [ ] `cargo test --all-features` passes with >80% coverage
+- [ ] All public items have doc comments with examples
+- [ ] Documentation file created in `docs/explanations/`
+- [ ] All filenames follow naming conventions (lowercase_with_underscores.md)
+- [ ] All YAML files use `.yaml` extension (not `.yml`)
+- [ ] No emojis in code or documentation
+
+## Implementation Notes
+
+1. Start by reading the architecture plan section
+2. Create file stubs with proper module structure
+3. Implement core functionality with error handling
+4. Add comprehensive tests (unit, integration, doc)
+5. Run quality checks incrementally
+6. Create documentation file
+7. Verify all acceptance criteria met
+
+## References
+
+- Architecture Plan: `docs/explanations/architecture_plan.md`
+- AGENTS.md Rules: `AGENTS.md`
+- Implementation Plan: `docs/explanations/implementation_plan.md`
+- Phase {{phase_number}} Overview: See implementation plan
+
+---
+
+Generated by xzagentz v{{version}} on {{timestamp}}
+```
 
 **Acceptance Criteria**:
 
-- Renders complete prompts from section data
-- Includes all required sections (Context, Rules, Tasks, Checklists)
-- Generates prompts for all implementation plan sections
-- Writes prompts to `prompts/prompt_X_Y.md`
-- Supports batch mode (all at once)
-- Supports interactive mode (one at a time)
-- Prevents overwriting existing prompts without confirmation
-- All generated prompts are valid markdown
+- Prompt templates loaded from embedded resources or custom directory
+- Templates use proper placeholder syntax compatible with renderer
+- Context extraction pulls relevant data from architecture and implementation plans
+- Generated prompts include all required sections: Context, Rules, Tasks, Deliverables, Acceptance Criteria, Quality Checklist
+- AGENTS.md rules filtered to only include relevant rules for the section
+- Architecture context includes related components and dependencies
+- Prompts written to `prompts/prompt_X_Y.md` by default
+- Batch mode generates all prompts with progress indicator
+- Interactive mode shows preview before writing each prompt
+- User can skip, edit, or accept each prompt in interactive mode
+- Existing prompts not overwritten unless `--force` flag provided
+- Backup created automatically when overwriting (unless disabled)
+- Custom output directory supported via `--output-dir` flag
+- Multiple naming schemes supported (phase_section, descriptive, readable)
+- All generated prompts are valid markdown with no syntax errors
+- All generated prompts follow AGENTS.md conventions (lowercase filenames, .md extension, no emojis)
+- Generated prompts include timestamp and generator version in footer
+- Error handling for missing templates, invalid context, file I/O errors
+- Progress tracking integration (marks sections as "prompt generated")
+- Template validation before generation
+- Dry-run mode to preview filenames without writing
+
+**Example Generated Prompt**:
+
+```markdown
+# Phase 2: Component System
+
+## Section 2.1: Component File Structure
+
+## Context
+
+You are implementing Component File Structure as part of the xzagentz project.
+
+### Project Overview
+
+xzagentz is a CLI tool for generating and managing AGENTS.md files for AI-assisted development.
+
+### Architecture Context
+
+The component system loads predefined content blocks from markdown files organized by category.
+Each component is a self-contained markdown document with proper structure.
+
+### Related Components
+
+- Template System (loads and renders templates)
+- Component Validator (validates component structure)
+- CLI List Command (displays available components)
+
+### Dependencies
+
+- File system access (std::fs)
+- Markdown parsing (optional)
+- Error handling framework
+
+## Critical Rules from AGENTS.md
+
+### Rule 1: File Extensions
+
+All Markdown files MUST use `.md` extension (not `.markdown` or `.MD`)
+All YAML files MUST use `.yaml` extension (not `.yml`)
+
+### Rule 2: Markdown File Naming
+
+All markdown filenames MUST use lowercase_with_underscores
+Exception: README.md is the ONLY uppercase filename allowed
+
+### Rule 5: Documentation is Mandatory
+
+Create documentation file in `docs/explanations/` for EVERY feature/task
+
+## Tasks
+
+Your goal is to complete the following tasks:
+
+1. Create components directory structure under `components/`
+2. Organize components by category: core, languages, tools, general
+3. Create sample component files for each category
+4. Ensure all component files follow markdown best practices
+5. Add component file structure documentation
+
+## Deliverables
+
+You must create the following files:
+
+- Component directory structure
+- Sample component files in each category
+- Documentation explaining component organization
+- Tests validating directory structure
+
+### Expected Files
+
+- `components/core/critical_rules.md`
+- `components/core/quick_reference.md`
+- `components/languages/rust.md`
+- `components/tools/cargo.md`
+- `components/general/communication.md`
+- `docs/explanations/component_structure.md`
+
+### Test Files
+
+- Tests in `src/components/tests.rs` or inline tests
+
+## Acceptance Criteria
+
+- [ ] Directory structure created under `components/` with subdirectories: core, languages, tools, general
+- [ ] At least 2 sample components in each category
+- [ ] All component filenames use lowercase_with_underscores.md
+- [ ] All components are valid markdown with proper headers
+- [ ] No emojis in component content
+- [ ] Documentation file created explaining structure
+- [ ] Tests verify expected files exist
+- [ ] Tests verify valid markdown structure
+
+## Quality Checklist
+
+Before completing this section, verify:
+
+- [ ] `cargo fmt --all` applied successfully
+- [ ] `cargo check --all-targets --all-features` passes with zero errors
+- [ ] `cargo clippy --all-targets --all-features -- -D warnings` shows zero warnings
+- [ ] `cargo test --all-features` passes with >80% coverage
+- [ ] All public items have doc comments with examples
+- [ ] Documentation file created in `docs/explanations/`
+- [ ] All filenames follow naming conventions (lowercase_with_underscores.md)
+- [ ] All YAML files use `.yaml` extension (not `.yml`)
+- [ ] No emojis in code or documentation
+
+## Implementation Notes
+
+1. Start by reading the architecture plan section
+2. Create file stubs with proper module structure
+3. Implement core functionality with error handling
+4. Add comprehensive tests (unit, integration, doc)
+5. Run quality checks incrementally
+6. Create documentation file
+7. Verify all acceptance criteria met
+
+## References
+
+- Architecture Plan: `docs/explanations/architecture_plan.md`
+- AGENTS.md Rules: `AGENTS.md`
+- Implementation Plan: `docs/explanations/implementation_plan.md`
+- Phase 2 Overview: See implementation plan
+
+---
+
+Generated by xzagentz v0.1.0 on 2024-01-15T10:30:00Z
+```
+
+**CLI Integration**:
+
+```bash
+# Generate all prompts at once
+xzagentz prompt generate --all
+
+# Generate specific section prompt
+xzagentz prompt generate --phase 2 --section 1
+
+# Interactive generation with preview
+xzagentz prompt generate --interactive
+
+# Custom output directory
+xzagentz prompt generate --all --output-dir ~/my-prompts
+
+# Force overwrite without confirmation
+xzagentz prompt generate --all --force
+
+# Dry run (preview filenames)
+xzagentz prompt generate --all --dry-run
+
+# Use custom templates
+xzagentz prompt generate --all --template-dir ~/.config/xzagentz/templates
+
+# Different naming scheme
+xzagentz prompt generate --all --naming-scheme readable
+
+# Show generated prompt without saving
+xzagentz prompt show --phase 2 --section 1
+```
 
 **Testing**:
 
 ```rust
 #[test]
-fn test_render_prompt_template()
+fn test_render_prompt_template() {
+    let template = PromptTemplate {
+        name: "test".to_string(),
+        content: "Phase {{phase_number}}: {{phase_title}}".to_string(),
+        required_context: vec!["phase_number".to_string(), "phase_title".to_string()],
+        ..Default::default()
+    };
+
+    let context = PromptContext {
+        phase_number: 1,
+        phase_title: "Foundation".to_string(),
+        ..Default::default()
+    };
+
+    let result = render_template(&template, &context).unwrap();
+    assert_eq!(result, "Phase 1: Foundation");
+}
+
 #[test]
-fn test_generate_all_prompts()
+fn test_generate_all_prompts() {
+    let config = PromptGeneratorConfig::default();
+    let generator = PromptGenerator::new(config).unwrap();
+
+    let impl_plan = load_test_implementation_plan();
+    let arch_plan = load_test_architecture_plan();
+
+    let generated = generator.generate_all(&impl_plan, &arch_plan).unwrap();
+
+    assert!(generated.len() > 0);
+    for path in generated {
+        assert!(path.exists());
+        assert!(path.extension().unwrap() == "md");
+    }
+}
+
 #[test]
-fn test_generate_single_section()
+fn test_generate_single_section() {
+    let config = PromptGeneratorConfig::default();
+    let generator = PromptGenerator::new(config).unwrap();
+
+    let context = create_test_context(2, 1);
+    let path = generator.generate_section(&context).unwrap();
+
+    assert!(path.exists());
+    let content = std::fs::read_to_string(&path).unwrap();
+    assert!(content.contains("Phase 2"));
+    assert!(content.contains("Section 2.1"));
+}
+
 #[test]
-fn test_interactive_generation()
+fn test_interactive_generation() {
+    // Test interactive mode with mocked input
+    let config = PromptGeneratorConfig::default();
+    let generator = PromptGenerator::new(config).unwrap();
+
+    // Mock user selecting: yes, no, edit, yes
+    let impl_plan = load_test_implementation_plan();
+    let arch_plan = load_test_architecture_plan();
+
+    let generated = generator.generate_interactive(&impl_plan, &arch_plan).unwrap();
+
+    // Should have generated some prompts (not all if user said no to some)
+    assert!(generated.len() > 0);
+}
+
 #[test]
-fn test_prevent_overwrite()
+fn test_prevent_overwrite() {
+    let temp_dir = tempfile::tempdir().unwrap();
+    let config = PromptGeneratorConfig {
+        output_dir: temp_dir.path().to_path_buf(),
+        force_overwrite: false,
+        ..Default::default()
+    };
+    let generator = PromptGenerator::new(config).unwrap();
+
+    let context = create_test_context(1, 1);
+
+    // Generate once
+    let path1 = generator.generate_section(&context).unwrap();
+    let content1 = std::fs::read_to_string(&path1).unwrap();
+
+    // Try to generate again (should fail or skip)
+    let result = generator.generate_section(&context);
+    assert!(result.is_err() || result.unwrap() == path1);
+
+    // Content should be unchanged
+    let content2 = std::fs::read_to_string(&path1).unwrap();
+    assert_eq!(content1, content2);
+}
+
 #[test]
-fn test_custom_output_directory()
+fn test_custom_output_directory() {
+    let temp_dir = tempfile::tempdir().unwrap();
+    let custom_dir = temp_dir.path().join("my-prompts");
+
+    let config = PromptGeneratorConfig {
+        output_dir: custom_dir.clone(),
+        ..Default::default()
+    };
+    let generator = PromptGenerator::new(config).unwrap();
+
+    let context = create_test_context(1, 1);
+    let path = generator.generate_section(&context).unwrap();
+
+    assert!(path.starts_with(&custom_dir));
+    assert!(path.exists());
+}
+
+#[test]
+fn test_naming_schemes() {
+    let temp_dir = tempfile::tempdir().unwrap();
+    let context = create_test_context(2, 3);
+
+    // Test PhaseSection naming
+    let config = PromptGeneratorConfig {
+        output_dir: temp_dir.path().to_path_buf(),
+        naming_scheme: PromptNamingScheme::PhaseSection,
+        ..Default::default()
+    };
+    let generator = PromptGenerator::new(config).unwrap();
+    let path = generator.generate_section(&context).unwrap();
+    assert_eq!(path.file_name().unwrap(), "prompt_2_3.md");
+
+    // Test Descriptive naming
+    let config = PromptGeneratorConfig {
+        output_dir: temp_dir.path().to_path_buf(),
+        naming_scheme: PromptNamingScheme::Descriptive,
+        ..Default::default()
+    };
+    let generator = PromptGenerator::new(config).unwrap();
+    let path = generator.generate_section(&context).unwrap();
+    assert_eq!(path.file_name().unwrap(), "prompt_phase2_section3.md");
+
+    // Test Readable naming
+    let config = PromptGeneratorConfig {
+        output_dir: temp_dir.path().to_path_buf(),
+        naming_scheme: PromptNamingScheme::Readable,
+        ..Default::default()
+    };
+    let generator = PromptGenerator::new(config).unwrap();
+    let path = generator.generate_section(&context).unwrap();
+    assert!(path.file_name().unwrap().to_str().unwrap().starts_with("phase_2_"));
+}
+
+#[test]
+fn test_context_extraction() {
+    let impl_plan = load_test_implementation_plan();
+    let arch_plan = load_test_architecture_plan();
+
+    let context = extract_context(&impl_plan, &arch_plan, 2, 1).unwrap();
+
+    assert_eq!(context.phase_number, 2);
+    assert_eq!(context.section_number, "2.1");
+    assert!(!context.section_tasks.is_empty());
+    assert!(!context.section_deliverables.is_empty());
+    assert!(!context.section_acceptance_criteria.is_empty());
+}
+
+#[test]
+fn test_relevant_rules_extraction() {
+    let context = create_test_context(2, 1);
+    context.section_title = "Component File Structure".to_string();
+
+    let rules = extract_relevant_rules(&context).unwrap();
+
+    // Should include file naming and structure rules
+    assert!(rules.iter().any(|r| r.contains("File Extensions")));
+    assert!(rules.iter().any(|r| r.contains("Markdown File Naming")));
+}
+
+#[test]
+fn test_backup_creation() {
+    let temp_dir = tempfile::tempdir().unwrap();
+    let file_path = temp_dir.path().join("prompt_1_1.md");
+
+    std::fs::write(&file_path, "original content").unwrap();
+
+    let config = PromptGeneratorConfig {
+        output_dir: temp_dir.path().to_path_buf(),
+        force_overwrite: true,
+        create_backup: true,
+        ..Default::default()
+    };
+    let generator = PromptGenerator::new(config).unwrap();
+
+    let backup_path = generator.create_backup(&file_path).unwrap();
+
+    assert!(backup_path.exists());
+    assert!(backup_path.to_str().unwrap().contains(".bak"));
+
+    let backup_content = std::fs::read_to_string(&backup_path).unwrap();
+    assert_eq!(backup_content, "original content");
+}
 ```
 
 ### 7.6 Progress Tracking and Compliance Verification
