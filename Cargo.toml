@@ -15,12 +15,15 @@ clap = { version = "4.4", features = ["derive", "cargo", "env"] }
 toml = "0.8"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
+serde_yaml = "0.9"
 thiserror = "1.0"
 anyhow = "1.0"
 walkdir = "2.4"
 dirs = "5.0"
 chrono = { version = "0.4", features = ["serde"] }
 regex = "1.10"
+lazy_static = "1.4"
+tracing = "0.1"
 
 [dev-dependencies]
 tempfile = "3.8"

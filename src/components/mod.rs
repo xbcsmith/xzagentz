@@ -25,10 +25,16 @@
 use crate::core::ComponentType;
 use std::collections::HashMap;
 
+pub mod language_filter;
 pub mod loader;
+pub mod metadata;
+pub mod renderer;
 pub mod validator;
 
+pub use language_filter::{LanguageFilter, LanguageSection};
 pub use loader::ComponentLoader;
+pub use metadata::{ComponentInfo, ComponentMetadata, SectionMetadata};
+pub use renderer::{ComponentRenderer, RenderConfig, RenderStats};
 pub use validator::ComponentValidator;
 
 /// Represents a single component section for AGENTS.md
