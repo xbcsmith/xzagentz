@@ -132,6 +132,14 @@ pub enum Error {
     #[error("Command execution failed: {command}")]
     CommandFailed { command: String },
 
+    /// Size limit exceeded error
+    #[error("Size limit exceeded for '{name}': {actual} lines > {limit} lines")]
+    SizeExceeded {
+        name: String,
+        actual: usize,
+        limit: usize,
+    },
+
     /// Generic I/O error
     #[error("I/O error: {0}")]
     Io(String),
@@ -219,6 +227,24 @@ impl Error {
     pub fn configuration(reason: impl Into<String>) -> Self {
         Self::Configuration {
             reason: reason.into(),
+        }
+    }
+
+    /// Creates a SizeExceeded error
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use xzagentz::error::Error;
+    ///
+    /// let err = Error::size_exceeded("component", 600, 500);
+    /// assert!(err.to_string().contains("600 lines > 500 lines"));
+    /// ```
+    pub fn size_exceeded(name: impl Into<String>, actual: usize, limit: usize) -> Self {
+        Self::SizeExceeded {
+            name: name.into(),
+            actual,
+            limit,
         }
     }
 
@@ -330,6 +356,20 @@ impl Error {
     /// ```
     pub fn section_not_found(section: impl Into<String>) -> Self {
         Self::other(format!("Section not found: {}", section.into()))
+    }
+
+    /// Creates an Io error
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use xzagentz::error::Error;
+    ///
+    /// let err = Error::io_error("Failed to read file");
+    /// assert!(err.to_string().contains("Failed to read file"));
+    /// ```
+    pub fn io_error(message: impl Into<String>) -> Self {
+        Self::Io(message.into())
     }
 }
 

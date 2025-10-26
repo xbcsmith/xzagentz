@@ -40,6 +40,7 @@ pub mod parser;
 pub mod plans;
 pub mod prompts;
 pub mod templates;
+pub mod validator;
 
 // Re-export commonly used types
 pub use error::{Error, Result};
