@@ -1,18 +1,49 @@
-# Testing Guidelines
-
-This section provides comprehensive testing guidelines and best practices for this project.
-
+---
+component:
+  name: testing_standards
+  category: general
+  version: 2.0.0
+  description: Testing standards and practices for comprehensive test coverage
+  languages:
+    - rust
+    - python
+    - golang
+    - typescript
+    - bash
+  sections:
+    - id: principles
+      language_specific: false
+      required: true
+    - id: test_types
+      language_specific: false
+      required: true
+    - id: test_structure
+      language_specific: true
+      required: true
+    - id: assertions
+      language_specific: true
+      required: true
+    - id: mocking
+      language_specific: true
+      required: true
+    - id: coverage
+      language_specific: true
+      required: true
 ---
 
-## Testing Philosophy
+# Testing Standards
 
-**Core Principles:**
-- Test behavior, not implementation
-- Write tests before fixing bugs
-- Keep tests simple and readable
-- Test one thing per test
-- Make tests deterministic
-- Achieve >80% code coverage
+## Core Principles
+
+Follow these universal testing principles:
+
+1. **Test Behavior, Not Implementation**: Focus on what code does, not how
+2. **Write Tests First for Bugs**: Reproduce bugs with failing tests before fixing
+3. **Keep Tests Simple**: Tests should be easier to understand than the code they test
+4. **Test One Thing**: Each test validates a single behavior or condition
+5. **Make Tests Deterministic**: Same inputs always produce same results
+6. **Achieve >80% Coverage**: Minimum code coverage threshold for all projects
+7. **Use Descriptive Names**: Test names should describe what they validate
 
 ---
 
@@ -20,643 +51,828 @@ This section provides comprehensive testing guidelines and best practices for th
 
 ### Unit Tests
 
-**Purpose**: Test individual functions and methods in isolation
+Test individual functions and methods in isolation.
 
-**Location**: Same file as code, in `#[cfg(test)]` module
+**Characteristics:**
 
-**Example:**
-```rust
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_component_creation() {
-        let component = Component::new("test");
-        assert_eq!(component.name(), "test");
-    }
-
-    #[test]
-    fn test_validation_rejects_empty_name() {
-        let result = Component::new("");
-        assert!(result.is_err());
-    }
-}
-```
+- Fast execution (milliseconds)
+- No external dependencies
+- Test single units of code
+- Mock dependencies
 
 ### Integration Tests
 
-**Purpose**: Test module interactions and public API
+Test interactions between modules and components.
 
-**Location**: `tests/` directory
+**Characteristics:**
 
-**Example:**
-```rust
-// tests/component_integration.rs
-use xzagentz::component::ComponentLoader;
-use tempfile::tempdir;
+- Moderate execution time
+- May use test databases or services
+- Test multiple components together
+- Validate contracts between modules
 
-#[test]
-fn test_load_and_validate_component() {
-    let dir = tempdir().unwrap();
-    let path = dir.path().join("component.md");
+### End-to-End Tests
 
-    std::fs::write(&path, "# Component\n\nContent").unwrap();
+Test complete workflows from user perspective.
 
-    let loader = ComponentLoader::new();
-    let component = loader.load(&path).unwrap();
+**Characteristics:**
 
-    assert!(component.is_valid());
-}
-```
+- Slower execution
+- Use real or production-like environment
+- Test entire system
+- Focus on critical user journeys
 
-### Doc Tests
+**Test Pyramid:**
 
-**Purpose**: Test code examples in documentation
-
-**Location**: In doc comments
-
-**Example:**
-```rust
-/// Load a component from file
-///
-/// # Examples
-///
-/// ```
-/// use xzagentz::component::load_component;
-/// use std::path::Path;
-///
-/// let component = load_component(Path::new("test.md")).unwrap();
-/// assert!(!component.is_empty());
-/// ```
-pub fn load_component(path: &Path) -> Result<Component> {
-    // Implementation
-}
-```
+- 70% Unit Tests
+- 20% Integration Tests
+- 10% End-to-End Tests
 
 ---
 
-## Test Organization
+## Test Structure
 
-### Test Module Structure
+Organize tests using the Arrange-Act-Assert pattern.
+
+<!-- LANG:rust -->
+
+### Rust Test Structure
 
 ```rust
 #[cfg(test)]
 mod tests {
     use super::*;
 
-    // Test helpers
-    mod helpers {
-        pub fn create_test_component() -> Component {
-            Component::new("test")
-        }
+    #[test]
+    fn test_parse_with_valid_input_returns_ok() {
+        // Arrange
+        let input = "valid input";
+
+        // Act
+        let result = parse(input);
+
+        // Assert
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap(), expected_value);
     }
 
-    // Success cases
     #[test]
-    fn test_valid_component() {
-        let comp = helpers::create_test_component();
-        assert!(comp.is_valid());
+    fn test_parse_with_invalid_input_returns_error() {
+        let result = parse("");
+        assert!(result.is_err());
     }
 
-    // Error cases
     #[test]
-    fn test_invalid_component() {
-        let comp = Component::new("");
-        assert!(comp.is_err());
-    }
-
-    // Edge cases
-    #[test]
-    fn test_boundary_condition() {
-        // Test edge cases
+    fn test_parse_with_edge_case() {
+        let input = "x".repeat(MAX_SIZE);
+        assert!(parse(&input).is_ok());
     }
 }
 ```
 
----
+**Naming Convention:** `test_{function}_{condition}_{expected}`
 
-## Test Naming
+**Test Organization:**
 
-### Naming Convention
+- Place unit tests in same file as code
+- Use `#[cfg(test)]` module
+- Group related tests in sub-modules
+- Integration tests in `tests/` directory
 
-**Format**: `test_{function}_{condition}_{expected}`
+<!-- /LANG -->
 
-**Examples:**
-```rust
-#[test]
-fn test_parse_with_valid_input_returns_ok() { }
+<!-- LANG:python -->
 
-#[test]
-fn test_parse_with_empty_input_returns_error() { }
+### Python Test Structure
 
-#[test]
-fn test_parse_with_invalid_format_returns_parse_error() { }
+```python
+import pytest
 
-#[test]
-fn test_component_with_max_size_succeeds() { }
+class TestParser:
+    def test_parse_with_valid_input_returns_result(self):
+        # Arrange
+        input_data = "valid input"
+
+        # Act
+        result = parse(input_data)
+
+        # Assert
+        assert result is not None
+        assert result == expected_value
+
+    def test_parse_with_invalid_input_raises_error(self):
+        with pytest.raises(ValueError):
+            parse("")
+
+    def test_parse_with_edge_case(self):
+        input_data = "x" * MAX_SIZE
+        assert parse(input_data) is not None
 ```
+
+**Naming Convention:** `test_{function}_{condition}_{expected}`
+
+**Test Organization:**
+
+- Place tests in `tests/` directory
+- Use `test_*.py` or `*_test.py` naming
+- Mirror source structure in test directory
+- Use classes to group related tests
+
+<!-- /LANG -->
+
+<!-- LANG:golang -->
+
+### Go Test Structure
+
+```go
+package parser
+
+import "testing"
+
+func TestParseWithValidInputReturnsResult(t *testing.T) {
+    // Arrange
+    input := "valid input"
+
+    // Act
+    result, err := Parse(input)
+
+    // Assert
+    if err != nil {
+        t.Fatalf("unexpected error: %v", err)
+    }
+    if result != expectedValue {
+        t.Errorf("got %v, want %v", result, expectedValue)
+    }
+}
+
+func TestParseWithInvalidInputReturnsError(t *testing.T) {
+    _, err := Parse("")
+    if err == nil {
+        t.Error("expected error, got nil")
+    }
+}
+
+func TestParseWithEdgeCase(t *testing.T) {
+    input := strings.Repeat("x", MaxSize)
+    _, err := Parse(input)
+    if err != nil {
+        t.Fatalf("unexpected error: %v", err)
+    }
+}
+```
+
+**Naming Convention:** `Test{Function}{Condition}{Expected}`
+
+**Test Organization:**
+
+- Place tests in `*_test.go` files
+- Same package as code being tested
+- Use table-driven tests for multiple cases
+- Subtests with `t.Run()` for grouping
+
+<!-- /LANG -->
+
+<!-- LANG:typescript -->
+
+### TypeScript Test Structure
+
+```typescript
+import { describe, it, expect } from "vitest";
+
+describe("Parser", () => {
+  it("should parse valid input and return result", () => {
+    // Arrange
+    const input = "valid input";
+
+    // Act
+    const result = parse(input);
+
+    // Assert
+    expect(result).toBeDefined();
+    expect(result).toBe(expectedValue);
+  });
+
+  it("should throw error for invalid input", () => {
+    expect(() => parse("")).toThrow(Error);
+  });
+
+  it("should handle edge case", () => {
+    const input = "x".repeat(MAX_SIZE);
+    expect(() => parse(input)).not.toThrow();
+  });
+});
+```
+
+**Naming Convention:** `should {expected behavior} when {condition}`
+
+**Test Organization:**
+
+- Place tests in `*.test.ts` or `*.spec.ts` files
+- Use `describe` blocks for grouping
+- Mirror source structure in test directory
+- Use `it` or `test` for individual test cases
+
+<!-- /LANG -->
+
+<!-- LANG:bash -->
+
+### Bash Test Structure
+
+```bash
+#!/usr/bin/env bash
+
+test_parse_with_valid_input_returns_ok() {
+    # Arrange
+    local input="valid input"
+
+    # Act
+    local result
+    result=$(parse "$input")
+    local status=$?
+
+    # Assert
+    assertEquals "Expected success" 0 "$status"
+    assertEquals "Expected value" "expected" "$result"
+}
+
+test_parse_with_invalid_input_returns_error() {
+    local result
+    result=$(parse "" 2>&1)
+    local status=$?
+
+    assertNotEquals "Expected failure" 0 "$status"
+}
+
+# Run tests using shunit2
+. shunit2
+```
+
+**Naming Convention:** `test_{function}_{condition}_{expected}`
+
+**Test Organization:**
+
+- Use testing framework like `shunit2` or `bats`
+- Place tests in `tests/` directory
+- Source functions to test
+- One test file per script
+
+<!-- /LANG -->
 
 ---
 
 ## Assertions
 
-### Basic Assertions
+Use appropriate assertions for different validation scenarios.
+
+<!-- LANG:rust -->
+
+### Rust Assertions
 
 ```rust
 // Equality
 assert_eq!(actual, expected);
 assert_ne!(actual, not_expected);
 
-// Boolean
+// Boolean conditions
 assert!(condition);
 assert!(!condition);
 
-// Custom message
+// Custom messages
 assert_eq!(actual, expected, "Expected {}, got {}", expected, actual);
-```
 
-### Result Assertions
-
-```rust
-// Check if Ok
-let result = function();
+// Result assertions
 assert!(result.is_ok());
-
-// Check if Err
 assert!(result.is_err());
 
-// Unwrap and check value
-assert_eq!(result.unwrap(), expected_value);
-
 // Pattern matching
-match result {
-    Ok(value) => assert_eq!(value, expected),
-    Err(e) => panic!("Unexpected error: {}", e),
-}
+assert!(matches!(error, ConfigError::ParseError { .. }));
+
+// Floating point comparison
+assert!((actual - expected).abs() < 0.0001);
 ```
 
-### Error Type Assertions
+<!-- /LANG -->
 
-```rust
-use crate::error::Error;
+<!-- LANG:python -->
 
-#[test]
-fn test_returns_not_found_error() {
-    let result = load_component("nonexistent.md");
+### Python Assertions
 
-    assert!(result.is_err());
+```python
+# Equality
+assert actual == expected
+assert actual != not_expected
 
-    match result.unwrap_err() {
-        Error::NotFound { path } => {
-            assert_eq!(path, "nonexistent.md");
-        }
-        other => panic!("Wrong error type: {:?}", other),
-    }
-}
+# Boolean conditions
+assert condition
+assert not condition
+
+# Exception handling
+with pytest.raises(ValueError):
+    function()
+
+with pytest.raises(ValueError, match="error message"):
+    function()
+
+# Approximate equality
+assert actual == pytest.approx(expected, rel=1e-6)
+
+# Collection membership
+assert item in collection
+assert item not in collection
+
+# Type checking
+assert isinstance(obj, ExpectedType)
 ```
+
+<!-- /LANG -->
+
+<!-- LANG:golang -->
+
+### Go Assertions
+
+```go
+// Equality
+if actual != expected {
+    t.Errorf("got %v, want %v", actual, expected)
+}
+
+// Error checking
+if err != nil {
+    t.Fatalf("unexpected error: %v", err)
+}
+
+if err == nil {
+    t.Error("expected error, got nil")
+}
+
+// Boolean conditions
+if !condition {
+    t.Error("expected condition to be true")
+}
+
+// Deep equality
+if !reflect.DeepEqual(actual, expected) {
+    t.Errorf("got %+v, want %+v", actual, expected)
+}
+
+// Using testify
+assert.Equal(t, expected, actual)
+assert.Error(t, err)
+assert.NoError(t, err)
+```
+
+<!-- /LANG -->
+
+<!-- LANG:typescript -->
+
+### TypeScript Assertions
+
+```typescript
+// Equality
+expect(actual).toBe(expected);
+expect(actual).toEqual(expected); // Deep equality
+
+// Boolean conditions
+expect(condition).toBeTruthy();
+expect(condition).toBeFalsy();
+
+// Exception handling
+expect(() => function()).toThrow(Error);
+expect(() => function()).toThrow('error message');
+
+// Null/undefined
+expect(value).toBeNull();
+expect(value).toBeUndefined();
+expect(value).toBeDefined();
+
+// Collection membership
+expect(array).toContain(item);
+expect(array).toHaveLength(3);
+
+// Object matching
+expect(object).toMatchObject({ key: 'value' });
+
+// Approximate equality
+expect(actual).toBeCloseTo(expected, 2);
+```
+
+<!-- /LANG -->
+
+<!-- LANG:bash -->
+
+### Bash Assertions
+
+```bash
+# Equality
+assertEquals "message" "expected" "$actual"
+assertNotEquals "message" "not_expected" "$actual"
+
+# Null/empty checks
+assertNull "message" "$value"
+assertNotNull "message" "$value"
+
+# Boolean conditions
+assertTrue "message" "$condition"
+assertFalse "message" "$condition"
+
+# String matching
+assertContains "message" "substring" "$string"
+
+# File checks
+assertTrue "File should exist" "[ -f $file ]"
+assertTrue "Directory should exist" "[ -d $dir ]"
+```
+
+<!-- /LANG -->
 
 ---
 
-## Test Fixtures
+## Mocking
 
-### Using Setup Functions
+Mock external dependencies to isolate code under test.
+
+<!-- LANG:rust -->
+
+### Rust Mocking
 
 ```rust
+use mockall::*;
+
+#[automock]
+trait Database {
+    fn get_user(&self, id: u64) -> Result<User>;
+    fn save_user(&mut self, user: User) -> Result<()>;
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
 
-    fn setup() -> TestEnvironment {
-        TestEnvironment {
-            temp_dir: tempfile::tempdir().unwrap(),
-        }
-    }
-
     #[test]
-    fn test_with_setup() {
-        let env = setup();
-        // Use env in test
-    }
-}
-```
+    fn test_service_with_mock_database() {
+        let mut mock_db = MockDatabase::new();
 
-### Shared Test Data
+        mock_db.expect_get_user()
+            .with(eq(123))
+            .times(1)
+            .returning(|_| Ok(User::default()));
 
-```rust
-#[cfg(test)]
-mod test_data {
-    pub const VALID_COMPONENT: &str = r#"
-# Component Name
+        let service = UserService::new(mock_db);
+        let result = service.process_user(123);
 
-Component content here.
-"#;
-
-    pub const INVALID_COMPONENT: &str = "";
-}
-
-#[test]
-fn test_parse_valid() {
-    let result = parse(test_data::VALID_COMPONENT);
-    assert!(result.is_ok());
-}
-```
-
----
-
-## Testing Async Code
-
-### Async Test Example
-
-```rust
-use tokio::test;
-
-#[tokio::test]
-async fn test_async_load() {
-    let component = load_async("test.md").await.unwrap();
-    assert!(!component.is_empty());
-}
-
-#[tokio::test]
-async fn test_concurrent_loads() {
-    let handles: Vec<_> = (0..10)
-        .map(|i| tokio::spawn(async move {
-            load_async(&format!("test{}.md", i)).await
-        }))
-        .collect();
-
-    for handle in handles {
-        assert!(handle.await.unwrap().is_ok());
-    }
-}
-```
-
----
-
-## Mocking and Test Doubles
-
-### Trait-Based Mocking
-
-```rust
-pub trait ComponentLoader {
-    fn load(&self, path: &Path) -> Result<Component>;
-}
-
-#[cfg(test)]
-mod tests {
-    struct MockLoader {
-        should_fail: bool,
-    }
-
-    impl ComponentLoader for MockLoader {
-        fn load(&self, _path: &Path) -> Result<Component> {
-            if self.should_fail {
-                Err(Error::NotFound)
-            } else {
-                Ok(Component::new("test"))
-            }
-        }
-    }
-
-    #[test]
-    fn test_with_mock() {
-        let loader = MockLoader { should_fail: false };
-        let result = process_component(&loader);
         assert!(result.is_ok());
     }
 }
 ```
 
----
+<!-- /LANG -->
 
-## Table-Driven Tests
+<!-- LANG:python -->
 
-### Parameterized Test Pattern
+### Python Mocking
 
-```rust
-#[test]
-fn test_parse_various_inputs() {
-    let test_cases = vec![
-        ("valid input", Ok(Expected)),
-        ("", Err(Error::Empty)),
-        ("invalid", Err(Error::Parse)),
-    ];
+```python
+from unittest.mock import Mock, patch, MagicMock
 
-    for (input, expected) in test_cases {
-        let result = parse(input);
-        assert_eq!(result, expected, "Failed for input: {}", input);
-    }
-}
+def test_service_with_mock_database():
+    # Mock object
+    mock_db = Mock()
+    mock_db.get_user.return_value = User()
+
+    service = UserService(mock_db)
+    result = service.process_user(123)
+
+    mock_db.get_user.assert_called_once_with(123)
+    assert result is not None
+
+def test_with_patch():
+    with patch('module.Database') as mock_db:
+        mock_db.return_value.get_user.return_value = User()
+
+        service = UserService()
+        result = service.process_user(123)
+
+        assert result is not None
+
+@patch('module.external_api')
+def test_with_decorator(mock_api):
+    mock_api.fetch.return_value = {'data': 'value'}
+    result = process_data()
+    assert result == expected
 ```
 
-### Structured Test Cases
+<!-- /LANG -->
 
-```rust
-#[test]
-fn test_validation_rules() {
-    struct TestCase {
-        name: &'static str,
-        input: &'static str,
-        expected: bool,
-    }
+<!-- LANG:golang -->
 
-    let cases = vec![
-        TestCase {
-            name: "valid input",
-            input: "valid",
-            expected: true,
+### Go Mocking
+
+```go
+// Interface for mocking
+type Database interface {
+    GetUser(id uint64) (*User, error)
+    SaveUser(user *User) error
+}
+
+// Mock implementation
+type MockDatabase struct {
+    GetUserFunc  func(id uint64) (*User, error)
+    SaveUserFunc func(user *User) error
+}
+
+func (m *MockDatabase) GetUser(id uint64) (*User, error) {
+    return m.GetUserFunc(id)
+}
+
+func (m *MockDatabase) SaveUser(user *User) error {
+    return m.SaveUserFunc(user)
+}
+
+// Test using mock
+func TestServiceWithMockDatabase(t *testing.T) {
+    mockDB := &MockDatabase{
+        GetUserFunc: func(id uint64) (*User, error) {
+            return &User{ID: id}, nil
         },
-        TestCase {
-            name: "empty input",
-            input: "",
-            expected: false,
-        },
-    ];
+    }
 
-    for case in cases {
-        let result = validate(case.input);
-        assert_eq!(
-            result, case.expected,
-            "Test '{}' failed", case.name
-        );
+    service := NewUserService(mockDB)
+    user, err := service.ProcessUser(123)
+
+    if err != nil {
+        t.Fatalf("unexpected error: %v", err)
+    }
+    if user.ID != 123 {
+        t.Errorf("got ID %d, want 123", user.ID)
     }
 }
 ```
 
----
+<!-- /LANG -->
 
-## Testing File I/O
+<!-- LANG:typescript -->
 
-### Using tempfile
+### TypeScript Mocking
 
-```rust
-use tempfile::{tempdir, NamedTempFile};
+```typescript
+import { vi } from "vitest";
 
-#[test]
-fn test_load_from_file() {
-    let dir = tempdir().unwrap();
-    let file_path = dir.path().join("test.md");
-
-    std::fs::write(&file_path, "content").unwrap();
-
-    let result = load_component(&file_path);
-    assert!(result.is_ok());
+interface Database {
+  getUser(id: number): Promise<User>;
+  saveUser(user: User): Promise<void>;
 }
 
-#[test]
-fn test_save_to_file() {
-    let mut file = NamedTempFile::new().unwrap();
-    let component = Component::new("test");
+describe("UserService", () => {
+  it("should process user with mocked database", async () => {
+    const mockDb: Database = {
+      getUser: vi.fn().mockResolvedValue({ id: 123, name: "Test" }),
+      saveUser: vi.fn().mockResolvedValue(undefined),
+    };
 
-    component.save(file.path()).unwrap();
+    const service = new UserService(mockDb);
+    const result = await service.processUser(123);
 
-    let content = std::fs::read_to_string(file.path()).unwrap();
-    assert!(content.contains("test"));
+    expect(mockDb.getUser).toHaveBeenCalledWith(123);
+    expect(result).toBeDefined();
+  });
+
+  it("should handle API calls with spy", () => {
+    const spy = vi.spyOn(api, "fetch");
+    spy.mockResolvedValue({ data: "value" });
+
+    const result = processData();
+
+    expect(spy).toHaveBeenCalled();
+    expect(result).toBe(expected);
+  });
+});
+```
+
+<!-- /LANG -->
+
+<!-- LANG:bash -->
+
+### Bash Mocking
+
+```bash
+# Override function for testing
+original_curl=$(declare -f curl)
+
+curl() {
+    echo '{"status": "ok"}'
+    return 0
+}
+
+test_api_call_with_mock() {
+    result=$(make_api_call)
+    assertEquals "Expected success" 0 $?
+    assertContains "Response contains status" "$result" "ok"
+}
+
+# Restore original function
+eval "$original_curl"
+
+# Mock external commands
+test_with_command_mock() {
+    # Create mock in PATH
+    mkdir -p "$SHUNIT_TMPDIR/bin"
+    export PATH="$SHUNIT_TMPDIR/bin:$PATH"
+
+    cat > "$SHUNIT_TMPDIR/bin/external_command" << 'EOF'
+#!/bin/sh
+echo "mocked output"
+EOF
+    chmod +x "$SHUNIT_TMPDIR/bin/external_command"
+
+    result=$(function_using_external_command)
+    assertContains "Uses mock" "$result" "mocked"
 }
 ```
 
----
-
-## Property-Based Testing
-
-### Using proptest
-
-```rust
-use proptest::prelude::*;
-
-proptest! {
-    #[test]
-    fn test_parse_doesnt_panic(s in "\\PC*") {
-        let _ = parse(&s);
-    }
-
-    #[test]
-    fn test_roundtrip(name in "[a-zA-Z0-9]+") {
-        let component = Component::new(&name);
-        let serialized = component.serialize();
-        let deserialized = Component::deserialize(&serialized).unwrap();
-        assert_eq!(component, deserialized);
-    }
-}
-```
+<!-- /LANG -->
 
 ---
 
-## Test Coverage
+## Coverage
 
-### Measuring Coverage
+Measure and maintain test coverage above 80%.
+
+<!-- LANG:rust -->
+
+### Rust Coverage
 
 ```bash
 # Install tarpaulin
 cargo install cargo-tarpaulin
 
 # Generate coverage report
-cargo tarpaulin --out Html
+cargo tarpaulin --out Html --output-dir coverage
 
-# View coverage in browser
-open tarpaulin-report.html
+# CI-friendly output
+cargo tarpaulin --out Xml
+
+# With all features
+cargo tarpaulin --all-features --workspace
+
+# View report
+open coverage/index.html
 ```
 
-### Coverage Requirements
+**Coverage Targets:**
 
-- **Minimum**: 80% overall coverage
-- **Critical paths**: 100% coverage
-- **Public API**: 100% coverage
-- **Error paths**: 100% coverage
+- Overall: >80%
+- Critical paths: 100%
+- New code: 100%
 
----
+<!-- /LANG -->
 
-## Running Tests
+<!-- LANG:python -->
 
-### Basic Commands
+### Python Coverage
 
 ```bash
-# Run all tests
-cargo test
+# Install coverage.py
+pip install coverage pytest-cov
 
-# Run specific test
-cargo test test_name
+# Run tests with coverage
+pytest --cov=mypackage --cov-report=html
 
-# Run tests in module
-cargo test module::tests::
+# Generate report
+coverage run -m pytest
+coverage report
+coverage html
 
-# Run with output
-cargo test -- --nocapture
+# View report
+open htmlcov/index.html
 
-# Run ignored tests
-cargo test -- --ignored
-
-# Run single-threaded
-cargo test -- --test-threads=1
+# Fail if below threshold
+pytest --cov=mypackage --cov-fail-under=80
 ```
 
-### Test Filtering
+**Coverage Targets:**
+
+- Overall: >80%
+- Critical modules: >90%
+- New code: 100%
+
+<!-- /LANG -->
+
+<!-- LANG:golang -->
+
+### Go Coverage
 
 ```bash
-# Run tests matching pattern
-cargo test parse
+# Run tests with coverage
+go test -cover ./...
 
-# Run integration tests only
-cargo test --test integration_test
+# Generate coverage profile
+go test -coverprofile=coverage.out ./...
 
-# Run doc tests only
-cargo test --doc
+# View coverage report
+go tool cover -html=coverage.out
 
-# Run lib tests only
-cargo test --lib
+# Function-level coverage
+go test -covermode=count -coverprofile=coverage.out ./...
+go tool cover -func=coverage.out
+
+# CI: fail if below threshold
+go test -cover ./... | grep -v "coverage: 100.0%"
 ```
 
----
+**Coverage Targets:**
 
-## Continuous Testing
+- Overall: >80%
+- Package-level: >75%
+- Critical functions: 100%
 
-### Watch Mode
+<!-- /LANG -->
+
+<!-- LANG:typescript -->
+
+### TypeScript Coverage
 
 ```bash
-# Install cargo-watch
-cargo install cargo-watch
+# Install coverage tools
+npm install --save-dev @vitest/coverage-v8
 
-# Auto-run tests on file changes
-cargo watch -x test
+# Run tests with coverage
+npx vitest --coverage
 
-# Run tests and checks
-cargo watch -x check -x test -x clippy
+# Generate HTML report
+npx vitest --coverage --reporter=html
+
+# View report
+open coverage/index.html
+
+# CI: enforce thresholds (vitest.config.ts)
+# coverage: {
+#   lines: 80,
+#   functions: 80,
+#   branches: 80,
+#   statements: 80
+# }
 ```
 
----
+**Coverage Targets:**
 
-## Test Best Practices
+- Lines: >80%
+- Branches: >75%
+- Functions: >85%
 
-### Do's
+<!-- /LANG -->
 
-- Write tests first for bugs (TDD for fixes)
-- Test edge cases and boundaries
-- Use descriptive test names
-- Keep tests independent
-- Test one behavior per test
-- Use arrange-act-assert pattern
-- Clean up resources (use Drop or defer)
+<!-- LANG:bash -->
 
-### Don'ts
-
-- Don't test implementation details
-- Don't make tests depend on each other
-- Don't use sleep or timing in tests
-- Don't skip error cases
-- Don't leave commented-out tests
-- Don't test third-party code
-
----
-
-## Common Testing Patterns
-
-### Arrange-Act-Assert
-
-```rust
-#[test]
-fn test_component_validation() {
-    // Arrange
-    let component = Component::new("test");
-
-    // Act
-    let result = component.validate();
-
-    // Assert
-    assert!(result.is_ok());
-}
-```
-
-### Given-When-Then
-
-```rust
-#[test]
-fn test_component_lifecycle() {
-    // Given a new component
-    let mut component = Component::new("test");
-
-    // When we update it
-    component.update("new content");
-
-    // Then it should be valid
-    assert!(component.is_valid());
-}
-```
-
----
-
-## Debugging Tests
-
-### Show Output
+### Bash Coverage
 
 ```bash
-# Show println! output
-cargo test -- --nocapture
+# Install kcov
+apt-get install kcov  # Debian/Ubuntu
 
-# Show test names as they run
-cargo test -- --nocapture --test-threads=1
+# Run tests with coverage
+kcov --exclude-pattern=/usr coverage tests/run_tests.sh
+
+# View report
+open coverage/index.html
+
+# Using shunit2 with coverage
+kcov coverage shunit2 tests/test_script.sh
+
+# Simple line tracking
+# Add to script:
+# PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+# set -x
 ```
 
-### Using dbg! in Tests
+**Coverage Targets:**
 
-```rust
-#[test]
-fn test_debug() {
-    let value = compute();
-    dbg!(&value);
-    assert_eq!(value, expected);
-}
-```
+- Critical scripts: >80%
+- Utility scripts: >70%
+- Complex logic: 100%
 
-### Test-Specific Logging
-
-```rust
-#[test]
-fn test_with_logging() {
-    env_logger::init();
-    log::debug!("Starting test");
-    // Test code
-}
-```
+<!-- /LANG -->
 
 ---
 
-## Performance Testing
+## Additional Guidelines
 
-### Benchmarks
+### Test Data Management
 
-```rust
-#![feature(test)]
+- Use fixtures for reusable test data
+- Keep test data small and focused
+- Clean up test artifacts after execution
+- Use temporary directories for file operations
 
-extern crate test;
+### Continuous Testing
 
-#[bench]
-fn bench_parse(b: &mut test::Bencher) {
-    let input = "test input";
-    b.iter(|| {
-        parse(input)
-    });
-}
-```
+- Run tests on every commit
+- Fail builds on test failures
+- Track coverage trends over time
+- Run tests in parallel when possible
 
-### Criterion Benchmarks
+### Test Maintenance
 
-```rust
-use criterion::{black_box, criterion_group, criterion_main, Criterion};
-
-fn benchmark_parse(c: &mut Criterion) {
-    c.bench_function("parse", |b| {
-        b.iter(|| parse(black_box("test input")))
-    });
-}
-
-criterion_group!(benches, benchmark_parse);
-criterion_main!(benches);
-```
-
----
-
-## Additional Resources
-
-- **Rust Testing Guide**: https://doc.rust-lang.org/book/ch11-00-testing.html
-- **proptest**: https://proptest-rs.github.io/proptest/
-- **criterion**: https://bheisler.github.io/criterion.rs/
+- Update tests when requirements change
+- Remove obsolete tests
+- Refactor duplicated test code
+- Keep tests as simple as production code
