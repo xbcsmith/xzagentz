@@ -14,6 +14,7 @@
 //! - `components`: Component system for AGENTS.md
 //! - `plans`: Architecture and implementation plan management
 //! - `prompts`: Prompt generation system
+//! - `markdown`: Markdown cleaning and normalization
 //! - `cli`: Command-line interface (when used as binary)
 //!
 //! # Examples
@@ -36,6 +37,7 @@ pub mod components;
 pub mod config;
 pub mod core;
 pub mod error;
+pub mod markdown;
 pub mod parser;
 pub mod plans;
 pub mod prompts;

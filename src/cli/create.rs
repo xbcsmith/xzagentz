@@ -33,8 +33,9 @@
 use crate::components::{Component, ComponentLoader};
 use crate::core::ComponentType;
 use crate::error::{Error, Result};
+use crate::markdown::MarkdownCleaner;
 use crate::templates::{PlaceholderRenderer, Template, TemplateLoader};
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::fs;
 use std::io::{self, Write};
 use std::path::{Path, PathBuf};
@@ -130,12 +131,25 @@ impl CreateCommand {
         // Create file creator
         let creator = FileCreator::new(config.clone());
 
+        // Select components in interactive mode
+        let selected_components = if self.interactive && template.is_none() {
+            Some(InteractivePrompt::select_components(
+                &config.component_dir,
+                &metadata.language,
+            )?)
+        } else {
+            None
+        };
+
         // Generate content
-        let content = creator.generate_content(&template, &metadata)?;
+        let content = creator.generate_content(&template, &metadata, &selected_components)?;
+
+        // Clean markdown content
+        let cleaned_content = MarkdownCleaner::clean(&content)?;
 
         // Preview in interactive mode
         if self.interactive {
-            InteractivePrompt::preview_content(&content)?;
+            InteractivePrompt::preview_content(&cleaned_content)?;
             if !InteractivePrompt::confirm_write()? {
                 println!("Create cancelled by user");
                 return Ok(());
@@ -148,7 +162,7 @@ impl CreateCommand {
         }
 
         // Write file
-        creator.write_file(&self.output, &content)?;
+        creator.write_file(&self.output, &cleaned_content)?;
 
         println!("Successfully created: {}", self.output.display());
         Ok(())
@@ -185,12 +199,16 @@ impl FileCreator {
         &self,
         template: &Option<Template>,
         metadata: &ProjectMetadata,
+        selected_components: &Option<Vec<(ComponentType, String)>>,
     ) -> Result<String> {
         let loader = ComponentLoader::new(Some(self.config.component_dir.clone()));
 
         let components = if let Some(tmpl) = template {
             // Load components from template
             self.load_template_components(&loader, tmpl)?
+        } else if let Some(selected) = selected_components {
+            // Load user-selected components
+            self.load_selected_components(&loader, selected)?
         } else {
             // Use default component set
             self.load_default_components(&loader)?
@@ -248,6 +266,28 @@ impl FileCreator {
         for name in core_names {
             if let Ok(comp) = loader.load(name, ComponentType::Core) {
                 components.push(comp);
+            }
+        }
+
+        Ok(components)
+    }
+
+    /// Loads user-selected components
+    fn load_selected_components(
+        &self,
+        loader: &ComponentLoader,
+        selected: &[(ComponentType, String)],
+    ) -> Result<Vec<Component>> {
+        let mut components = Vec::new();
+
+        for (comp_type, name) in selected {
+            match loader.load(name, *comp_type) {
+                Ok(comp) => components.push(comp),
+                Err(e) => {
+                    if self.config.verbose {
+                        eprintln!("Warning: Could not load component '{}': {}", name, e);
+                    }
+                }
             }
         }
 
@@ -316,7 +356,7 @@ impl FileCreator {
 pub struct ComponentComposer;
 
 impl ComponentComposer {
-    /// Composes components with placeholder replacement
+    /// Composes components with placeholder replacement and language filtering
     ///
     /// # Arguments
     ///
@@ -337,9 +377,19 @@ impl ComponentComposer {
         let mut output = String::new();
         let renderer = PlaceholderRenderer::new(placeholders.clone());
 
+        // Get the selected language from placeholders
+        let selected_language = placeholders
+            .get("PRIMARY_LANGUAGE")
+            .or_else(|| placeholders.get("language"))
+            .map(|s| s.to_lowercase())
+            .unwrap_or_else(|| "rust".to_string());
+
         for (i, component) in components.iter().enumerate() {
-            // Render placeholders in component content
-            let rendered = renderer.render(&component.content)?;
+            // Filter language-specific sections
+            let filtered = Self::filter_language_sections(&component.content, &selected_language);
+
+            // Render placeholders in filtered content
+            let rendered = renderer.render(&filtered)?;
 
             output.push_str(&rendered);
 
@@ -350,6 +400,57 @@ impl ComponentComposer {
         }
 
         Ok(output)
+    }
+
+    /// Filters component content to include only sections for the selected language
+    ///
+    /// # Arguments
+    ///
+    /// * `content` - Component content with language markers
+    /// * `language` - Selected language (lowercase)
+    ///
+    /// # Returns
+    ///
+    /// Returns filtered content with only relevant language sections
+    fn filter_language_sections(content: &str, language: &str) -> String {
+        let mut output = String::new();
+        let lines = content.lines();
+        let mut in_language_section = false;
+        let mut skip_current_section = false;
+
+        for line in lines {
+            // Check for language section start marker
+            if line.trim().starts_with("<!-- LANG:") {
+                in_language_section = true;
+                let lang = line
+                    .trim()
+                    .strip_prefix("<!-- LANG:")
+                    .and_then(|s| s.strip_suffix("-->"))
+                    .map(|s| s.trim().to_lowercase())
+                    .unwrap_or_default();
+
+                skip_current_section = lang != language;
+                continue; // Don't output the marker itself
+            }
+
+            // Check for language section end marker
+            if line.trim() == "<!-- /LANG -->" {
+                in_language_section = false;
+                skip_current_section = false;
+                continue; // Don't output the marker itself
+            }
+
+            // Skip lines in non-matching language sections
+            if in_language_section && skip_current_section {
+                continue;
+            }
+
+            // Include the line
+            output.push_str(line);
+            output.push('\n');
+        }
+
+        output
     }
 }
 
@@ -521,23 +622,39 @@ impl ProjectMetadata {
     pub fn to_placeholder_map(&self) -> HashMap<String, String> {
         let mut map = HashMap::new();
 
+        // Lowercase variants
         map.insert("project_name".to_string(), self.project_name.clone());
-        map.insert("PROJECT_NAME".to_string(), self.project_name.to_uppercase());
         map.insert("language".to_string(), self.language.clone());
         map.insert("project_type".to_string(), self.project_type.clone());
         map.insert("version".to_string(), self.version.clone());
 
-        if let Some(desc) = &self.description {
-            map.insert("description".to_string(), desc.clone());
-        }
+        // Uppercase variants (used in component templates)
+        map.insert("PROJECT_NAME".to_string(), self.project_name.clone());
+        map.insert("PRIMARY_LANGUAGE".to_string(), self.language.clone());
+        map.insert("PROJECT_TYPE".to_string(), self.project_type.clone());
+        map.insert("VERSION".to_string(), self.version.clone());
 
+        // Description
+        let default_description = format!(
+            "A {} project written in {}",
+            self.project_type, self.language
+        );
+        let description = self.description.as_ref().unwrap_or(&default_description);
+        map.insert("description".to_string(), description.clone());
+        map.insert("PROJECT_DESCRIPTION".to_string(), description.clone());
+
+        // Author
         if let Some(author) = &self.author {
             map.insert("author".to_string(), author.clone());
+            map.insert("AUTHOR".to_string(), author.clone());
         }
 
-        // Add current date
+        // Dates
         let date = chrono::Local::now().format("%Y-%m-%d").to_string();
-        map.insert("date".to_string(), date);
+        let datetime = chrono::Local::now().format("%Y-%m-%d %H:%M:%S").to_string();
+        map.insert("date".to_string(), date.clone());
+        map.insert("UPDATED_AT".to_string(), date);
+        map.insert("CREATED_AT".to_string(), datetime);
 
         map
     }
@@ -578,6 +695,200 @@ impl InteractivePrompt {
             author,
             version,
         })
+    }
+
+    /// Selects components interactively
+    ///
+    /// # Arguments
+    ///
+    /// * `component_dir` - Path to components directory
+    /// * `language` - Selected language for filtering
+    ///
+    /// # Returns
+    ///
+    /// Returns list of selected components with their types
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if component discovery or selection fails
+    pub fn select_components(
+        component_dir: &Path,
+        language: &str,
+    ) -> Result<Vec<(ComponentType, String)>> {
+        println!("\n=== Interactive Mode: Component Selection ===\n");
+
+        let mut selected = Vec::new();
+
+        // Ask about core components
+        if Self::prompt_yes_no("Include core components?", true)? {
+            let core_components = Self::list_components(component_dir, ComponentType::Core)?;
+            let selected_core = Self::select_from_list(
+                "Select core components (comma-separated numbers, or 'all')",
+                &core_components,
+            )?;
+            for name in selected_core {
+                selected.push((ComponentType::Core, name));
+            }
+        }
+
+        // Ask about general components
+        if Self::prompt_yes_no("Include general components?", true)? {
+            let general_components = Self::list_components(component_dir, ComponentType::General)?;
+            let selected_general = Self::select_from_list(
+                "Select general components (comma-separated numbers, or 'all')",
+                &general_components,
+            )?;
+            for name in selected_general {
+                selected.push((ComponentType::General, name));
+            }
+        }
+
+        // Ask about language-specific components
+        if Self::prompt_yes_no(
+            &format!("Include language-specific components for '{}'?", language),
+            true,
+        )? {
+            let language_components =
+                Self::list_components(component_dir, ComponentType::Languages)?;
+            let filtered: Vec<String> = language_components
+                .iter()
+                .filter(|name| name.contains(language) || name.contains("common"))
+                .cloned()
+                .collect();
+
+            if !filtered.is_empty() {
+                let selected_lang = Self::select_from_list(
+                    &format!(
+                        "Select {} components (comma-separated numbers, or 'all')",
+                        language
+                    ),
+                    &filtered,
+                )?;
+                for name in selected_lang {
+                    selected.push((ComponentType::Languages, name));
+                }
+            } else {
+                println!("No language-specific components found for '{}'", language);
+            }
+        }
+
+        // Ask about tool-specific components
+        if Self::prompt_yes_no("Include tool-specific components?", false)? {
+            let tool_components = Self::list_components(component_dir, ComponentType::Tools)?;
+            let selected_tools = Self::select_from_list(
+                "Select tool components (comma-separated numbers, or 'all')",
+                &tool_components,
+            )?;
+            for name in selected_tools {
+                selected.push((ComponentType::Tools, name));
+            }
+        }
+
+        if selected.is_empty() {
+            println!("\nWarning: No components selected. Using minimal default set.");
+            selected.push((ComponentType::Core, "critical_rules".to_string()));
+        }
+
+        println!("\nSelected {} component(s)", selected.len());
+        Ok(selected)
+    }
+
+    /// Lists available components in a directory
+    fn list_components(base_dir: &Path, comp_type: ComponentType) -> Result<Vec<String>> {
+        let type_dir = base_dir.join(comp_type.to_string());
+        let mut components = Vec::new();
+
+        if !type_dir.exists() {
+            return Ok(components);
+        }
+
+        let entries = fs::read_dir(&type_dir).map_err(|e| Error::Io(e.to_string()))?;
+
+        for entry in entries {
+            let entry = entry.map_err(|e| Error::Io(e.to_string()))?;
+            let path = entry.path();
+
+            if path.is_file() {
+                if let Some(ext) = path.extension() {
+                    if ext == "md" || ext == "yaml" {
+                        if let Some(stem) = path.file_stem() {
+                            if let Some(name) = stem.to_str() {
+                                components.push(name.to_string());
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        components.sort();
+        Ok(components)
+    }
+
+    /// Prompts user to select from a list
+    fn select_from_list(prompt: &str, items: &[String]) -> Result<Vec<String>> {
+        if items.is_empty() {
+            return Ok(Vec::new());
+        }
+
+        println!("\nAvailable options:");
+        for (i, item) in items.iter().enumerate() {
+            println!("  {}. {}", i + 1, item);
+        }
+
+        print!("\n{}: ", prompt);
+        io::stdout().flush().map_err(|e| Error::Io(e.to_string()))?;
+
+        let mut input = String::new();
+        io::stdin()
+            .read_line(&mut input)
+            .map_err(|e| Error::Io(e.to_string()))?;
+
+        let input = input.trim();
+
+        if input.is_empty() {
+            return Ok(Vec::new());
+        }
+
+        if input.to_lowercase() == "all" {
+            return Ok(items.to_vec());
+        }
+
+        let mut selected = Vec::new();
+        let mut seen = HashSet::new();
+
+        for part in input.split(',') {
+            let part = part.trim();
+            if let Ok(num) = part.parse::<usize>() {
+                if num > 0 && num <= items.len() {
+                    let idx = num - 1;
+                    if seen.insert(idx) {
+                        selected.push(items[idx].clone());
+                    }
+                }
+            }
+        }
+
+        Ok(selected)
+    }
+
+    /// Prompts for yes/no question
+    fn prompt_yes_no(prompt: &str, default: bool) -> Result<bool> {
+        let default_str = if default { "Y/n" } else { "y/N" };
+        print!("{} [{}]: ", prompt, default_str);
+        io::stdout().flush().map_err(|e| Error::Io(e.to_string()))?;
+
+        let mut input = String::new();
+        io::stdin()
+            .read_line(&mut input)
+            .map_err(|e| Error::Io(e.to_string()))?;
+
+        let trimmed = input.trim().to_lowercase();
+        if trimmed.is_empty() {
+            Ok(default)
+        } else {
+            Ok(trimmed == "y" || trimmed == "yes")
+        }
     }
 
     /// Prompts for input with default value
@@ -690,12 +1001,64 @@ mod tests {
         let map = metadata.to_placeholder_map();
 
         assert_eq!(map.get("project_name").unwrap(), "test-project");
-        assert_eq!(map.get("PROJECT_NAME").unwrap(), "TEST-PROJECT");
+        assert_eq!(map.get("PROJECT_NAME").unwrap(), "test-project");
         assert_eq!(map.get("language").unwrap(), "rust");
+        assert_eq!(map.get("PRIMARY_LANGUAGE").unwrap(), "rust");
+        assert_eq!(map.get("PROJECT_TYPE").unwrap(), "cli");
         assert_eq!(map.get("version").unwrap(), "1.0.0");
+        assert_eq!(map.get("VERSION").unwrap(), "1.0.0");
         assert_eq!(map.get("description").unwrap(), "A test project");
+        assert_eq!(map.get("PROJECT_DESCRIPTION").unwrap(), "A test project");
         assert_eq!(map.get("author").unwrap(), "Test Author");
+        assert_eq!(map.get("AUTHOR").unwrap(), "Test Author");
         assert!(map.contains_key("date"));
+        assert!(map.contains_key("UPDATED_AT"));
+        assert!(map.contains_key("CREATED_AT"));
+    }
+
+    #[test]
+    fn test_filter_language_sections_rust_only() {
+        let content = r#"Common content here
+
+<!-- LANG:rust -->
+Rust-specific content
+<!-- /LANG -->
+
+<!-- LANG:python -->
+Python-specific content
+<!-- /LANG -->
+
+More common content"#;
+
+        let filtered = ComponentComposer::filter_language_sections(content, "rust");
+
+        assert!(filtered.contains("Common content here"));
+        assert!(filtered.contains("Rust-specific content"));
+        assert!(!filtered.contains("Python-specific content"));
+        assert!(filtered.contains("More common content"));
+    }
+
+    #[test]
+    fn test_filter_language_sections_python_only() {
+        let content = r#"<!-- LANG:rust -->
+Rust content
+<!-- /LANG -->
+
+<!-- LANG:python -->
+Python content
+<!-- /LANG -->"#;
+
+        let filtered = ComponentComposer::filter_language_sections(content, "python");
+
+        assert!(!filtered.contains("Rust content"));
+        assert!(filtered.contains("Python content"));
+    }
+
+    #[test]
+    fn test_filter_language_sections_no_markers() {
+        let content = "Just plain content without markers";
+        let filtered = ComponentComposer::filter_language_sections(content, "rust");
+        assert_eq!(filtered.trim(), content);
     }
 
     #[test]

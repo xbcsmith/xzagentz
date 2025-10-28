@@ -111,7 +111,10 @@ impl ComponentLoader {
         }
 
         // Read file content
-        let content = fs::read_to_string(&path).map_err(|e| Error::file_io(path.clone(), e))?;
+        let raw_content = fs::read_to_string(&path).map_err(|e| Error::file_io(path.clone(), e))?;
+
+        // Strip YAML frontmatter if present
+        let content = Self::strip_yaml_frontmatter(&raw_content);
 
         // Create component
         let component = Component::new(name, component_type, content);
@@ -275,6 +278,59 @@ impl ComponentLoader {
             PathBuf::from("components").join(component_type.as_str())
         }
     }
+
+    /// Strips YAML frontmatter from component content
+    ///
+    /// Component files may have YAML frontmatter delimited by `---` markers.
+    /// This function removes that frontmatter and returns only the markdown content.
+    ///
+    /// # Arguments
+    ///
+    /// * `content` - Raw file content that may contain YAML frontmatter
+    ///
+    /// # Returns
+    ///
+    /// Returns the content with YAML frontmatter removed, or the original content
+    /// if no frontmatter is present.
+    ///
+    /// # Implementation Note
+    ///
+    /// This is an internal helper function used during component loading.
+    /// The frontmatter stripping happens automatically when loading components.
+    fn strip_yaml_frontmatter(content: &str) -> String {
+        let lines: Vec<&str> = content.lines().collect();
+
+        // Check if content starts with frontmatter delimiter
+        if lines.is_empty() || lines[0].trim() != "---" {
+            return content.to_string();
+        }
+
+        // Find the closing delimiter
+        let mut end_index = None;
+        for (i, line) in lines.iter().enumerate().skip(1) {
+            if line.trim() == "---" {
+                end_index = Some(i);
+                break;
+            }
+        }
+
+        // If we found the closing delimiter, skip all lines up to and including it
+        if let Some(end) = end_index {
+            // Skip frontmatter and any immediately following blank lines
+            let content_start = lines
+                .iter()
+                .enumerate()
+                .skip(end + 1)
+                .find(|(_, line)| !line.trim().is_empty())
+                .map(|(i, _)| i)
+                .unwrap_or(end + 1);
+
+            return lines[content_start..].join("\n");
+        }
+
+        // No closing delimiter found, return original content
+        content.to_string()
+    }
 }
 
 impl Default for ComponentLoader {
@@ -432,5 +488,43 @@ mod tests {
         assert_eq!(core_component.component_type, ComponentType::Core);
         assert_eq!(lang_component.component_type, ComponentType::Languages);
         assert_eq!(loader.cache_size(), 2);
+    }
+
+    #[test]
+    fn test_strip_yaml_frontmatter_with_frontmatter() {
+        let content = "---\nkey: value\nname: test\n---\n\n# Heading\n\nContent here";
+        let stripped = ComponentLoader::strip_yaml_frontmatter(content);
+        assert_eq!(stripped, "# Heading\n\nContent here");
+    }
+
+    #[test]
+    fn test_strip_yaml_frontmatter_without_frontmatter() {
+        let content = "# Heading\n\nContent here";
+        let stripped = ComponentLoader::strip_yaml_frontmatter(content);
+        assert_eq!(stripped, "# Heading\n\nContent here");
+    }
+
+    #[test]
+    fn test_strip_yaml_frontmatter_unclosed() {
+        let content = "---\nkey: value\n\n# Heading\n\nContent";
+        let stripped = ComponentLoader::strip_yaml_frontmatter(content);
+        // Unclosed frontmatter should return original content
+        assert_eq!(stripped, content);
+    }
+
+    #[test]
+    fn test_strip_yaml_frontmatter_empty() {
+        let content = "";
+        let stripped = ComponentLoader::strip_yaml_frontmatter(content);
+        assert_eq!(stripped, "");
+    }
+
+    #[test]
+    fn test_strip_yaml_frontmatter_with_component_metadata() {
+        let content = "---\ncomponent:\n  name: critical_rules\n  category: core\n  version: 2.0.0\n---\n\n# Critical Rules\n\nContent";
+        let stripped = ComponentLoader::strip_yaml_frontmatter(content);
+        assert_eq!(stripped, "# Critical Rules\n\nContent");
+        assert!(!stripped.contains("component:"));
+        assert!(!stripped.contains("name: critical_rules"));
     }
 }
