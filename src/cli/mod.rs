@@ -11,6 +11,7 @@
 
 pub mod add;
 pub mod create;
+pub mod init;
 pub mod list;
 pub mod output;
 pub mod prompt;
@@ -63,6 +64,25 @@ pub enum OutputFormat {
 /// Available subcommands
 #[derive(Subcommand, Debug)]
 pub enum Commands {
+    /// Initialize xzagentz by extracting embedded resources
+    Init {
+        /// Custom components directory (default: ~/.config/xzagentz/components)
+        #[arg(short, long)]
+        components_dir: Option<PathBuf>,
+
+        /// Custom templates directory (default: ~/.config/xzagentz/templates)
+        #[arg(short, long)]
+        templates_dir: Option<PathBuf>,
+
+        /// Force overwrite existing files
+        #[arg(short, long)]
+        force: bool,
+
+        /// Dry run - show what would be done without doing it
+        #[arg(short = 'n', long)]
+        dry_run: bool,
+    },
+
     /// List available components or templates
     List {
         /// What to list

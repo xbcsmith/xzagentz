@@ -30,7 +30,7 @@ use std::path::PathBuf;
 use walkdir::WalkDir;
 
 #[cfg(test)]
-use std::path::Path;
+use tempfile::TempDir;
 
 /// Component loader with caching support
 ///

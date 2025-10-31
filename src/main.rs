@@ -40,6 +40,40 @@ fn run(cli: Cli) -> Result<(), Error> {
 
     // Dispatch to command handlers
     match cli.command {
+        Commands::Init {
+            components_dir,
+            templates_dir,
+            force,
+            dry_run,
+        } => {
+            let result = xzagentz::cli::init::execute(
+                components_dir,
+                templates_dir,
+                force,
+                dry_run,
+                cli.verbose,
+            )?;
+
+            if !dry_run {
+                println!("Successfully initialized xzagentz!");
+                println!(
+                    "  Components: {} files in {}",
+                    result.components_extracted,
+                    result.components_dir.display()
+                );
+                println!(
+                    "  Templates:  {} files in {}",
+                    result.templates_extracted,
+                    result.templates_dir.display()
+                );
+                if result.conflicts_overwritten > 0 {
+                    println!(
+                        "  Overwrote {} existing files",
+                        result.conflicts_overwritten
+                    );
+                }
+            }
+        }
         Commands::List { target } => {
             xzagentz::cli::list::execute(
                 &target,
@@ -162,6 +196,12 @@ mod tests {
     fn test_run_create_command() {
         let cli = Cli::parse_from(["xzagentz", "create", "--output", "test_output.md"]);
         // This will fail if components/templates don't exist, but that's expected in tests
+        let _result = run(cli);
+    }
+
+    #[test]
+    fn test_run_init_dry_run() {
+        let cli = Cli::parse_from(["xzagentz", "init", "--dry-run"]);
         let _result = run(cli);
     }
 }

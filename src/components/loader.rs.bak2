@@ -23,14 +23,51 @@
 use crate::components::Component;
 use crate::core::ComponentType;
 use crate::error::{Error, Result};
+use crate::infrastructure::embedded::EmbeddedResources;
+use crate::components::resolution::ResourceSource;
 use std::cell::RefCell;
 use std::collections::HashMap;
+use std::env;
 use std::fs;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use walkdir::WalkDir;
 
 #[cfg(test)]
-use std::path::Path;
+use tempfile::TempDir;
+
+
+impl ResourceSource {
+    /// Returns true if the resource is from the filesystem
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use xzagentz::components::loader::ResourceSource;
+    /// use std::path::PathBuf;
+    ///
+    /// let source = ResourceSource::Filesystem(PathBuf::from("/tmp/components"));
+    /// assert!(source.is_filesystem());
+    /// ```
+    pub fn is_filesystem(&self) -> bool {
+        matches!(self, ResourceSource::Filesystem(_))
+    }
+
+    /// Returns true if the resource is embedded
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use xzagentz::components::loader::ResourceSource;
+    ///
+    /// let source = ResourceSource::Embedded;
+    /// assert!(source.is_embedded());
+    /// ```
+    pub fn is_embedded(&self) -> bool {
+        matches!(self, ResourceSource::Embedded)
+    }
+}
+</parameter>
+</invoke>
 
 /// Component loader with caching support
 ///

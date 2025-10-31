@@ -39,10 +39,12 @@
 
 mod loader;
 mod renderer;
+pub mod resolution;
 mod validator;
 
 pub use loader::TemplateLoader;
 pub use renderer::PlaceholderRenderer;
+pub use resolution::{default_templates_dir, resolve_template_dir};
 pub use validator::TemplateValidator;
 
 use serde::{Deserialize, Serialize};
