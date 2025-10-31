@@ -3,6 +3,9 @@
 //! This module provides functionality for managing project configuration files,
 //! including metadata, template information, component lists, and project options.
 
+use crate::config::resolution::{
+    default_components_dir, default_config_dir, default_templates_dir,
+};
 use crate::error::{Error, Result};
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
@@ -341,6 +344,54 @@ impl ProjectConfig {
         self.placeholders.insert(key, value);
         self.update();
     }
+
+    /// Returns the default configuration directory
+    ///
+    /// This is a convenience method that delegates to the resolution module.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use xzagentz::config::ProjectConfig;
+    ///
+    /// let dir = ProjectConfig::default_config_dir();
+    /// assert!(dir.ends_with("xzagentz") || dir.ends_with(".config/xzagentz"));
+    /// ```
+    pub fn default_config_dir() -> PathBuf {
+        default_config_dir()
+    }
+
+    /// Returns the default components directory
+    ///
+    /// This is a convenience method that delegates to the resolution module.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use xzagentz::config::ProjectConfig;
+    ///
+    /// let dir = ProjectConfig::default_components_dir();
+    /// assert!(dir.ends_with(".config/xzagentz/components"));
+    /// ```
+    pub fn default_components_dir() -> PathBuf {
+        default_components_dir()
+    }
+
+    /// Returns the default templates directory
+    ///
+    /// This is a convenience method that delegates to the resolution module.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use xzagentz::config::ProjectConfig;
+    ///
+    /// let dir = ProjectConfig::default_templates_dir();
+    /// assert!(dir.ends_with(".config/xzagentz/templates"));
+    /// ```
+    pub fn default_templates_dir() -> PathBuf {
+        default_templates_dir()
+    }
 }
 
 #[cfg(test)]
@@ -544,5 +595,30 @@ name = "default"
         assert!(components.languages.is_empty());
         assert!(components.tools.is_empty());
         assert!(components.general.is_empty());
+    }
+
+    #[test]
+    fn test_default_config_dir() {
+        let dir = ProjectConfig::default_config_dir();
+        let dir_str = dir.to_string_lossy();
+        assert!(
+            dir_str.contains(".config/xzagentz") || dir_str.ends_with("xzagentz"),
+            "Expected config dir to contain .config/xzagentz or end with xzagentz, got: {}",
+            dir_str
+        );
+    }
+
+    #[test]
+    fn test_default_components_dir() {
+        let dir = ProjectConfig::default_components_dir();
+        assert!(dir
+            .to_string_lossy()
+            .contains(".config/xzagentz/components"));
+    }
+
+    #[test]
+    fn test_default_templates_dir() {
+        let dir = ProjectConfig::default_templates_dir();
+        assert!(dir.to_string_lossy().contains(".config/xzagentz/templates"));
     }
 }
