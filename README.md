@@ -64,6 +64,83 @@ cargo test size_validation_test
 xzagentz list --category core
 ```
 
+## Embedded Resources
+
+xzagentz includes all components and templates embedded in the binary, allowing it to work out of the box without any setup. You can also customize resources by extracting and modifying them.
+
+### Using Embedded Resources (Default)
+
+No setup required - just run commands:
+
+```bash
+# Create a new project using embedded resources
+xzagentz create my-project --template rust_binary --language rust
+
+# List embedded components
+xzagentz list components
+
+# List embedded templates
+xzagentz list templates
+```
+
+### Customizing Resources
+
+Extract resources for customization:
+
+```bash
+# Initialize and extract to default location (~/.config/xzagentz)
+xzagentz init
+
+# Or extract to custom location
+xzagentz init --config-dir ./my-config
+```
+
+This creates:
+
+```text
+~/.config/xzagentz/
+├── components/
+│   ├── core/
+│   ├── development/
+│   ├── documentation/
+│   └── testing/
+└── templates/
+    └── plans/
+```
+
+Modify extracted files and xzagentz will automatically use your customized versions.
+
+### Environment Variables
+
+Control resource locations with environment variables:
+
+```bash
+# Use custom components directory
+export XZAGENTZ_COMPONENTS_DIR=/path/to/components
+
+# Use custom templates directory
+export XZAGENTZ_TEMPLATES_DIR=/path/to/templates
+
+# Use custom config directory
+export XZAGENTZ_CONFIG_DIR=/path/to/config
+```
+
+### Resource Resolution
+
+xzagentz searches for resources in this order:
+
+1. Custom directory (via CLI flag)
+2. Environment variable (XZAGENTZ\_\*\_DIR)
+3. XDG directories (XDG_DATA_HOME)
+4. Home directory (~/.config/xzagentz)
+5. Embedded resources (always available)
+
+For more details, see:
+
+- Setup Guide: `docs/how_to/setup_custom_resources.md`
+- Environment Variables: `docs/reference/environment_variables.md`
+- Architecture: `docs/explanations/embedded_resources_architecture.md`
+
 ## Component System
 
 ### Component Structure
