@@ -27,6 +27,9 @@ tracing = "0.1"
 include_dir = "0.7"
 reqwest = { version = "0.11", features = ["json", "stream"] }
 tokio = { version = "1.35", features = ["full"] }
+dialoguer = "0.11"
+console = "0.15"
+indicatif = "0.17"
 
 [dev-dependencies]
 tempfile = "3.8"

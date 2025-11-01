@@ -15,7 +15,9 @@
 //! - `plans`: Architecture and implementation plan management
 //! - `prompts`: Prompt generation system
 //! - `markdown`: Markdown cleaning and normalization
-//! - `infrastructure`: Infrastructure layer (embedded resources)
+//! - `domain`: Domain layer (business logic and models)
+//! - `infrastructure`: Infrastructure layer (external services and I/O)
+//! - `application`: Application layer (use cases and orchestration)
 //! - `cli`: Command-line interface (when used as binary)
 //!
 //! # Examples
@@ -33,6 +35,7 @@
 //! };
 //! ```
 
+pub mod application;
 pub mod cli;
 pub mod components;
 pub mod config;
