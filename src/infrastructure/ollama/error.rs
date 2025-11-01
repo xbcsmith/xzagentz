@@ -166,8 +166,8 @@ impl OllamaError {
     /// ```rust
     /// use xzagentz::infrastructure::ollama::OllamaError;
     ///
-    /// let error = OllamaError::model_not_found("llama2:13b");
-    /// assert!(error.to_string().contains("llama2:13b"));
+    /// let error = OllamaError::model_not_found("llama3.2:3b");
+    /// assert!(error.to_string().contains("llama3.2:3b"));
     /// ```
     pub fn model_not_found(model: impl Into<String>) -> Self {
         Self::ModelNotFound {
@@ -312,8 +312,8 @@ mod tests {
 
     #[test]
     fn test_model_not_found_error() {
-        let error = OllamaError::model_not_found("llama2");
-        assert!(error.to_string().contains("llama2"));
+        let error = OllamaError::model_not_found("llama3:latest");
+        assert!(error.to_string().contains("llama3:latest"));
         assert!(error.to_string().contains("not found"));
     }
 

@@ -22,7 +22,7 @@
 //!
 //! // Generate text
 //! let prompt = "Explain Rust ownership";
-//! let response = client.generate("llama2", prompt, None).await?;
+//! let response = client.generate("llama3.2:3b", prompt, None).await?;
 //! println!("Response: {}", response);
 //! # Ok(())
 //! # }
@@ -240,7 +240,7 @@ impl OllamaClient {
     ///
     /// # async fn example() -> Result<(), Box<dyn std::error::Error>> {
     /// let client = OllamaClient::new(OllamaConfig::default())?;
-    /// let response = client.generate("llama2", "Hello", None).await?;
+    /// let response = client.generate("llama3.2:3b", "Hello", None).await?;
     /// println!("Generated: {}", response);
     /// # Ok(())
     /// # }
@@ -329,7 +329,7 @@ impl OllamaClient {
     ///
     /// # async fn example() -> Result<(), Box<dyn std::error::Error>> {
     /// let client = OllamaClient::new(OllamaConfig::default())?;
-    /// let response = client.generate_stream("llama2", "Hello", None).await?;
+    /// let response = client.generate_stream("llama3.2:3b", "Hello", None).await?;
     /// println!("Generated: {}", response);
     /// # Ok(())
     /// # }
@@ -417,7 +417,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_client_creation() {
+    fn test_client_creation_with_valid_config() {
         let config = OllamaConfig::default();
         let client = OllamaClient::new(config);
         assert!(client.is_ok());
@@ -431,23 +431,40 @@ mod tests {
     }
 
     #[test]
-    fn test_client_base_url() {
+    fn test_client_creation_with_custom_base_url() {
+        let config = OllamaConfig::new()
+            .with_base_url("http://custom-host:8080")
+            .with_timeout_seconds(60);
+        let client = OllamaClient::new(config).unwrap();
+        assert_eq!(client.base_url(), "http://custom-host:8080");
+        assert_eq!(client.timeout(), Duration::from_secs(60));
+    }
+
+    #[test]
+    fn test_client_base_url_default() {
         let config = OllamaConfig::default();
         let client = OllamaClient::new(config).unwrap();
         assert_eq!(client.base_url(), "http://localhost:11434");
     }
 
     #[test]
-    fn test_client_timeout() {
+    fn test_client_timeout_default() {
         let config = OllamaConfig::default();
         let client = OllamaClient::new(config).unwrap();
         assert_eq!(client.timeout(), Duration::from_secs(120));
     }
 
     #[test]
-    fn test_generate_request_serialization() {
+    fn test_client_timeout_custom() {
+        let config = OllamaConfig::new().with_timeout_seconds(300);
+        let client = OllamaClient::new(config).unwrap();
+        assert_eq!(client.timeout(), Duration::from_secs(300));
+    }
+
+    #[test]
+    fn test_generate_request_serialization_full() {
         let request = GenerateRequest {
-            model: "llama2".to_string(),
+            model: "llama3.2:3b".to_string(),
             prompt: "Hello".to_string(),
             stream: Some(false),
             options: Some(GenerateOptions {
@@ -457,52 +474,190 @@ mod tests {
         };
 
         let json = serde_json::to_string(&request).unwrap();
-        assert!(json.contains("llama2"));
+        assert!(json.contains("llama3.2:3b"));
         assert!(json.contains("Hello"));
+        assert!(json.contains("0.7"));
+        assert!(json.contains("100"));
     }
 
     #[test]
-    fn test_generate_response_deserialization() {
-        let json = r#"{"response":"test","done":true,"model":"llama2"}"#;
+    fn test_generate_request_serialization_minimal() {
+        let request = GenerateRequest {
+            model: "llama3.2:3b".to_string(),
+            prompt: "Test".to_string(),
+            stream: None,
+            options: None,
+        };
+
+        let json = serde_json::to_string(&request).unwrap();
+        assert!(json.contains("llama3.2:3b"));
+        assert!(json.contains("Test"));
+        assert!(!json.contains("stream"));
+        assert!(!json.contains("options"));
+    }
+
+    #[test]
+    fn test_generate_request_serialization_with_temperature_only() {
+        let request = GenerateRequest {
+            model: "llama3.2:3b".to_string(),
+            prompt: "Test".to_string(),
+            stream: Some(false),
+            options: Some(GenerateOptions {
+                temperature: Some(0.8),
+                num_predict: None,
+            }),
+        };
+
+        let json = serde_json::to_string(&request).unwrap();
+        assert!(json.contains("0.8"));
+    }
+
+    #[test]
+    fn test_generate_response_deserialization_complete() {
+        let json = r#"{"response":"test","done":true,"model":"llama3.2:3b"}"#;
         let response: GenerateResponse = serde_json::from_str(json).unwrap();
         assert_eq!(response.response, "test");
         assert!(response.done);
-        assert_eq!(response.model, "llama2");
+        assert_eq!(response.model, "llama3.2:3b");
     }
 
     #[test]
-    fn test_list_models_response_deserialization() {
-        let json = r#"{"models":[{"name":"llama2","size":3825819519}]}"#;
+    fn test_generate_response_deserialization_partial() {
+        let json = r#"{"response":"partial"}"#;
+        let response: GenerateResponse = serde_json::from_str(json).unwrap();
+        assert_eq!(response.response, "partial");
+        assert!(!response.done);
+    }
+
+    #[test]
+    fn test_generate_response_deserialization_empty() {
+        let json = r#"{"response":"","done":true,"model":""}"#;
+        let response: GenerateResponse = serde_json::from_str(json).unwrap();
+        assert_eq!(response.response, "");
+        assert!(response.done);
+    }
+
+    #[test]
+    fn test_list_models_response_deserialization_single() {
+        let json = r#"{"models":[{"name":"llama3.2:3b","size":3825819519}]}"#;
         let response: ListModelsResponse = serde_json::from_str(json).unwrap();
         assert_eq!(response.models.len(), 1);
-        assert_eq!(response.models[0].name, "llama2");
+        assert_eq!(response.models[0].name, "llama3.2:3b");
+        assert_eq!(response.models[0].size, Some(3825819519));
     }
 
     #[test]
-    fn test_model_info_serialization() {
+    fn test_list_models_response_deserialization_multiple() {
+        let json =
+            r#"{"models":[{"name":"llama3.2:3b","size":1000},{"name":"codellama","size":2000}]}"#;
+        let response: ListModelsResponse = serde_json::from_str(json).unwrap();
+        assert_eq!(response.models.len(), 2);
+        assert_eq!(response.models[0].name, "llama3.2:3b");
+        assert_eq!(response.models[1].name, "codellama");
+    }
+
+    #[test]
+    fn test_list_models_response_deserialization_empty() {
+        let json = r#"{"models":[]}"#;
+        let response: ListModelsResponse = serde_json::from_str(json).unwrap();
+        assert_eq!(response.models.len(), 0);
+    }
+
+    #[test]
+    fn test_list_models_response_deserialization_with_metadata() {
+        let json = r#"{"models":[{"name":"llama3.2:3b","size":1000,"modified_at":"2024-01-01"}]}"#;
+        let response: ListModelsResponse = serde_json::from_str(json).unwrap();
+        assert_eq!(response.models.len(), 1);
+        assert_eq!(
+            response.models[0].modified_at,
+            Some("2024-01-01".to_string())
+        );
+    }
+
+    #[test]
+    fn test_model_info_serialization_full() {
         let model = ModelInfo {
-            name: "llama2".to_string(),
+            name: "llama3.2:3b".to_string(),
             size: Some(1000),
             modified_at: Some("2024-01-01".to_string()),
         };
 
         let json = serde_json::to_string(&model).unwrap();
-        assert!(json.contains("llama2"));
+        assert!(json.contains("llama3.2:3b"));
+        assert!(json.contains("1000"));
+        assert!(json.contains("2024-01-01"));
     }
 
     #[test]
-    fn test_client_clone() {
+    fn test_model_info_serialization_minimal() {
+        let model = ModelInfo {
+            name: "codellama".to_string(),
+            size: None,
+            modified_at: None,
+        };
+
+        let json = serde_json::to_string(&model).unwrap();
+        assert!(json.contains("codellama"));
+        assert!(!json.contains("size"));
+        assert!(!json.contains("modified_at"));
+    }
+
+    #[test]
+    fn test_model_info_deserialization() {
+        let json = r#"{"name":"llama3.2:3b","size":1000}"#;
+        let model: ModelInfo = serde_json::from_str(json).unwrap();
+        assert_eq!(model.name, "llama3.2:3b");
+        assert_eq!(model.size, Some(1000));
+    }
+
+    #[test]
+    fn test_client_clone_preserves_config() {
         let config = OllamaConfig::default();
         let client1 = OllamaClient::new(config).unwrap();
         let client2 = client1.clone();
         assert_eq!(client1.base_url(), client2.base_url());
+        assert_eq!(client1.timeout(), client2.timeout());
     }
 
     #[test]
-    fn test_client_debug() {
+    fn test_client_debug_format() {
         let config = OllamaConfig::default();
         let client = OllamaClient::new(config).unwrap();
         let debug_str = format!("{:?}", client);
         assert!(debug_str.contains("OllamaClient"));
+        assert!(debug_str.contains("base_url"));
+    }
+
+    #[test]
+    fn test_generate_options_with_both_parameters() {
+        let options = GenerateOptions {
+            temperature: Some(0.5),
+            num_predict: Some(200),
+        };
+        let json = serde_json::to_string(&options).unwrap();
+        assert!(json.contains("0.5"));
+        assert!(json.contains("200"));
+    }
+
+    #[test]
+    fn test_generate_options_with_temperature_only() {
+        let options = GenerateOptions {
+            temperature: Some(0.9),
+            num_predict: None,
+        };
+        let json = serde_json::to_string(&options).unwrap();
+        assert!(json.contains("0.9"));
+        assert!(!json.contains("num_predict"));
+    }
+
+    #[test]
+    fn test_generate_options_with_num_predict_only() {
+        let options = GenerateOptions {
+            temperature: None,
+            num_predict: Some(500),
+        };
+        let json = serde_json::to_string(&options).unwrap();
+        assert!(json.contains("500"));
+        assert!(!json.contains("temperature"));
     }
 }

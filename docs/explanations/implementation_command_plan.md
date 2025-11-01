@@ -257,7 +257,7 @@ impl Default for OllamaConfig {
     fn default() -> Self {
         Self {
             base_url: "http://localhost:11434".to_string(),
-            default_model: "llama2".to_string(),
+            default_model: "llama3.2:3b".to_string(),
             timeout_seconds: 300,
             max_retries: 3,
         }
@@ -598,7 +598,7 @@ Implementation(implementation::ImplementationArgs),
 # config/planning.yaml
 ollama:
   base_url: "http://localhost:11434"
-  default_model: "llama2"
+  default_model: "llama3.2:3b"
   timeout_seconds: 300
 
 planning:

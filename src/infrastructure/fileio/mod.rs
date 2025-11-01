@@ -24,7 +24,7 @@
 //!
 //! # fn example() -> Result<(), Box<dyn std::error::Error>> {
 //! let writer = MarkdownPlanWriter::new();
-//! let metadata = PlanMetadata::new(Utc::now(), "llama2", PathBuf::from("arch.md"));
+//! let metadata = PlanMetadata::new(Utc::now(), "llama3.2:3b", PathBuf::from("arch.md"));
 //! let plan = Plan::new("Implementation Plan", "Description", vec![], metadata);
 //!
 //! writer.write_plan(&plan, Path::new("plan.md"))?;

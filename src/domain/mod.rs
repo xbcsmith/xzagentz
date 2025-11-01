@@ -38,7 +38,7 @@
 //!
 //! let metadata = PlanMetadata::new(
 //!     Utc::now(),
-//!     "llama2",
+//!     "llama3.2:3b",
 //!     PathBuf::from("docs/architecture.md"),
 //! );
 //!

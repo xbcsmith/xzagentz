@@ -14,7 +14,7 @@
 //!
 //! let config = OllamaConfig::default();
 //! assert_eq!(config.base_url(), "http://localhost:11434");
-//! assert_eq!(config.default_model(), "llama2");
+//! assert_eq!(config.default_model(), "llama3.2:3b");
 //! ```
 
 use serde::{Deserialize, Serialize};
@@ -213,7 +213,7 @@ impl OllamaConfig {
     /// use xzagentz::infrastructure::ollama::OllamaConfig;
     ///
     /// let config = OllamaConfig::default();
-    /// assert_eq!(config.default_model(), "llama2");
+    /// assert_eq!(config.default_model(), "llama3.2:3b");
     /// ```
     pub fn default_model(&self) -> &str {
         &self.default_model
@@ -335,7 +335,7 @@ impl Default for OllamaConfig {
     /// # Defaults
     ///
     /// - base_url: "http://localhost:11434"
-    /// - default_model: "llama2"
+    /// - default_model: "llama3.2:3b"
     /// - timeout_seconds: 120
     /// - max_retries: 3
     /// - temperature: 0.7
@@ -348,14 +348,14 @@ impl Default for OllamaConfig {
     ///
     /// let config = OllamaConfig::default();
     /// assert_eq!(config.base_url(), "http://localhost:11434");
-    /// assert_eq!(config.default_model(), "llama2");
+    /// assert_eq!(config.default_model(), "llama3.2:3b");
     /// assert_eq!(config.timeout_seconds(), 120);
     /// assert_eq!(config.max_retries(), 3);
     /// ```
     fn default() -> Self {
         Self {
             base_url: "http://localhost:11434".to_string(),
-            default_model: "llama2".to_string(),
+            default_model: "llama3.2:3b".to_string(),
             timeout_seconds: 120,
             max_retries: 3,
             temperature: default_temperature(),
@@ -372,7 +372,7 @@ mod tests {
     fn test_default_config() {
         let config = OllamaConfig::default();
         assert_eq!(config.base_url(), "http://localhost:11434");
-        assert_eq!(config.default_model(), "llama2");
+        assert_eq!(config.default_model(), "llama3.2:3b");
         assert_eq!(config.timeout_seconds(), 120);
         assert_eq!(config.max_retries(), 3);
         assert_eq!(config.temperature(), 0.7);
@@ -510,21 +510,21 @@ mod tests {
     fn test_serialization() {
         let config = OllamaConfig::default();
         let json = serde_json::to_string(&config).unwrap();
-        assert!(json.contains("llama2"));
+        assert!(json.contains("llama3.2:3b"));
     }
 
     #[test]
     fn test_deserialization() {
         let json = r#"{
             "base_url": "http://localhost:11434",
-            "default_model": "llama2",
+            "default_model": "llama3.2:3b",
             "timeout_seconds": 120,
             "max_retries": 3,
             "temperature": 0.7,
             "max_tokens": 8192
         }"#;
         let config: OllamaConfig = serde_json::from_str(json).unwrap();
-        assert_eq!(config.default_model(), "llama2");
+        assert_eq!(config.default_model(), "llama3.2:3b");
     }
 
     #[test]

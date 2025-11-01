@@ -22,7 +22,7 @@
 //! # async fn example() -> Result<(), Box<dyn std::error::Error>> {
 //! // Create client
 //! let config = OllamaConfig::default()
-//!     .with_default_model("llama2")
+//!     .with_default_model("llama3.2:3b")
 //!     .with_timeout_seconds(120);
 //!
 //! let client = OllamaClient::new(config)?;

@@ -77,7 +77,7 @@ pub struct OllamaConfig {
 
 **Default Configuration**:
 - Base URL: `http://localhost:11434`
-- Default Model: `llama2`
+- Default Model: `llama3.2:3b`
 - Timeout: 120 seconds
 - Max Retries: 3
 - Temperature: 0.7
@@ -253,7 +253,7 @@ use xzagentz::domain::planning::{PlanGenerator, ArchitectureDocument, PlanOption
 async fn generate_plan() -> Result<(), Box<dyn std::error::Error>> {
     // Create and configure client
     let config = OllamaConfig::default()
-        .with_default_model("llama2")
+        .with_default_model("llama3.2:3b")
         .with_timeout_seconds(120);
 
     let client = OllamaClient::new(config)?;
@@ -278,7 +278,7 @@ async fn generate_plan() -> Result<(), Box<dyn std::error::Error>> {
     // Generate plan
     let options = PlanOptions::default()
         .with_num_phases(5)
-        .with_model("llama2")
+        .with_model("llama3.2:3b")
         .with_temperature(0.7);
 
     let plan = generator.generate_plan(&architecture, &options)?;

@@ -10,9 +10,9 @@ ollama:
   base_url: "http://localhost:11434"
 
   # Default model to use for plan generation
-  # Default: llama3
-  # Options: llama3, llama2, mistral, codellama, or any installed model
-  default_model: "llama3"
+  # Default: llama3.2:3b
+  # Options: llama3.2:3b, llama3:latest, gpt-oss:latest, or any installed model
+  default_model: "llama3.2:3b"
 
   # Request timeout in seconds
   # Default: 300 (5 minutes)
@@ -56,7 +56,6 @@ interactive:
   # Default: true
   # Set to false to skip confirmation prompts
   confirm_before_save: true
-
 # Example configurations for different scenarios:
 
 # For CI/CD pipelines:

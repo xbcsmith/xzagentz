@@ -18,7 +18,7 @@
 //!
 //! let metadata = PlanMetadata::new(
 //!     Utc::now(),
-//!     "llama2",
+//!     "llama3.2:3b",
 //!     PathBuf::from("architecture.md"),
 //! );
 //!
@@ -58,7 +58,7 @@ use super::phase::Phase;
 ///
 /// let metadata = PlanMetadata::new(
 ///     Utc::now(),
-///     "llama2",
+///     "llama3.2:3b",
 ///     PathBuf::from("docs/architecture.md"),
 /// );
 ///
@@ -109,7 +109,7 @@ impl Plan {
     ///
     /// let metadata = PlanMetadata::new(
     ///     Utc::now(),
-    ///     "llama2",
+    ///     "llama3.2:3b",
     ///     PathBuf::from("arch.md"),
     /// );
     ///
@@ -189,9 +189,9 @@ impl Plan {
     /// # use xzagentz::domain::planning::{Plan, PlanMetadata};
     /// # use chrono::Utc;
     /// # use std::path::PathBuf;
-    /// # let metadata = PlanMetadata::new(Utc::now(), "llama2", PathBuf::from("test.md"));
+    /// # let metadata = PlanMetadata::new(Utc::now(), "llama3.2:3b", PathBuf::from("test.md"));
     /// let plan = Plan::new("Title", "Description", vec![], metadata.clone());
-    /// assert_eq!(plan.metadata().model_used(), "llama2");
+    /// assert_eq!(plan.metadata().model_used(), "llama3.2:3b");
     /// ```
     pub fn metadata(&self) -> &PlanMetadata {
         &self.metadata
@@ -334,11 +334,11 @@ impl Plan {
 ///
 /// let metadata = PlanMetadata::new(
 ///     Utc::now(),
-///     "llama2:13b",
+///     "llama3.2:3b",
 ///     PathBuf::from("docs/reference/architecture.md"),
 /// );
 ///
-/// assert_eq!(metadata.model_used(), "llama2:13b");
+/// assert_eq!(metadata.model_used(), "llama3.2:3b");
 /// ```
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct PlanMetadata {
@@ -370,7 +370,7 @@ impl PlanMetadata {
     ///
     /// let metadata = PlanMetadata::new(
     ///     Utc::now(),
-    ///     "llama2",
+    ///     "llama3.2:3b",
     ///     PathBuf::from("architecture.md"),
     /// );
     ///
@@ -400,7 +400,7 @@ impl PlanMetadata {
     ///
     /// let metadata = PlanMetadata::with_version(
     ///     Utc::now(),
-    ///     "llama2",
+    ///     "llama3.2:3b",
     ///     PathBuf::from("architecture.md"),
     ///     "2.0.0",
     /// );
@@ -563,9 +563,9 @@ mod tests {
     #[test]
     fn test_metadata_new() {
         let now = Utc::now();
-        let metadata = PlanMetadata::new(now, "llama2", PathBuf::from("arch.md"));
+        let metadata = PlanMetadata::new(now, "llama3.2:3b", PathBuf::from("arch.md"));
 
-        assert_eq!(metadata.model_used(), "llama2");
+        assert_eq!(metadata.model_used(), "llama3.2:3b");
         assert_eq!(metadata.source_document(), &PathBuf::from("arch.md"));
         assert_eq!(metadata.version(), "1.0.0");
     }
@@ -573,7 +573,8 @@ mod tests {
     #[test]
     fn test_metadata_with_version() {
         let now = Utc::now();
-        let metadata = PlanMetadata::with_version(now, "llama2", PathBuf::from("arch.md"), "2.1.0");
+        let metadata =
+            PlanMetadata::with_version(now, "llama3.2:3b", PathBuf::from("arch.md"), "2.1.0");
 
         assert_eq!(metadata.version(), "2.1.0");
     }

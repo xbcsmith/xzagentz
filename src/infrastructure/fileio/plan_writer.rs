@@ -17,7 +17,7 @@
 //!
 //! let metadata = PlanMetadata::new(
 //!     Utc::now(),
-//!     "llama2",
+//!     "llama3.2:3b",
 //!     PathBuf::from("architecture.md"),
 //! );
 //! let plan = Plan::new(
@@ -61,7 +61,7 @@ use std::path::Path;
 ///
 /// # fn example() -> Result<(), Box<dyn std::error::Error>> {
 /// let writer = MarkdownPlanWriter::new();
-/// let metadata = PlanMetadata::new(Utc::now(), "llama2", PathBuf::from("arch.md"));
+/// let metadata = PlanMetadata::new(Utc::now(), "llama3.2:3b", PathBuf::from("arch.md"));
 /// let plan = Plan::new("Title", "Description", vec![], metadata);
 ///
 /// writer.write_plan(&plan, Path::new("plan.md"))?;
@@ -104,7 +104,7 @@ impl MarkdownPlanWriter {
     /// use std::path::PathBuf;
     ///
     /// let writer = MarkdownPlanWriter::new();
-    /// let metadata = PlanMetadata::new(Utc::now(), "llama2", PathBuf::from("arch.md"));
+    /// let metadata = PlanMetadata::new(Utc::now(), "llama3.2:3b", PathBuf::from("arch.md"));
     /// let plan = Plan::new("Test Plan", "Description", vec![], metadata);
     ///
     /// let markdown = writer.format_plan(&plan);
@@ -250,7 +250,8 @@ mod tests {
     use tempfile::TempDir;
 
     fn create_test_plan() -> Plan {
-        let metadata = PlanMetadata::new(Utc::now(), "llama2", PathBuf::from("architecture.md"));
+        let metadata =
+            PlanMetadata::new(Utc::now(), "llama3.2:3b", PathBuf::from("architecture.md"));
 
         let task = Task::new("Setup database", "Initialize PostgreSQL")
             .with_acceptance_criteria(vec!["DB running".to_string()])
@@ -297,7 +298,7 @@ mod tests {
         let markdown = writer.format_plan(&plan);
 
         assert!(markdown.contains("## Metadata"));
-        assert!(markdown.contains("**Model**: llama2"));
+        assert!(markdown.contains("**Model**: llama3.2:3b"));
         assert!(markdown.contains("**Source**: architecture.md"));
     }
 
@@ -415,7 +416,7 @@ mod tests {
     #[test]
     fn test_format_plan_with_dependencies() {
         let writer = MarkdownPlanWriter::new();
-        let metadata = PlanMetadata::new(Utc::now(), "llama2", PathBuf::from("arch.md"));
+        let metadata = PlanMetadata::new(Utc::now(), "llama3.2:3b", PathBuf::from("arch.md"));
 
         let phase =
             Phase::new("phase-2", "Build", "Build phase").with_dependencies(vec!["phase-1".into()]);
@@ -430,7 +431,7 @@ mod tests {
     #[test]
     fn test_format_plan_with_estimated_duration() {
         let writer = MarkdownPlanWriter::new();
-        let metadata = PlanMetadata::new(Utc::now(), "llama2", PathBuf::from("arch.md"));
+        let metadata = PlanMetadata::new(Utc::now(), "llama3.2:3b", PathBuf::from("arch.md"));
 
         let phase =
             Phase::new("phase-1", "Setup", "Setup phase").with_estimated_duration("2 weeks");

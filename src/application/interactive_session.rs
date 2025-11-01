@@ -181,7 +181,7 @@ where
     fn prompt_model_selection(&self) -> Result<String> {
         let models = vec![
             "llama3",
-            "llama2",
+            "llama3.2:3b",
             "mistral",
             "mixtral",
             "codellama",

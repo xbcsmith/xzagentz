@@ -58,7 +58,7 @@ use super::models::Plan;
 ///
 /// let options = PlanOptions::default()
 ///     .with_num_phases(5)
-///     .with_model("llama2:13b");
+///     .with_model("llama3.2:3b");
 ///
 /// assert_eq!(options.num_phases(), Some(5));
 /// ```
@@ -107,8 +107,8 @@ impl PlanOptions {
     /// ```rust
     /// use xzagentz::domain::planning::PlanOptions;
     ///
-    /// let options = PlanOptions::new().with_model("llama2");
-    /// assert_eq!(options.model(), Some("llama2"));
+    /// let options = PlanOptions::new().with_model("llama3.2:3b");
+    /// assert_eq!(options.model(), Some("llama3.2:3b"));
     /// ```
     pub fn with_model(mut self, model: impl Into<String>) -> Self {
         self.model = Some(model.into());
@@ -351,8 +351,8 @@ mod tests {
 
     #[test]
     fn test_plan_options_with_model() {
-        let options = PlanOptions::new().with_model("llama2");
-        assert_eq!(options.model(), Some("llama2"));
+        let options = PlanOptions::new().with_model("llama3.2:3b");
+        assert_eq!(options.model(), Some("llama3.2:3b"));
     }
 
     #[test]

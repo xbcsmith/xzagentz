@@ -344,12 +344,12 @@ mod tests {
             "--output",
             "plan.md",
             "--model",
-            "llama2",
+            "llama3.2:3b",
         ]);
         assert!(!cli.args.interactive);
         assert_eq!(cli.args.architecture, Some(PathBuf::from("arch.md")));
         assert_eq!(cli.args.output, Some(PathBuf::from("plan.md")));
-        assert_eq!(cli.args.model, Some("llama2".to_string()));
+        assert_eq!(cli.args.model, Some("llama3.2:3b".to_string()));
     }
 
     #[test]

@@ -153,11 +153,13 @@ mod tests {
 
     #[test]
     fn test_model_not_found() {
-        let err =
-            ApplicationError::ModelNotFound("llama2".to_string(), "llama3, mistral".to_string());
+        let err = ApplicationError::ModelNotFound(
+            "old-model".to_string(),
+            "llama3.2:3b, llama3:latest, gpt-oss:latest".to_string(),
+        );
         assert_eq!(
             err.to_string(),
-            "Model 'llama2' not found. Available models: llama3, mistral"
+            "Model 'old-model' not found. Available models: llama3.2:3b, llama3:latest, gpt-oss:latest"
         );
     }
 
