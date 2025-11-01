@@ -1,0 +1,83 @@
+# xzagentz Configuration Example
+#
+# Copy this file to ~/.config/xzagentz/config.yaml and customize as needed.
+# All settings are optional - xzagentz will use sensible defaults if not specified.
+
+# Ollama service configuration
+ollama:
+  # Base URL for Ollama service
+  # Default: http://localhost:11434
+  base_url: "http://localhost:11434"
+
+  # Default model to use for plan generation
+  # Default: llama3
+  # Options: llama3, llama2, mistral, codellama, or any installed model
+  default_model: "llama3"
+
+  # Request timeout in seconds
+  # Default: 300 (5 minutes)
+  # Increase for large architecture documents or slower models
+  timeout_seconds: 300
+
+  # Maximum number of retry attempts for failed requests
+  # Default: 3
+  max_retries: 3
+
+# Planning operation defaults
+planning:
+  # Default number of phases to generate
+  # Default: 7
+  # Set to null for auto-detection based on architecture complexity
+  default_phases: 7
+
+  # Default output directory for generated plans
+  # Default: docs/plans
+  # Relative paths are resolved from current working directory
+  default_output_dir: "docs/plans"
+
+  # Output format for generated plans
+  # Default: markdown
+  # Options: markdown, json, yaml
+  output_format: "markdown"
+
+# Interactive mode preferences
+interactive:
+  # Enable colored output in interactive mode
+  # Default: true
+  # Set to false for CI/CD environments or non-color terminals
+  enable_colors: true
+
+  # Show progress indicators during plan generation
+  # Default: true
+  # Set to false for cleaner output in logs
+  show_progress: true
+
+  # Confirm before saving files
+  # Default: true
+  # Set to false to skip confirmation prompts
+  confirm_before_save: true
+
+# Example configurations for different scenarios:
+
+# For CI/CD pipelines:
+# interactive:
+#   enable_colors: false
+#   show_progress: false
+#   confirm_before_save: false
+
+# For remote Ollama server:
+# ollama:
+#   base_url: "http://ollama-server.example.com:11434"
+#   timeout_seconds: 600
+#   max_retries: 5
+
+# For large complex projects:
+# planning:
+#   default_phases: 12
+#   timeout_seconds: 900
+
+# For quick iterations:
+# planning:
+#   default_phases: 5
+#   interactive:
+#     confirm_before_save: false

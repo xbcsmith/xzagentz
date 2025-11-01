@@ -6,6 +6,7 @@
 use crate::application::{
     ApplicationError, InteractiveConfig, InteractivePlanningSession, PlanningService,
 };
+use crate::config::AppConfig;
 use crate::domain::planning::PlanOptions;
 use crate::infrastructure::fileio::{MarkdownArchitectureParser, MarkdownPlanWriter};
 use crate::infrastructure::ollama::{OllamaClient, OllamaConfig, OllamaPlanGenerator};
@@ -41,13 +42,13 @@ pub struct ImplementationArgs {
     #[arg(short, long, value_name = "FILE")]
     pub output: Option<PathBuf>,
 
-    /// Ollama model to use for generation
-    #[arg(short, long, default_value = "llama3")]
-    pub model: String,
+    /// Ollama model to use for generation (overrides config file)
+    #[arg(short, long)]
+    pub model: Option<String>,
 
-    /// Ollama service URL
-    #[arg(long, default_value = "http://localhost:11434")]
-    pub ollama_url: String,
+    /// Ollama service URL (overrides config file)
+    #[arg(long)]
+    pub ollama_url: Option<String>,
 
     /// Run in interactive mode
     #[arg(short, long)]
@@ -100,19 +101,39 @@ pub async fn execute(
     args: ImplementationArgs,
     verbose: bool,
 ) -> Result<(), Box<dyn std::error::Error>> {
+    // Load application configuration from file (or use defaults)
+    let app_config = AppConfig::load().unwrap_or_else(|e| {
+        if verbose {
+            println!("Warning: Failed to load config file, using defaults: {}", e);
+        }
+        AppConfig::default()
+    });
+
+    // Merge CLI args with config (CLI args take precedence)
+    let ollama_url = args
+        .ollama_url
+        .as_ref()
+        .unwrap_or(&app_config.ollama.base_url)
+        .clone();
+    let model = args
+        .model
+        .as_ref()
+        .unwrap_or(&app_config.ollama.default_model)
+        .clone();
+
     if verbose {
         println!("Running implementation command...");
-        println!("  Ollama URL: {}", args.ollama_url);
-        println!("  Model: {}", args.model);
+        println!("  Ollama URL: {}", ollama_url);
+        println!("  Model: {}", model);
         println!("  Interactive: {}", args.interactive);
     }
 
     // Create Ollama configuration
     let ollama_config = OllamaConfig::new()
-        .with_base_url(&args.ollama_url)
-        .with_default_model(&args.model)
-        .with_timeout_seconds(120)
-        .with_max_retries(3);
+        .with_base_url(&ollama_url)
+        .with_default_model(&model)
+        .with_timeout_seconds(app_config.ollama.timeout_seconds)
+        .with_max_retries(app_config.ollama.max_retries);
 
     if verbose {
         println!("Creating Ollama client...");
@@ -122,7 +143,7 @@ pub async fn execute(
     let client = OllamaClient::new(ollama_config.clone()).map_err(|e| {
         format!(
             "Failed to create Ollama client: {}. Is Ollama running at {}?",
-            e, args.ollama_url
+            e, ollama_url
         )
     })?;
 
@@ -141,14 +162,12 @@ pub async fn execute(
             Ok(false) => {
                 return Err(format!(
                     "Ollama service at {} is not responding properly",
-                    args.ollama_url
+                    ollama_url
                 )
                 .into());
             }
             Err(e) => {
-                return Err(
-                    format!("Failed to connect to Ollama at {}: {}", args.ollama_url, e).into(),
-                );
+                return Err(format!("Failed to connect to Ollama at {}: {}", ollama_url, e).into());
             }
         }
     }
@@ -163,9 +182,9 @@ pub async fn execute(
 
     // Execute based on mode
     if args.interactive {
-        execute_interactive(service, args, verbose)
+        execute_interactive(service, args, app_config, verbose)
     } else {
-        execute_non_interactive(service, args, verbose)
+        execute_non_interactive(service, args, app_config, verbose)
     }
 }
 
@@ -173,6 +192,7 @@ pub async fn execute(
 fn execute_interactive<G, P, W>(
     service: PlanningService<G, P, W>,
     args: ImplementationArgs,
+    app_config: AppConfig,
     verbose: bool,
 ) -> Result<(), Box<dyn std::error::Error>>
 where
@@ -184,12 +204,24 @@ where
         println!("Starting interactive session...");
     }
 
-    // Create interactive configuration
+    // Create interactive configuration (CLI flags override config file)
     let config = InteractiveConfig {
-        enable_colors: !args.no_color,
-        show_progress: !args.no_progress,
-        confirm_before_save: !args.yes,
-        default_output_dir: Some("./plans".to_string()),
+        enable_colors: if args.no_color {
+            false
+        } else {
+            app_config.interactive.enable_colors
+        },
+        show_progress: if args.no_progress {
+            false
+        } else {
+            app_config.interactive.show_progress
+        },
+        confirm_before_save: if args.yes {
+            false
+        } else {
+            app_config.interactive.confirm_before_save
+        },
+        default_output_dir: Some(app_config.planning.default_output_dir.clone()),
     };
 
     // Create and run interactive session
@@ -216,6 +248,7 @@ where
 fn execute_non_interactive<G, P, W>(
     service: PlanningService<G, P, W>,
     args: ImplementationArgs,
+    app_config: AppConfig,
     verbose: bool,
 ) -> Result<(), Box<dyn std::error::Error>>
 where
@@ -237,13 +270,20 @@ where
         println!("Output: {}", output_path.display());
     }
 
-    // Build plan options
-    let mut options = PlanOptions::new().with_model(&args.model);
+    // Build plan options (merge config and args)
+    let model = args
+        .model
+        .as_ref()
+        .unwrap_or(&app_config.ollama.default_model)
+        .clone();
+    let mut options = PlanOptions::new().with_model(&model);
 
-    if let Some(num_phases) = args.num_phases {
-        options = options.with_num_phases(num_phases);
+    // Use CLI num_phases if provided, otherwise use config default
+    let num_phases = args.num_phases.or(app_config.planning.default_phases);
+    if let Some(phases) = num_phases {
+        options = options.with_num_phases(phases);
         if verbose {
-            println!("Number of phases: {}", num_phases);
+            println!("Number of phases: {}", phases);
         }
     } else if verbose {
         println!("Number of phases: auto-detect");
@@ -291,8 +331,8 @@ mod tests {
     fn test_parse_interactive() {
         let cli = TestCli::parse_from(["test", "--interactive"]);
         assert!(cli.args.interactive);
-        assert_eq!(cli.args.model, "llama3");
-        assert_eq!(cli.args.ollama_url, "http://localhost:11434");
+        assert_eq!(cli.args.model, None);
+        assert_eq!(cli.args.ollama_url, None);
     }
 
     #[test]
@@ -309,7 +349,7 @@ mod tests {
         assert!(!cli.args.interactive);
         assert_eq!(cli.args.architecture, Some(PathBuf::from("arch.md")));
         assert_eq!(cli.args.output, Some(PathBuf::from("plan.md")));
-        assert_eq!(cli.args.model, "llama2");
+        assert_eq!(cli.args.model, Some("llama2".to_string()));
     }
 
     #[test]
@@ -320,7 +360,7 @@ mod tests {
             "--ollama-url",
             "http://remote:8080",
         ]);
-        assert_eq!(cli.args.ollama_url, "http://remote:8080");
+        assert_eq!(cli.args.ollama_url, Some("http://remote:8080".to_string()));
     }
 
     #[test]
@@ -362,8 +402,8 @@ mod tests {
     #[test]
     fn test_default_values() {
         let cli = TestCli::parse_from(["test", "--interactive"]);
-        assert_eq!(cli.args.model, "llama3");
-        assert_eq!(cli.args.ollama_url, "http://localhost:11434");
+        assert_eq!(cli.args.model, None);
+        assert_eq!(cli.args.ollama_url, None);
         assert!(!cli.args.force);
         assert!(!cli.args.skip_health_check);
         assert!(!cli.args.no_color);
