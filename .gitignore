@@ -23,3 +23,5 @@ target
 .venv/
 *.DS_store
 test_output.md
+plan_agent.md
+

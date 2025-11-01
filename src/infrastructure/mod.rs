@@ -21,7 +21,9 @@
 //! ```
 
 pub mod embedded;
+pub mod fileio;
 pub mod ollama;
 
 pub use embedded::EmbeddedResources;
+pub use fileio::{FileIoError, MarkdownArchitectureParser, MarkdownPlanWriter};
 pub use ollama::{ModelInfo, OllamaClient, OllamaConfig, OllamaError, OllamaPlanGenerator};
