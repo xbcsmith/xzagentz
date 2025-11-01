@@ -21,5 +21,7 @@
 //! ```
 
 pub mod embedded;
+pub mod ollama;
 
 pub use embedded::EmbeddedResources;
+pub use ollama::{ModelInfo, OllamaClient, OllamaConfig, OllamaError, OllamaPlanGenerator};

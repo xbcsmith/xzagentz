@@ -32,7 +32,7 @@ Core Git workflows and conventions for daily development tasks.
 **MANDATORY FORMAT:**
 
 ```text
-pr-{jira-issue}
+pr-<feat>-<issue>
 ```
 
 **Rules:**
@@ -86,14 +86,14 @@ pr-{jira-issue}
 
 ```text
 ✅ CORRECT:
-feat(auth): add JWT token refresh endpoint (CPIPE-1234)
-fix(api): handle edge case in validation (CPIPE-5678)
-docs(readme): update installation steps (XZAGENTZ-9012)
+feat(auth): add JWT token refresh endpoint
+fix(api): handle edge case in validation
+docs(readme): update installation steps
 
 ❌ WRONG:
-Added JWT token (CPIPE-1234)              (no type, wrong mood)
-feat(auth): Add JWT Token (cpipe-1234)    (wrong case)
-add jwt refresh (CPIPE-1234)              (no type)
+Added JWT token             (no type, wrong mood)
+feat(auth): Add JWT Token   (wrong case)
+add jwt refresh             (no type)
 ```
 
 ---

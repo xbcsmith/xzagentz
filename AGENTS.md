@@ -640,7 +640,7 @@ mod tests {
 **YOU MUST use this format:**
 
 ```text
-pr-{jira-issue}
+pr-<feat>-<issue>
 ```
 
 **Examples:**
@@ -1093,7 +1093,7 @@ cargo clippy --all-targets --all-features -- -D warnings
 
 ### Git
 
-- [ ] Branch name follows `pr-{jira-issue}` format (lowercase)
+- [ ] Branch name follows `pr-<feat>-<issue>` format (lowercase)
 - [ ] Commit message follows conventional commits
 - [ ] Commit message includes JIRA issue in uppercase
 - [ ] Commit message first line ≤72 characters
@@ -1198,7 +1198,7 @@ All four cargo commands MUST pass before claiming done:
 **FOLLOW THIS SEQUENCE FOR EVERY TASK:**
 
 ```text
-1. Create branch: pr-{jira-issue}
+1. Create branch: pr-<feat>-<issue>
 2. Implement code with /// doc comments
 3. Add tests (>80% coverage)
 4. Run: cargo fmt --all

@@ -8,19 +8,18 @@ This section provides Git-specific guidelines, workflows, and best practices for
 
 **MANDATORY FORMAT:**
 ```text
-pr-{jira-issue}
+pr-<feat>-<issue>
 ```
 
 **Rules:**
 - Use lowercase letters
 - Separate with hyphens (not underscores)
-- Always include JIRA issue number
 - No uppercase in branch names
 
 **Examples:**
 ```text
 ✅ CORRECT:
-   pr-cpipe-1234
+   pr-foo-1234
    pr-xzagentz-5678
    pr-proj-9012
 
@@ -37,7 +36,7 @@ pr-{jira-issue}
 
 **MANDATORY FORMAT:**
 ```text
-<type>(<scope>): <description> (<JIRA-ISSUE>)
+<type>(<scope>): <description>
 
 [optional body explaining why change was made]
 

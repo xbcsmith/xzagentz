@@ -711,7 +711,7 @@ describe('function', () => {
 **Format:**
 
 ```text
-<type>(<scope>): <description> (<JIRA-ISSUE>)
+<type>(<scope>): <description>
 
 [optional body]
 
@@ -723,8 +723,7 @@ describe('function', () => {
 1. Type MUST be: `feat|fix|docs|style|refactor|perf|test|chore`
 2. Description MUST be lowercase
 3. Description MUST use imperative mood ("add" not "added")
-4. JIRA issue MUST be uppercase
-5. First line MUST be ≤72 characters
+4. First line MUST be ≤72 characters
 
 **Examples:**
 

@@ -25,11 +25,14 @@ regex = "1.10"
 lazy_static = "1.4"
 tracing = "0.1"
 include_dir = "0.7"
+reqwest = { version = "0.11", features = ["json", "stream"] }
+tokio = { version = "1.35", features = ["full"] }
 
 [dev-dependencies]
 tempfile = "3.8"
 assert_cmd = "2.0"
 predicates = "3.0"
+wiremock = "0.5"
 
 [profile.release]
 opt-level = 3

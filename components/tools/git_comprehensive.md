@@ -38,7 +38,7 @@ Complete Git workflows including advanced operations, troubleshooting, and best 
 **MANDATORY FORMAT:**
 
 ```text
-pr-{jira-issue}
+pr-<feat>-<issue>
 ```
 
 **Rules:**
@@ -52,7 +52,7 @@ pr-{jira-issue}
 
 ```text
 ✅ CORRECT:
-   pr-cpipe-1234
+   pr-foo-1234
    pr-xzagentz-5678
    pr-proj-9012
 
