@@ -11,6 +11,7 @@
 
 pub mod add;
 pub mod create;
+pub mod implementation;
 pub mod init;
 pub mod list;
 pub mod output;
@@ -156,6 +157,9 @@ pub enum Commands {
 
     /// Prompt generation and management commands
     Prompt(prompt::PromptArgs),
+
+    /// Generate implementation plans from architecture documents
+    Implementation(implementation::ImplementationArgs),
 }
 
 /// List command targets

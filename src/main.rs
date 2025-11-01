@@ -169,6 +169,17 @@ fn run(cli: Cli) -> Result<(), Error> {
         Commands::Prompt(prompt_args) => {
             xzagentz::cli::prompt::execute(prompt_args)?;
         }
+        Commands::Implementation(impl_args) => {
+            // Implementation command requires async runtime
+            let runtime = tokio::runtime::Runtime::new()
+                .map_err(|e| Error::other(format!("Failed to create async runtime: {}", e)))?;
+
+            runtime.block_on(async {
+                xzagentz::cli::implementation::execute(impl_args, cli.verbose)
+                    .await
+                    .map_err(|e| Error::other(e.to_string()))
+            })?;
+        }
     }
 
     Ok(())
