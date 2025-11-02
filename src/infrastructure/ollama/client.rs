@@ -271,14 +271,32 @@ impl OllamaClient {
         while attempts <= self.max_retries {
             match self.http_client.post(&url).json(&request_body).send().await {
                 Ok(response) => {
-                    if !response.status().is_success() {
-                        let status = response.status();
+                    let status = response.status();
+
+                    if !status.is_success() {
                         let error_text = response.text().await.unwrap_or_default();
 
                         if status.as_u16() == 404 && error_text.contains("not found") {
                             return Err(OllamaError::model_not_found(model));
                         }
 
+                        // Retry on 5xx server errors
+                        if status.is_server_error() {
+                            last_error = Some(OllamaError::http(format!(
+                                "HTTP error {}: {}",
+                                status, error_text
+                            )));
+                            attempts += 1;
+
+                            if attempts <= self.max_retries {
+                                tokio::time::sleep(Duration::from_secs(2u64.pow(attempts - 1)))
+                                    .await;
+                                continue;
+                            }
+                            break;
+                        }
+
+                        // Don't retry on 4xx client errors
                         return Err(OllamaError::http(format!(
                             "HTTP error {}: {}",
                             status, error_text

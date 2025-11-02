@@ -51,7 +51,7 @@ fn test_plan_metadata_accessors() {
 
     assert_eq!(metadata.model_used(), "llama3.2:3b");
     assert_eq!(metadata.source_document(), &PathBuf::from("arch.md"));
-    assert_eq!(metadata.version(), "1.0");
+    assert_eq!(metadata.version(), "1.0.0");
 }
 
 #[test]
@@ -211,8 +211,8 @@ fn test_architecture_document_creation() {
 
 #[test]
 fn test_architecture_document_with_description() {
-    let doc = ArchitectureDocument::new("Test Architecture")
-        .with_description("Detailed description");
+    let doc =
+        ArchitectureDocument::new("Test Architecture").with_description("Detailed description");
 
     assert_eq!(doc.description(), Some("Detailed description"));
 }
@@ -250,8 +250,8 @@ fn test_architecture_document_add_requirement() {
 
 #[test]
 fn test_architecture_document_complex_structure() {
-    let mut doc = ArchitectureDocument::new("Complex Architecture")
-        .with_description("A complex system");
+    let mut doc =
+        ArchitectureDocument::new("Complex Architecture").with_description("A complex system");
 
     let section1 = Section::new("Section 1", 1).with_content("Content 1");
     let section2 = Section::new("Section 2", 1).with_content("Content 2");
@@ -437,7 +437,7 @@ fn test_architecture_document_with_many_sections() {
     let mut doc = ArchitectureDocument::new("Large Doc");
 
     for i in 0..50 {
-        let section = Section::new(&format!("Section {}", i), 1);
+        let section = Section::new(format!("Section {}", i), 1);
         doc.add_section(section);
     }
 

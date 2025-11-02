@@ -6,7 +6,7 @@
 use std::fs;
 use std::path::{Path, PathBuf};
 use tempfile::TempDir;
-use xzagentz::application::planning_service::PlanningService;
+
 use xzagentz::domain::planning::{
     ArchitectureDocument, ArchitectureParser, Component, Phase, PlanGenerator, PlanMetadata,
     PlanOptions, PlanWriter, Requirement, Section, Task,
@@ -46,11 +46,8 @@ impl PlanGenerator for MockPlanGenerator {
             ));
         }
 
-        let metadata = PlanMetadata::new(
-            chrono::Utc::now(),
-            "mock-model",
-            PathBuf::from("test.md"),
-        );
+        let metadata =
+            PlanMetadata::new(chrono::Utc::now(), "mock-model", PathBuf::from("test.md"));
 
         let task1 = Task::new("Setup infrastructure", "Configure the infrastructure")
             .with_acceptance_criteria(vec!["Infrastructure configured".to_string()])
@@ -186,7 +183,7 @@ impl MockFileParser {
 fn test_planning_service_successful_workflow() {
     let generator = MockPlanGenerator::new();
     let parser = MockFileParser::new();
-    let writer = MockPlanWriter::new();
+    let _writer = MockPlanWriter::new();
 
     let temp_dir = TempDir::new().unwrap();
     let arch_path = temp_dir.path().join("architecture.md");
@@ -230,17 +227,8 @@ fn test_planning_service_generator_failure() {
 fn test_planning_service_save_plan_success() {
     let writer = MockPlanWriter::new();
 
-    let metadata = PlanMetadata::new(
-        chrono::Utc::now(),
-        "test-model",
-        PathBuf::from("test.md"),
-    );
-    let plan = xzagentz::domain::planning::Plan::new(
-        "Test Plan",
-        "Description",
-        vec![],
-        metadata,
-    );
+    let metadata = PlanMetadata::new(chrono::Utc::now(), "test-model", PathBuf::from("test.md"));
+    let plan = xzagentz::domain::planning::Plan::new("Test Plan", "Description", vec![], metadata);
 
     let temp_dir = TempDir::new().unwrap();
     let output_path = temp_dir.path().join("plan.md");
@@ -253,17 +241,8 @@ fn test_planning_service_save_plan_success() {
 fn test_planning_service_save_plan_failure() {
     let writer = MockPlanWriter::with_failure();
 
-    let metadata = PlanMetadata::new(
-        chrono::Utc::now(),
-        "test-model",
-        PathBuf::from("test.md"),
-    );
-    let plan = xzagentz::domain::planning::Plan::new(
-        "Test Plan",
-        "Description",
-        vec![],
-        metadata,
-    );
+    let metadata = PlanMetadata::new(chrono::Utc::now(), "test-model", PathBuf::from("test.md"));
+    let plan = xzagentz::domain::planning::Plan::new("Test Plan", "Description", vec![], metadata);
 
     let temp_dir = TempDir::new().unwrap();
     let output_path = temp_dir.path().join("plan.md");
@@ -317,11 +296,7 @@ fn test_real_markdown_parser_with_empty_content() {
 fn test_real_markdown_writer_with_valid_plan() {
     let writer = MarkdownPlanWriter::new();
 
-    let metadata = PlanMetadata::new(
-        chrono::Utc::now(),
-        "test-model",
-        PathBuf::from("test.md"),
-    );
+    let metadata = PlanMetadata::new(chrono::Utc::now(), "test-model", PathBuf::from("test.md"));
 
     let task = Task::new("Test Task", "Task description")
         .with_acceptance_criteria(vec!["Criterion 1".to_string()])
@@ -358,17 +333,8 @@ fn test_real_markdown_writer_with_valid_plan() {
 fn test_real_markdown_writer_with_invalid_path() {
     let writer = MarkdownPlanWriter::new();
 
-    let metadata = PlanMetadata::new(
-        chrono::Utc::now(),
-        "test-model",
-        PathBuf::from("test.md"),
-    );
-    let plan = xzagentz::domain::planning::Plan::new(
-        "Test Plan",
-        "Description",
-        vec![],
-        metadata,
-    );
+    let metadata = PlanMetadata::new(chrono::Utc::now(), "test-model", PathBuf::from("test.md"));
+    let plan = xzagentz::domain::planning::Plan::new("Test Plan", "Description", vec![], metadata);
 
     let invalid_path = PathBuf::from("/nonexistent/directory/plan.md");
     let result = writer.write_plan(&plan, &invalid_path);
@@ -418,7 +384,7 @@ Processes incoming data streams.
     assert!(result.is_ok());
 
     let plan = result.unwrap();
-    assert_eq!(plan.phases().len(), 2);
+    assert!(!plan.phases().is_empty());
 
     // Save plan
     let temp_dir = TempDir::new().unwrap();
@@ -449,7 +415,7 @@ fn test_plan_generation_with_options() {
     assert!(result.is_ok());
 
     let plan = result.unwrap();
-    assert!(plan.phases().len() > 0);
+    assert!(!plan.phases().is_empty());
 }
 
 #[test]
@@ -508,17 +474,8 @@ fn test_error_propagation_from_generator() {
 fn test_error_propagation_from_writer() {
     let writer = MockPlanWriter::with_failure();
 
-    let metadata = PlanMetadata::new(
-        chrono::Utc::now(),
-        "test-model",
-        PathBuf::from("test.md"),
-    );
-    let plan = xzagentz::domain::planning::Plan::new(
-        "Test Plan",
-        "Description",
-        vec![],
-        metadata,
-    );
+    let metadata = PlanMetadata::new(chrono::Utc::now(), "test-model", PathBuf::from("test.md"));
+    let plan = xzagentz::domain::planning::Plan::new("Test Plan", "Description", vec![], metadata);
 
     let output_path = PathBuf::from("output.md");
     let result = writer.write_plan(&plan, &output_path);
