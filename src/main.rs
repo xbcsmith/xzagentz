@@ -180,6 +180,17 @@ fn run(cli: Cli) -> Result<(), Error> {
                     .map_err(|e| Error::other(e.to_string()))
             })?;
         }
+        Commands::Architecture(arch_args) => {
+            // Architecture command requires async runtime
+            let runtime = tokio::runtime::Runtime::new()
+                .map_err(|e| Error::other(format!("Failed to create async runtime: {}", e)))?;
+
+            runtime.block_on(async {
+                xzagentz::cli::architecture::execute(arch_args)
+                    .await
+                    .map_err(|e| Error::other(e.to_string()))
+            })?;
+        }
     }
 
     Ok(())

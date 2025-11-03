@@ -80,3 +80,123 @@ interactive:
 #   default_phases: 5
 #   interactive:
 #     confirm_before_save: false
+
+# Architecture generation configuration
+architecture:
+  # Ollama settings specific to architecture generation
+  ollama:
+    # Base URL for Ollama service (inherits from global ollama.base_url if not set)
+    # Default: inherits from global
+    # base_url: "http://localhost:11434"
+
+    # Default model for architecture generation
+    # Default: llama3
+    # Options: llama3, llama3.2, codellama, or any installed model
+    default_model: "llama3"
+
+    # Timeout in seconds for architecture generation (typically longer than planning)
+    # Default: 600 (10 minutes)
+    timeout_seconds: 600
+
+    # Maximum retry attempts for failed generation requests
+    # Default: 3
+    max_retries: 3
+
+  # Generation defaults
+  generation:
+    # Default architecture pattern
+    # Default: layered
+    # Options: microservices, monolithic, event-driven, layered, hexagonal, cqrs, serverless
+    default_pattern: "layered"
+
+    # Default complexity level
+    # Default: moderate
+    # Options: simple, moderate, complex, enterprise
+    default_complexity: "moderate"
+
+    # Include deployment architecture section by default
+    # Default: true
+    include_deployment: true
+
+    # Include quality attributes section by default
+    # Default: true
+    include_quality_attributes: true
+
+    # Maximum number of components to generate
+    # Default: 20
+    # Increase for complex enterprise architectures
+    max_components: 20
+
+  # Output settings
+  output:
+    # Default directory for architecture documents
+    # Default: docs/architecture
+    default_directory: "docs/architecture"
+
+    # Output format
+    # Default: markdown
+    # Options: markdown, json, yaml
+    format: "markdown"
+
+    # Create backup before overwriting existing files
+    # Default: true
+    create_backup: true
+
+  # Template settings
+  templates:
+    # Directory containing architecture templates
+    # Default: templates/architecture
+    directory: "templates/architecture"
+
+    # Automatically create default templates if directory is empty
+    # Default: true
+    auto_create_defaults: true
+
+  # Interactive mode settings for architecture commands
+  interactive:
+    # Enable colored output in architecture interactive mode
+    # Default: true
+    enable_colors: true
+
+    # Show progress indicators during generation
+    # Default: true
+    show_progress: true
+
+    # Confirm before saving architecture documents
+    # Default: true
+    confirm_before_save: true
+
+    # Show token usage statistics after generation
+    # Default: false
+    show_token_usage: false
+# Example architecture configurations:
+
+# For microservices focus:
+# architecture:
+#   generation:
+#     default_pattern: "microservices"
+#     default_complexity: "complex"
+#     max_components: 30
+
+# For simple applications:
+# architecture:
+#   generation:
+#     default_pattern: "monolithic"
+#     default_complexity: "simple"
+#     max_components: 10
+#     include_deployment: false
+
+# For event-driven systems:
+# architecture:
+#   generation:
+#     default_pattern: "event-driven"
+#     include_quality_attributes: true
+
+# For CI/CD automation:
+# architecture:
+#   interactive:
+#     enable_colors: false
+#     show_progress: false
+#     confirm_before_save: false
+#   output:
+#     create_backup: false

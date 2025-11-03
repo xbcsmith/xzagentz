@@ -52,10 +52,22 @@
 //! assert!(plan.validate().is_ok());
 //! ```
 
+pub mod architecture;
 pub mod planning;
 
 // Re-export main types from planning for convenience
 pub use planning::{
-    ArchitectureDocument, ArchitectureParser, Component, Phase, PhaseId, Plan, PlanGenerator,
-    PlanMetadata, PlanOptions, PlanWriter, Requirement, Section, Task,
+    ArchitectureDocument as PlanningArchitectureDocument, ArchitectureParser, Component, Phase,
+    PhaseId, Plan, PlanGenerator, PlanMetadata, PlanOptions, PlanWriter, Requirement, Section,
+    Task,
+};
+
+// Re-export main types from architecture for convenience
+pub use architecture::{
+    ArchitectureDocument, ArchitectureGenerator, ArchitectureMetadata, ArchitecturePattern,
+    ArchitectureTemplate, ArchitectureValidator, ArchitectureWriter, AvailabilityDesign,
+    ComplexityLevel, ComponentTemplate, DeploymentArchitecture, DeploymentStrategy,
+    GenerationOptions, InfrastructureComponent, Integration, IntegrationType, Interface, Layer,
+    Overview, QualityAttribute, ScalingStrategy, TemplateInfo, TemplateRepository,
+    TemplateStructure, ValidationError,
 };

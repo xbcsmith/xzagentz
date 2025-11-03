@@ -1,0 +1,153 @@
+# Event-Driven Architecture Template
+#
+# This template provides a foundation for event-driven architectures
+# with event sourcing, CQRS, and reactive patterns.
+
+info:
+  name: "event-driven"
+  pattern: "EventDriven"
+  description: "Architecture based on event production, detection, and reaction with decoupled components communicating through events"
+  use_cases:
+    - "Real-time data processing and analytics"
+    - "Systems requiring high scalability and loose coupling"
+    - "Applications with complex event flows and workflows"
+    - "IoT and streaming data platforms"
+
+structure:
+  layers:
+    - "Event Producers Layer"
+    - "Event Processing Layer"
+    - "Event Consumers Layer"
+    - "Event Store Layer"
+    - "Infrastructure Layer"
+
+  integration_patterns:
+    - "Publish-Subscribe messaging for event distribution"
+    - "Event streaming for real-time processing"
+    - "Event sourcing for state management"
+    - "CQRS for read/write separation"
+
+  required_components:
+    - "Event Bus/Message Broker"
+    - "Event Producers"
+    - "Event Consumers"
+    - "Event Store"
+
+default_components:
+  - name: "API Gateway"
+    layer: "Event Producers Layer"
+    role: "HTTP entry point that converts requests to events"
+    typical_technologies:
+      - "Kong"
+      - "Spring Cloud Gateway"
+      - "AWS API Gateway"
+      - "Nginx"
+
+  - name: "Event Bus"
+    layer: "Infrastructure Layer"
+    role: "Central message broker for event distribution"
+    typical_technologies:
+      - "Apache Kafka"
+      - "RabbitMQ"
+      - "AWS EventBridge"
+      - "Azure Event Grid"
+      - "Google Cloud Pub/Sub"
+
+  - name: "Event Store"
+    layer: "Event Store Layer"
+    role: "Persistent storage for all domain events"
+    typical_technologies:
+      - "EventStoreDB"
+      - "Apache Kafka (log-based)"
+      - "PostgreSQL (with event sourcing)"
+      - "MongoDB (event collections)"
+
+  - name: "Command Service"
+    layer: "Event Producers Layer"
+    role: "Handles write operations and produces events"
+    typical_technologies:
+      - "Spring Boot"
+      - "Axon Framework"
+      - "Akka"
+      - "Custom microservices"
+
+  - name: "Query Service"
+    layer: "Event Consumers Layer"
+    role: "Handles read operations from projections"
+    typical_technologies:
+      - "Spring Boot"
+      - "Node.js/Express"
+      - "GraphQL server"
+      - "Custom read models"
+
+  - name: "Event Processor"
+    layer: "Event Processing Layer"
+    role: "Complex event processing and transformation"
+    typical_technologies:
+      - "Apache Flink"
+      - "Apache Storm"
+      - "Kafka Streams"
+      - "AWS Kinesis Analytics"
+
+  - name: "Projection Builder"
+    layer: "Event Consumers Layer"
+    role: "Builds read models from event streams"
+    typical_technologies:
+      - "Custom event handlers"
+      - "Materialized views"
+      - "Debezium"
+      - "Change Data Capture"
+
+  - name: "Read Database"
+    layer: "Event Store Layer"
+    role: "Optimized database for queries (CQRS read side)"
+    typical_technologies:
+      - "PostgreSQL"
+      - "MongoDB"
+      - "Elasticsearch"
+      - "Redis"
+
+  - name: "Saga Coordinator"
+    layer: "Event Processing Layer"
+    role: "Manages distributed transactions and workflows"
+    typical_technologies:
+      - "Axon Saga"
+      - "Eventuate Tram Saga"
+      - "Temporal"
+      - "Custom saga implementation"
+
+  - name: "Event Schema Registry"
+    layer: "Infrastructure Layer"
+    role: "Schema versioning and compatibility management"
+    typical_technologies:
+      - "Confluent Schema Registry"
+      - "AWS Glue Schema Registry"
+      - "Apicurio Registry"
+      - "Custom registry"
+
+  - name: "Dead Letter Queue"
+    layer: "Infrastructure Layer"
+    role: "Failed event handling and retry mechanism"
+    typical_technologies:
+      - "Kafka DLQ topics"
+      - "RabbitMQ DLX"
+      - "AWS SQS DLQ"
+      - "Custom error handling"
+
+  - name: "Event Monitoring"
+    layer: "Infrastructure Layer"
+    role: "Event flow monitoring and observability"
+    typical_technologies:
+      - "Prometheus + Grafana"
+      - "Jaeger for distributed tracing"
+      - "ELK Stack"
+      - "Kafka UI tools"
+
+customization_points:
+  - "Event schema design and versioning strategy"
+  - "Choice between event sourcing vs traditional state storage"
+  - "CQRS implementation (separate read/write models)"
+  - "Event processing patterns (CEP, stream processing, batch)"
+  - "Saga pattern for distributed transactions"
+  - "Event replay and time-travel debugging capabilities"
+  - "Event retention and archival policies"

@@ -7,6 +7,7 @@
 //! - Fallback to embedded resources
 //! - Resolution hierarchy correctness
 
+use serial_test::serial;
 use std::env;
 use std::fs;
 use tempfile::TempDir;
@@ -51,6 +52,7 @@ impl Drop for EnvGuard {
 // Component resolution tests
 
 #[test]
+#[serial]
 fn test_resolve_component_custom_dir_takes_precedence() {
     let _guard = EnvGuard::new(&["XZAGENTZ_COMPONENTS_DIR", "XDG_DATA_HOME", "HOME"]);
     let temp1 = TempDir::new().unwrap();
@@ -67,6 +69,7 @@ fn test_resolve_component_custom_dir_takes_precedence() {
 }
 
 #[test]
+#[serial]
 fn test_resolve_component_env_var_precedence() {
     let _guard = EnvGuard::new(&["XZAGENTZ_COMPONENTS_DIR", "XDG_DATA_HOME", "HOME"]);
     let temp = TempDir::new().unwrap();
@@ -82,6 +85,7 @@ fn test_resolve_component_env_var_precedence() {
 }
 
 #[test]
+#[serial]
 fn test_resolve_component_embedded_fallback() {
     let _guard = EnvGuard::new(&["XZAGENTZ_COMPONENTS_DIR", "XDG_DATA_HOME", "HOME"]);
     _guard.clear_all();
@@ -92,6 +96,7 @@ fn test_resolve_component_embedded_fallback() {
 }
 
 #[test]
+#[serial]
 fn test_default_components_dir_respects_home() {
     let _guard = EnvGuard::new(&["HOME"]);
     let temp = TempDir::new().unwrap();
@@ -111,6 +116,7 @@ fn test_default_components_dir_respects_home() {
 // Template resolution tests
 
 #[test]
+#[serial]
 fn test_resolve_template_env_var_precedence() {
     let _guard = EnvGuard::new(&["XZAGENTZ_TEMPLATES_DIR", "XDG_DATA_HOME", "HOME"]);
     let temp = TempDir::new().unwrap();
@@ -126,6 +132,7 @@ fn test_resolve_template_env_var_precedence() {
 }
 
 #[test]
+#[serial]
 fn test_resolve_template_embedded_fallback() {
     let _guard = EnvGuard::new(&["XZAGENTZ_TEMPLATES_DIR", "XDG_DATA_HOME", "HOME"]);
     _guard.clear_all();
@@ -136,6 +143,7 @@ fn test_resolve_template_embedded_fallback() {
 }
 
 #[test]
+#[serial]
 fn test_default_templates_dir_respects_home() {
     let _guard = EnvGuard::new(&["HOME"]);
     let temp = TempDir::new().unwrap();
@@ -155,6 +163,7 @@ fn test_default_templates_dir_respects_home() {
 // Config resolution tests
 
 #[test]
+#[serial]
 fn test_resolve_config_env_var_precedence() {
     let _guard = EnvGuard::new(&["XZAGENTZ_CONFIG_DIR", "XDG_CONFIG_HOME", "HOME"]);
     let temp = TempDir::new().unwrap();
@@ -167,6 +176,7 @@ fn test_resolve_config_env_var_precedence() {
 }
 
 #[test]
+#[serial]
 fn test_resolve_config_xdg_config_home_fallback() {
     let _guard = EnvGuard::new(&["XZAGENTZ_CONFIG_DIR", "XDG_CONFIG_HOME", "HOME"]);
 
@@ -183,6 +193,7 @@ fn test_resolve_config_xdg_config_home_fallback() {
 }
 
 #[test]
+#[serial]
 fn test_default_config_dir_respects_home() {
     let _guard = EnvGuard::new(&["HOME"]);
     let temp = TempDir::new().unwrap();
@@ -198,6 +209,7 @@ fn test_default_config_dir_respects_home() {
 // Cross-resource consistency tests
 
 #[test]
+#[serial]
 fn test_all_defaults_use_consistent_base_path() {
     let _guard = EnvGuard::new(&["HOME"]);
     let temp = TempDir::new().unwrap();
@@ -228,6 +240,7 @@ fn test_all_defaults_use_consistent_base_path() {
 }
 
 #[test]
+#[serial]
 fn test_resolution_hierarchy_independence() {
     let _guard = EnvGuard::new(&[
         "XZAGENTZ_COMPONENTS_DIR",
@@ -270,16 +283,16 @@ fn test_resolution_hierarchy_independence() {
 }
 
 #[test]
+#[serial]
 fn test_resolution_with_xdg_data_home() {
     let _guard = EnvGuard::new(&["XZAGENTZ_COMPONENTS_DIR", "XDG_DATA_HOME", "HOME"]);
+    _guard.clear_all();
 
     let temp = TempDir::new().unwrap();
     let components_dir = temp.path().join("xzagentz").join("components");
     fs::create_dir_all(&components_dir).unwrap();
 
-    // Clear only the vars we don't want, then set XDG_DATA_HOME
-    env::remove_var("XZAGENTZ_COMPONENTS_DIR");
-    env::remove_var("HOME");
+    // Set XDG_DATA_HOME to temp directory with components subdirectory
     env::set_var("XDG_DATA_HOME", temp.path());
 
     let source = resolve_component_dir(None);
@@ -291,24 +304,48 @@ fn test_resolution_with_xdg_data_home() {
 }
 
 #[test]
+#[serial]
 fn test_resolution_deterministic() {
     let _guard = EnvGuard::new(&["XZAGENTZ_COMPONENTS_DIR", "XDG_DATA_HOME", "HOME"]);
+    _guard.clear_all();
+
     let temp = TempDir::new().unwrap();
     let temp_path = temp.path().to_path_buf();
 
+    // Ensure temp directory exists (TempDir creates it, but verify)
+    assert!(
+        temp_path.exists(),
+        "Temp directory should exist: {:?}",
+        temp_path
+    );
+
     env::set_var("XZAGENTZ_COMPONENTS_DIR", &temp_path);
 
-    // Call multiple times
+    // Call multiple times - should be deterministic
     let first = resolve_component_dir(None);
     let second = resolve_component_dir(None);
     let third = resolve_component_dir(None);
 
     // All should return the same result
-    assert_eq!(first, second);
-    assert_eq!(second, third);
+    assert_eq!(
+        first, second,
+        "First and second resolution should be identical"
+    );
+    assert_eq!(
+        second, third,
+        "Second and third resolution should be identical"
+    );
 
-    // All should resolve to the same temp path
+    // All should resolve to the same temp path, not embedded
+    assert!(
+        first.is_filesystem(),
+        "Should resolve to filesystem, not embedded. Got: {:?}",
+        first
+    );
+
     if let ResourceSource::Filesystem(path) = first {
-        assert_eq!(path, temp_path);
+        assert_eq!(path, temp_path, "Resolved path should match temp directory");
+    } else {
+        panic!("Expected Filesystem variant, got: {:?}", first);
     }
 }

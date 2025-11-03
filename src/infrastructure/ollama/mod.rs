@@ -81,11 +81,13 @@
 //! }
 //! ```
 
+pub mod architecture_generator;
 pub mod client;
 pub mod config;
 pub mod error;
 pub mod plan_generator;
 
+pub use architecture_generator::{GeneratorError, OllamaArchitectureGenerator};
 pub use client::{ModelInfo, OllamaClient};
 pub use config::OllamaConfig;
 pub use error::OllamaError;

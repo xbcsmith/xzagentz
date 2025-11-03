@@ -23,7 +23,14 @@
 pub mod embedded;
 pub mod fileio;
 pub mod ollama;
+pub mod templates;
+pub mod writers;
 
 pub use embedded::EmbeddedResources;
 pub use fileio::{FileIoError, MarkdownArchitectureParser, MarkdownPlanWriter};
-pub use ollama::{ModelInfo, OllamaClient, OllamaConfig, OllamaError, OllamaPlanGenerator};
+pub use ollama::{
+    GeneratorError, ModelInfo, OllamaArchitectureGenerator, OllamaClient, OllamaConfig,
+    OllamaError, OllamaPlanGenerator,
+};
+pub use templates::{FileTemplateRepository, RepositoryError};
+pub use writers::{MarkdownArchitectureWriter, WriterError};

@@ -187,8 +187,29 @@ mod tests {
 
     #[test]
     fn test_resolve_with_custom_dir_nonexistent() {
+        // Clear all environment variables to ensure proper fallback to embedded
+        let old_components = env::var_os("XZAGENTZ_COMPONENTS_DIR");
+        let old_xdg_data = env::var_os("XDG_DATA_HOME");
+        let old_home = env::var_os("HOME");
+
+        env::remove_var("XZAGENTZ_COMPONENTS_DIR");
+        env::remove_var("XDG_DATA_HOME");
+        env::remove_var("HOME");
+
         let source = resolve_component_dir(Some(PathBuf::from("/nonexistent/path")));
-        // Should fall back to embedded since custom dir doesn't exist
+
+        // Restore environment variables
+        if let Some(val) = old_components {
+            env::set_var("XZAGENTZ_COMPONENTS_DIR", val);
+        }
+        if let Some(val) = old_xdg_data {
+            env::set_var("XDG_DATA_HOME", val);
+        }
+        if let Some(val) = old_home {
+            env::set_var("HOME", val);
+        }
+
+        // Should fall back to embedded since custom dir doesn't exist and no env vars
         assert!(source.is_embedded());
     }
 
@@ -209,12 +230,29 @@ mod tests {
 
     #[test]
     fn test_resolve_fallback_to_embedded() {
-        // Ensure no env vars are set
+        // Save and clear all env vars for proper test isolation
+        let old_components = env::var_os("XZAGENTZ_COMPONENTS_DIR");
+        let old_xdg_data = env::var_os("XDG_DATA_HOME");
+        let old_home = env::var_os("HOME");
+
         env::remove_var("XZAGENTZ_COMPONENTS_DIR");
         env::remove_var("XDG_DATA_HOME");
+        env::remove_var("HOME");
 
         // Use a nonexistent custom dir
         let source = resolve_component_dir(Some(PathBuf::from("/definitely/does/not/exist")));
+
+        // Restore environment variables
+        if let Some(val) = old_components {
+            env::set_var("XZAGENTZ_COMPONENTS_DIR", val);
+        }
+        if let Some(val) = old_xdg_data {
+            env::set_var("XDG_DATA_HOME", val);
+        }
+        if let Some(val) = old_home {
+            env::set_var("HOME", val);
+        }
+
         assert!(source.is_embedded());
     }
 

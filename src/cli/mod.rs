@@ -10,6 +10,7 @@
 //! - Each command has its own implementation module
 
 pub mod add;
+pub mod architecture;
 pub mod create;
 pub mod implementation;
 pub mod init;
@@ -160,6 +161,9 @@ pub enum Commands {
 
     /// Generate implementation plans from architecture documents
     Implementation(implementation::ImplementationArgs),
+
+    /// Generate and manage software architecture documents with LLM
+    Architecture(architecture::ArchitectureArgs),
 }
 
 /// List command targets

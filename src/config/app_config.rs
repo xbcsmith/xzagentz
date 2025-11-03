@@ -50,6 +50,10 @@ pub struct AppConfig {
     /// Interactive mode preferences
     #[serde(default)]
     pub interactive: InteractiveConfig,
+
+    /// Architecture generation configuration
+    #[serde(default)]
+    pub architecture: ArchitectureConfig,
 }
 
 /// Ollama service configuration
@@ -121,6 +125,152 @@ impl Default for InteractiveConfig {
             enable_colors: true,
             show_progress: true,
             confirm_before_save: true,
+        }
+    }
+}
+
+/// Architecture generation configuration
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+pub struct ArchitectureConfig {
+    /// Ollama-specific settings for architecture generation
+    pub ollama: ArchitectureOllamaConfig,
+
+    /// Default generation settings
+    pub generation: GenerationConfig,
+
+    /// Output settings
+    pub output: ArchitectureOutputConfig,
+
+    /// Template settings
+    pub templates: TemplateConfig,
+
+    /// Interactive mode settings for architecture commands
+    pub interactive: ArchitectureInteractiveConfig,
+}
+
+/// Ollama configuration specific to architecture generation
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ArchitectureOllamaConfig {
+    /// Base URL for Ollama service (inherits from global if not set)
+    pub base_url: Option<String>,
+
+    /// Default model for architecture generation
+    pub default_model: String,
+
+    /// Timeout in seconds for architecture generation requests
+    pub timeout_seconds: u64,
+
+    /// Maximum number of retry attempts
+    pub max_retries: u32,
+}
+
+/// Generation defaults configuration
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct GenerationConfig {
+    /// Default architecture pattern
+    pub default_pattern: String,
+
+    /// Default complexity level
+    pub default_complexity: String,
+
+    /// Include deployment architecture by default
+    pub include_deployment: bool,
+
+    /// Include quality attributes by default
+    pub include_quality_attributes: bool,
+
+    /// Maximum number of components to generate
+    pub max_components: usize,
+}
+
+/// Architecture output configuration
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ArchitectureOutputConfig {
+    /// Default output directory for architecture documents
+    pub default_directory: String,
+
+    /// Output format (markdown, json, yaml)
+    pub format: String,
+
+    /// Create backup before overwriting
+    pub create_backup: bool,
+}
+
+/// Template configuration
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct TemplateConfig {
+    /// Directory containing architecture templates
+    pub directory: String,
+
+    /// Automatically create default templates if missing
+    pub auto_create_defaults: bool,
+}
+
+/// Interactive mode configuration for architecture commands
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ArchitectureInteractiveConfig {
+    /// Enable colored output
+    pub enable_colors: bool,
+
+    /// Show progress during generation
+    pub show_progress: bool,
+
+    /// Confirm before saving
+    pub confirm_before_save: bool,
+
+    /// Show token usage statistics
+    pub show_token_usage: bool,
+}
+
+impl Default for ArchitectureOllamaConfig {
+    fn default() -> Self {
+        Self {
+            base_url: None, // Inherits from global ollama.base_url
+            default_model: "llama3".to_string(),
+            timeout_seconds: 600, // Longer timeout for architecture generation
+            max_retries: 3,
+        }
+    }
+}
+
+impl Default for GenerationConfig {
+    fn default() -> Self {
+        Self {
+            default_pattern: "layered".to_string(),
+            default_complexity: "moderate".to_string(),
+            include_deployment: true,
+            include_quality_attributes: true,
+            max_components: 20,
+        }
+    }
+}
+
+impl Default for ArchitectureOutputConfig {
+    fn default() -> Self {
+        Self {
+            default_directory: "docs/architecture".to_string(),
+            format: "markdown".to_string(),
+            create_backup: true,
+        }
+    }
+}
+
+impl Default for TemplateConfig {
+    fn default() -> Self {
+        Self {
+            directory: "templates/architecture".to_string(),
+            auto_create_defaults: true,
+        }
+    }
+}
+
+impl Default for ArchitectureInteractiveConfig {
+    fn default() -> Self {
+        Self {
+            enable_colors: true,
+            show_progress: true,
+            confirm_before_save: true,
+            show_token_usage: false,
         }
     }
 }
@@ -267,6 +417,58 @@ impl AppConfig {
             )));
         }
 
+        // Validate architecture configuration
+        if self.architecture.ollama.default_model.is_empty() {
+            return Err(ConfigError::ValidationError(
+                "architecture.ollama.default_model cannot be empty".to_string(),
+            ));
+        }
+
+        if self.architecture.ollama.timeout_seconds == 0 {
+            return Err(ConfigError::ValidationError(
+                "architecture.ollama.timeout_seconds must be greater than 0".to_string(),
+            ));
+        }
+
+        if !["markdown", "json", "yaml"].contains(&self.architecture.output.format.as_str()) {
+            return Err(ConfigError::ValidationError(format!(
+                "architecture.output.format must be one of: markdown, json, yaml (got: {})",
+                self.architecture.output.format
+            )));
+        }
+
+        let valid_patterns = [
+            "microservices",
+            "monolithic",
+            "event-driven",
+            "layered",
+            "hexagonal",
+            "cqrs",
+            "serverless",
+        ];
+        if !valid_patterns.contains(&self.architecture.generation.default_pattern.as_str()) {
+            return Err(ConfigError::ValidationError(format!(
+                "architecture.generation.default_pattern must be one of: {} (got: {})",
+                valid_patterns.join(", "),
+                self.architecture.generation.default_pattern
+            )));
+        }
+
+        let valid_complexity = ["simple", "moderate", "complex", "enterprise"];
+        if !valid_complexity.contains(&self.architecture.generation.default_complexity.as_str()) {
+            return Err(ConfigError::ValidationError(format!(
+                "architecture.generation.default_complexity must be one of: {} (got: {})",
+                valid_complexity.join(", "),
+                self.architecture.generation.default_complexity
+            )));
+        }
+
+        if self.architecture.generation.max_components == 0 {
+            return Err(ConfigError::ValidationError(
+                "architecture.generation.max_components must be greater than 0".to_string(),
+            ));
+        }
+
         Ok(())
     }
 
@@ -293,6 +495,7 @@ pub struct AppConfigBuilder {
     ollama: Option<OllamaConfig>,
     planning: Option<PlanningConfig>,
     interactive: Option<InteractiveConfig>,
+    architecture: Option<ArchitectureConfig>,
 }
 
 impl AppConfigBuilder {
@@ -368,12 +571,45 @@ impl AppConfigBuilder {
         self
     }
 
+    /// Sets the architecture templates directory
+    pub fn templates_dir(mut self, dir: impl Into<String>) -> Self {
+        let mut architecture = self.architecture.unwrap_or_default();
+        architecture.templates.directory = dir.into();
+        self.architecture = Some(architecture);
+        self
+    }
+
+    /// Sets the architecture output directory
+    pub fn architecture_output_dir(mut self, dir: impl Into<String>) -> Self {
+        let mut architecture = self.architecture.unwrap_or_default();
+        architecture.output.default_directory = dir.into();
+        self.architecture = Some(architecture);
+        self
+    }
+
+    /// Sets the default architecture pattern
+    pub fn architecture_pattern(mut self, pattern: impl Into<String>) -> Self {
+        let mut architecture = self.architecture.unwrap_or_default();
+        architecture.generation.default_pattern = pattern.into();
+        self.architecture = Some(architecture);
+        self
+    }
+
+    /// Sets the architecture model
+    pub fn architecture_model(mut self, model: impl Into<String>) -> Self {
+        let mut architecture = self.architecture.unwrap_or_default();
+        architecture.ollama.default_model = model.into();
+        self.architecture = Some(architecture);
+        self
+    }
+
     /// Builds the AppConfig
     pub fn build(self) -> AppConfig {
         AppConfig {
             ollama: self.ollama.unwrap_or_default(),
             planning: self.planning.unwrap_or_default(),
             interactive: self.interactive.unwrap_or_default(),
+            architecture: self.architecture.unwrap_or_default(),
         }
     }
 }
@@ -510,5 +746,58 @@ interactive:
         assert_eq!(config.ollama.base_url, "http://custom:11434");
         assert_eq!(config.planning.output_format, "json");
         assert!(!config.interactive.enable_colors);
+    }
+
+    #[test]
+    fn test_architecture_config_defaults() {
+        let config = ArchitectureConfig::default();
+        assert_eq!(config.generation.default_pattern, "layered");
+        assert_eq!(config.generation.default_complexity, "moderate");
+        assert_eq!(config.templates.directory, "templates/architecture");
+        assert!(config.generation.include_deployment);
+        assert!(config.output.create_backup);
+    }
+
+    #[test]
+    fn test_architecture_config_validation() {
+        let mut config = AppConfig::default();
+        config.architecture.generation.default_pattern = "invalid".to_string();
+        let result = config.validate();
+        assert!(result.is_err());
+        assert!(matches!(result, Err(ConfigError::ValidationError(_))));
+    }
+
+    #[test]
+    fn test_architecture_config_builder() {
+        let config = AppConfig::builder()
+            .templates_dir("custom/templates")
+            .architecture_output_dir("custom/arch")
+            .architecture_pattern("microservices")
+            .architecture_model("llama3.2")
+            .build();
+
+        assert_eq!(config.architecture.templates.directory, "custom/templates");
+        assert_eq!(config.architecture.output.default_directory, "custom/arch");
+        assert_eq!(
+            config.architecture.generation.default_pattern,
+            "microservices"
+        );
+        assert_eq!(config.architecture.ollama.default_model, "llama3.2");
+    }
+
+    #[test]
+    fn test_architecture_complexity_validation() {
+        let mut config = AppConfig::default();
+        config.architecture.generation.default_complexity = "invalid".to_string();
+        let result = config.validate();
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_architecture_max_components_validation() {
+        let mut config = AppConfig::default();
+        config.architecture.generation.max_components = 0;
+        let result = config.validate();
+        assert!(result.is_err());
     }
 }

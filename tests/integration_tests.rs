@@ -3,6 +3,7 @@
 //! This module contains integration tests that validate complete workflows
 //! and end-to-end functionality of the embedded resources system.
 
+use serial_test::serial;
 use std::env;
 use std::fs;
 use tempfile::TempDir;
@@ -40,6 +41,7 @@ impl Drop for EnvGuard {
 }
 
 #[test]
+#[serial]
 fn test_init_workflow_first_time_initialization() {
     let _guard = EnvGuard::new(&["HOME", "XDG_CONFIG_HOME", "XDG_DATA_HOME"]);
     let temp_home = TempDir::new().unwrap();
@@ -95,6 +97,7 @@ fn test_init_workflow_first_time_initialization() {
 }
 
 #[test]
+#[serial]
 fn test_resource_loading_from_embedded() {
     let _guard = EnvGuard::new(&["XZAGENTZ_COMPONENTS_DIR", "XDG_DATA_HOME", "HOME"]);
     env::remove_var("XZAGENTZ_COMPONENTS_DIR");
@@ -132,6 +135,7 @@ fn test_resource_loading_from_embedded() {
 }
 
 #[test]
+#[serial]
 fn test_resource_loading_from_filesystem() {
     let _guard = EnvGuard::new(&["XZAGENTZ_COMPONENTS_DIR", "XDG_DATA_HOME", "HOME"]);
     let temp_dir = TempDir::new().unwrap();
@@ -175,6 +179,7 @@ fn test_resource_loading_from_filesystem() {
 }
 
 #[test]
+#[serial]
 fn test_config_resolution_integration() {
     let _guard = EnvGuard::new(&["HOME", "XDG_CONFIG_HOME", "XZAGENTZ_CONFIG_DIR"]);
     let temp_home = TempDir::new().unwrap();
@@ -208,6 +213,7 @@ fn test_config_resolution_integration() {
 }
 
 #[test]
+#[serial]
 fn test_mixed_sources_components_and_templates() {
     let _guard = EnvGuard::new(&[
         "XZAGENTZ_COMPONENTS_DIR",
@@ -215,6 +221,12 @@ fn test_mixed_sources_components_and_templates() {
         "XDG_DATA_HOME",
         "HOME",
     ]);
+
+    // Clear all environment variables first for proper isolation
+    env::remove_var("XZAGENTZ_COMPONENTS_DIR");
+    env::remove_var("XZAGENTZ_TEMPLATES_DIR");
+    env::remove_var("XDG_DATA_HOME");
+    env::remove_var("HOME");
 
     // Use completely isolated temp directory
     let temp_dir = TempDir::new().unwrap();
@@ -227,9 +239,7 @@ fn test_mixed_sources_components_and_templates() {
 
     // Set environment variables to use isolated paths
     env::set_var("XZAGENTZ_COMPONENTS_DIR", &components_dir);
-    env::set_var("XZAGENTZ_TEMPLATES_DIR", "/nonexistent/templates");
-    env::set_var("XDG_DATA_HOME", "/nonexistent/xdg");
-    env::set_var("HOME", "/nonexistent/home");
+    // Don't set templates dir, XDG, or HOME - let them be unset for embedded fallback
 
     // Components should resolve to filesystem
     let component_source = resolve_component_dir(None);
@@ -278,6 +288,7 @@ fn test_content_integrity_after_extraction() {
 }
 
 #[test]
+#[serial]
 fn test_default_resource_dirs_consistency() {
     let _guard = EnvGuard::new(&["HOME"]);
     let temp_home = TempDir::new().unwrap();
