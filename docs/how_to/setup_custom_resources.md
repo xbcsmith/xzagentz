@@ -629,7 +629,7 @@ xzagentz create test-project --template rust_binary --dry-run
 ## Related Documentation
 
 - Environment Variables Reference: `docs/reference/environment_variables.md`
-- Embedded Resources Architecture: `docs/explanations/embedded_resources_architecture.md`
+- Embedded Resources Architecture: `docs/explanation/embedded_resources_architecture.md`
 - CLI Commands Reference: `docs/reference/cli_commands.md`
 
 ## Support

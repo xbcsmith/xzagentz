@@ -536,7 +536,7 @@ xzagentz list components
 ## Related Documentation
 
 - Setup and Customization Guide: `docs/how_to/setup_custom_resources.md`
-- Embedded Resources Architecture: `docs/explanations/embedded_resources_architecture.md`
+- Embedded Resources Architecture: `docs/explanation/embedded_resources_architecture.md`
 - CLI Reference: `docs/reference/cli_commands.md`
 
 ## Appendix: Quick Reference Table

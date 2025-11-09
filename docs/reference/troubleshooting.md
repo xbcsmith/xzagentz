@@ -618,7 +618,7 @@ mod tests {
 - **Authoring Guide**: `docs/how_to/authoring_components.md`
 - **Configuration Reference**: `docs/reference/component_configuration.md`
 - **Migration Guide**: `docs/how_to/migrating_to_v2.md`
-- **Architecture**: `docs/explanations/language_agnostic_component_system_implementation_plan.md`
+- **Architecture**: `docs/explanation/language_agnostic_component_system_implementation_plan.md`
 
 ### Example Components
 

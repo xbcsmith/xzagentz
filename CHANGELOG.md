@@ -197,7 +197,7 @@ See [Migration Guide](docs/how_to/migrating_to_v2.md) for detailed instructions.
 - [Repository](https://github.com/xbcsmith/xzagentz)
 - [Issues](https://github.com/xbcsmith/xzagentz/issues)
 - [Documentation](docs/)
-- [Implementation Plan](docs/explanations/language_agnostic_component_system_implementation_plan.md)
+- [Implementation Plan](docs/explanation/language_agnostic_component_system_implementation_plan.md)
 
 ---
 

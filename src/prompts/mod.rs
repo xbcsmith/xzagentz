@@ -20,12 +20,12 @@
 //!
 //! // Parse implementation plan
 //! let parser = PlanParser::new();
-//! let plan_content = std::fs::read_to_string("docs/explanations/implementation_plan.md").unwrap();
+//! let plan_content = std::fs::read_to_string("docs/explanation/implementation_plan.md").unwrap();
 //! let plan = parser.parse_implementation_plan(&plan_content).unwrap();
 //!
 //! // Initialize progress tracking
 //! let mut tracker = ProgressTracker::new(Path::new(".")).unwrap();
-//! tracker.initialize("docs/explanations/implementation_plan.md", 42, "xzagentz").unwrap();
+//! tracker.initialize("docs/explanation/implementation_plan.md", 42, "xzagentz").unwrap();
 //!
 //! // Generate prompts
 //! let generator = PromptGenerator::new(Path::new("prompts")).unwrap();

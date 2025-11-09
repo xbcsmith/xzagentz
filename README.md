@@ -139,7 +139,7 @@ For more details, see:
 
 - Setup Guide: `docs/how_to/setup_custom_resources.md`
 - Environment Variables: `docs/reference/environment_variables.md`
-- Architecture: `docs/explanations/embedded_resources_architecture.md`
+- Architecture: `docs/explanation/embedded_resources_architecture.md`
 
 ## Component System
 
@@ -341,7 +341,7 @@ xzagentz/
     │   ├── architecture.md
     │   ├── component_configuration.md
     │   └── troubleshooting.md
-    └── explanations/       # Conceptual documentation
+    └── explanation/       # Conceptual documentation
         ├── implementation.md
         └── language_agnostic_component_system_implementation_plan.md
 ```
@@ -391,8 +391,8 @@ xzagentz/
 ### For Developers
 
 - **[Architecture Reference](docs/reference/architecture.md)**: Comprehensive system architecture and design patterns
-- **[Implementation Guide](docs/explanations/implementation.md)**: Consolidated implementation documentation covering all 6 phases
-- **[Implementation Plan](docs/explanations/language_agnostic_component_system_implementation_plan.md)**: Original design decisions and requirements
+- **[Implementation Guide](docs/explanation/implementation.md)**: Consolidated implementation documentation covering all 6 phases
+- **[Implementation Plan](docs/explanation/language_agnostic_component_system_implementation_plan.md)**: Original design decisions and requirements
 - **[AGENTS.md](AGENTS.md)**: AI agent development guidelines and quality standards
 
 ### Examples

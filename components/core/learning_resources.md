@@ -24,8 +24,8 @@ This section provides curated learning resources, references, and guides for AI 
 ## Project-Specific Resources
 
 ### Architecture Documentation
-- `docs/explanations/architecture.md` - System architecture overview
-- `docs/explanations/implementation_plan.md` - Detailed implementation roadmap
+- `docs/explanation/architecture.md` - System architecture overview
+- `docs/explanation/implementation_plan.md` - Detailed implementation roadmap
 - `docs/reference/component_format.md` - Component file structure specification
 
 ### Development Guides

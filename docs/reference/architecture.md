@@ -903,7 +903,7 @@ tests/
 
 ## Related Documentation
 
-- **Implementation Plan**: `docs/explanations/implementation/language_agnostic_component_system_implementation_plan.md`
+- **Implementation Plan**: `docs/explanation/implementation/language_agnostic_component_system_implementation_plan.md`
 - **Configuration Reference**: `docs/reference/component_configuration.md`
 - **How-To Guide**: `docs/how_to/authoring_components.md`
 - **Troubleshooting**: `docs/reference/troubleshooting.md`

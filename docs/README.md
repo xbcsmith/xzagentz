@@ -33,7 +33,7 @@ particular problem.
 
 **Understanding-oriented** - Conceptual discussions to deepen your knowledge.
 
-- [Architecture Overview](explanations/architecture.md) - System design and
+- [Architecture Overview](explanation/architecture.md) - System design and
   component interaction
 
 Read these to understand the concepts and reasoning behind xzagentz's design.

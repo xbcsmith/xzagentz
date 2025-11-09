@@ -96,7 +96,7 @@ cargo test --all-features
 
 - ALL public items MUST have `///` doc comments
 - Doc comments MUST include Examples section
-- Create `docs/explanations/phase{{phase_number}}_*.md` files
+- Create `docs/explanation/phase{{phase_number}}_*.md` files
 - All code blocks MUST specify language
 
 ### 7. Testing (MANDATORY)
@@ -350,8 +350,8 @@ xzagentz prompt generate --phase {{phase_number}} --section X
 
 ## References
 
-- Implementation Plan: `docs/explanations/implementation_plan.md` (Phase {{phase_number}})
-- Architecture Plan: `docs/explanations/architecture_plan.md`
+- Implementation Plan: `docs/explanation/implementation_plan.md` (Phase {{phase_number}})
+- Architecture Plan: `docs/explanation/architecture_plan.md`
 - AGENTS.md Rules: `AGENTS.md`
 {{#if related_phases}}
 - Related Phases: {{#each related_phases}}{{this}}{{#unless @last}}, {{/unless}}{{/each}}

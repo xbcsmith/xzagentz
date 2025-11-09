@@ -369,7 +369,7 @@ Organize documentation into four categories:
 - Problem-solving recipes
 - Specific instructions
 
-**3. Explanations** (`docs/explanations/`)
+**3. Explanations** (`docs/explanation/`)
 - Understanding-oriented
 - Conceptual discussions
 - Architecture and design decisions

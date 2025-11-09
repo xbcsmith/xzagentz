@@ -610,7 +610,7 @@ Organize documentation into four categories:
 - Specific instructions
 - Focused on achieving goals
 
-**3. Explanations** (`docs/explanations/`)
+**3. Explanations** (`docs/explanation/`)
 
 - Understanding-oriented
 - Conceptual discussions

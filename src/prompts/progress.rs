@@ -94,7 +94,7 @@ impl ProgressTracker {
     /// use std::path::Path;
     ///
     /// let mut tracker = ProgressTracker::new(Path::new(".")).unwrap();
-    /// tracker.initialize("docs/explanations/implementation_plan.md", 42, "xzagentz").unwrap();
+    /// tracker.initialize("docs/explanation/implementation_plan.md", 42, "xzagentz").unwrap();
     /// ```
     pub fn initialize(
         &mut self,

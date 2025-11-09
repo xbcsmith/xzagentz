@@ -687,7 +687,7 @@ docs/how_to/
 
 Conceptual documentation explaining why and how things work.
 
-**Location:** `docs/explanations/`
+**Location:** `docs/explanation/`
 
 **Contents:**
 
@@ -699,7 +699,7 @@ Conceptual documentation explaining why and how things work.
 **Example:**
 
 ```
-docs/explanations/
+docs/explanation/
 ├── architecture.md
 ├── design_decisions.md
 └── phase1_implementation.md

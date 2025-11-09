@@ -126,7 +126,7 @@ impl PromptGenerator {
     ///
     /// let generator = PromptGenerator::new(Path::new("prompts")).unwrap();
     /// let parser = PlanParser::new();
-    /// let plan_content = std::fs::read_to_string("docs/explanations/implementation_plan.md").unwrap();
+    /// let plan_content = std::fs::read_to_string("docs/explanation/implementation_plan.md").unwrap();
     /// let plan = parser.parse_implementation_plan(&plan_content).unwrap();
     ///
     /// let generated = generator.generate_all(&plan, None).unwrap();
@@ -221,7 +221,7 @@ impl PromptGenerator {
     ///
     /// let generator = PromptGenerator::new(Path::new("prompts")).unwrap();
     /// let parser = PlanParser::new();
-    /// let plan_content = std::fs::read_to_string("docs/explanations/implementation_plan.md").unwrap();
+    /// let plan_content = std::fs::read_to_string("docs/explanation/implementation_plan.md").unwrap();
     /// let plan = parser.parse_implementation_plan(&plan_content).unwrap();
     ///
     /// let generated = generator.generate_interactive(&plan, None).unwrap();

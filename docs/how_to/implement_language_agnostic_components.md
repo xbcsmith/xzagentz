@@ -9,8 +9,8 @@ This guide walks you through the steps to begin implementing the language-agnost
 Before starting, ensure you have:
 
 - Rust toolchain installed (1.70 or later)
-- Read the implementation plan: `docs/explanations/language_agnostic_component_system_implementation_plan.md`
-- Read the executive summary: `docs/explanations/language_agnostic_components_summary.md`
+- Read the implementation plan: `docs/explanation/language_agnostic_component_system_implementation_plan.md`
+- Read the executive summary: `docs/explanation/language_agnostic_components_summary.md`
 - Reviewed the project rules in `AGENTS.md`
 
 ## Step 1: Set Up Feature Branch
@@ -346,7 +346,7 @@ Use the checklist to track your progress:
 
 ```bash
 # Open the checklist
-open docs/explanations/language_agnostic_components_checklist.md
+open docs/explanation/language_agnostic_components_checklist.md
 ```
 
 Mark tasks as complete as you finish them.
@@ -394,10 +394,10 @@ After completing the metadata and language_filter modules:
 
 ## Getting Help
 
-- Review the detailed implementation plan: `docs/explanations/language_agnostic_component_system_implementation_plan.md`
-- Check the component improvement analysis: `docs/explanations/component_improvement_plan.md`
+- Review the detailed implementation plan: `docs/explanation/language_agnostic_component_system_implementation_plan.md`
+- Check the component improvement analysis: `docs/explanation/component_improvement_plan.md`
 - Review project rules: `AGENTS.md`
-- Use the tracking checklist: `docs/explanations/language_agnostic_components_checklist.md`
+- Use the tracking checklist: `docs/explanation/language_agnostic_components_checklist.md`
 
 ## Quality Checklist
 
@@ -417,6 +417,6 @@ Before considering Phase 1 complete, verify:
 **Document Version**: 1.0.0
 **Last Updated**: 2024
 **Related Documents**:
-- `docs/explanations/language_agnostic_component_system_implementation_plan.md`
-- `docs/explanations/language_agnostic_components_checklist.md`
+- `docs/explanation/language_agnostic_component_system_implementation_plan.md`
+- `docs/explanation/language_agnostic_components_checklist.md`
 - `AGENTS.md`

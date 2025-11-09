@@ -347,7 +347,7 @@ export function function(param: Type): Type {
 
 2. **Implementation Documentation File**
 
-   - Create in `docs/explanations/` for EVERY feature/task
+   - Create in `docs/explanation/` for EVERY feature/task
    - Use filename pattern: `{feature_name}_implementation.md`
    - Include: Overview, Components, Implementation Details, Testing, Examples
 
@@ -764,7 +764,7 @@ add jwt refresh (PROJ-1234)          # No type
 - [ ] File naming follows conventions (lowercase_underscore.md, .yaml not .yml)
 - [ ] All quality gates pass (format, check, lint, test)
 - [ ] All public items have doc comments with examples
-- [ ] Implementation documentation created in `docs/explanations/`
+- [ ] Implementation documentation created in `docs/explanation/`
 - [ ] No emojis in code, docs, or commits
 - [ ] Commit message follows conventional format
 - [ ] Error handling uses appropriate patterns
@@ -779,6 +779,6 @@ add jwt refresh (PROJ-1234)          # No type
 
 1. **File Extensions**: `.yaml` NOT `.yml`, `.md` with lowercase_underscore
 2. **Quality Gates**: All language-specific commands MUST pass
-3. **Documentation**: Create file in `docs/explanations/` with implementation summary
+3. **Documentation**: Create file in `docs/explanation/` with implementation summary
 
 **These three rules will prevent 90% of rejections.**

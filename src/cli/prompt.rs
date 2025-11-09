@@ -48,11 +48,7 @@ pub enum PromptCommand {
 #[derive(Debug, Args)]
 pub struct GenerateArgs {
     /// Path to implementation plan
-    #[arg(
-        short,
-        long,
-        default_value = "docs/explanations/implementation_plan.md"
-    )]
+    #[arg(short, long, default_value = "docs/explanation/implementation_plan.md")]
     pub plan: PathBuf,
 
     /// Path to architecture plan (optional)
@@ -96,11 +92,7 @@ pub struct GenerateArgs {
 #[derive(Debug, Args)]
 pub struct ShowArgs {
     /// Path to implementation plan
-    #[arg(
-        short,
-        long,
-        default_value = "docs/explanations/implementation_plan.md"
-    )]
+    #[arg(short, long, default_value = "docs/explanation/implementation_plan.md")]
     pub plan: PathBuf,
 
     /// Phase number
@@ -127,11 +119,7 @@ pub struct CompleteArgs {
 #[derive(Debug, Args)]
 pub struct NextArgs {
     /// Path to implementation plan
-    #[arg(
-        short,
-        long,
-        default_value = "docs/explanations/implementation_plan.md"
-    )]
+    #[arg(short, long, default_value = "docs/explanation/implementation_plan.md")]
     pub plan: PathBuf,
 
     /// Path to project root (for .implementation_progress file)

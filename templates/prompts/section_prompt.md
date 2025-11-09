@@ -2,7 +2,7 @@
 
 ## Context
 
-- **Implementation Plan**: `docs/explanations/implementation_plan.md`
+- **Implementation Plan**: `docs/explanation/implementation_plan.md`
 - **Section**: {{section_number}} - {{section_name}}
 - **Phase**: Phase {{phase_number}} ({{phase_duration}})
 - **Files to Reference**: AGENTS.md, existing code
@@ -59,7 +59,7 @@ Based on AGENTS.md, these rules apply to this section:
 
 - ALL public items MUST have `///` doc comments
 - Include Examples section in doc comments
-- Create `docs/explanations/{{documentation_file}}` for this section
+- Create `docs/explanation/{{documentation_file}}` for this section
 - Doc comments MUST include runnable examples
 
 ### 7. Testing (MANDATORY)
@@ -141,7 +141,7 @@ You must create/modify the following:
 
 ### Documentation
 
-- `docs/explanations/{{documentation_file}}` - Implementation documentation for this section
+- `docs/explanation/{{documentation_file}}` - Implementation documentation for this section
 
 ## Acceptance Criteria
 
@@ -189,7 +189,7 @@ After completing implementation, verify:
 
 ### Documentation Quality
 
-- [ ] Documentation file created in `docs/explanations/`
+- [ ] Documentation file created in `docs/explanation/`
 - [ ] All filenames follow lowercase_with_underscores convention
 - [ ] All code blocks specify language
 - [ ] No emojis in documentation
@@ -230,7 +230,7 @@ cargo clippy --all-targets --all-features -- -D warnings
 cargo test --all-features
 
 # Verify documentation file exists
-ls -la docs/explanations/{{documentation_file}}
+ls -la docs/explanation/{{documentation_file}}
 
 # Check for emojis (should return no matches)
 grep -r "[\x{1F600}-\x{1F64F}]" src/ docs/ --exclude=AGENTS.md || echo "No emojis found - OK"
@@ -255,9 +255,9 @@ After completing this section:
 
 ## References
 
-- Implementation Plan: `docs/explanations/implementation_plan.md` (Section {{section_number}})
+- Implementation Plan: `docs/explanation/implementation_plan.md` (Section {{section_number}})
 - AGENTS.md Rules: `AGENTS.md`
-- Project Architecture: `docs/explanations/architecture_plan.md`
+- Project Architecture: `docs/explanation/architecture_plan.md`
 {{#if related_sections}}
 - Related Sections: {{#each related_sections}}{{this}}{{#unless @last}}, {{/unless}}{{/each}}
 {{/if}}

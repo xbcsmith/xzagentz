@@ -561,8 +561,8 @@ After generating your architecture:
 
 ## Related Documentation
 
-- Architecture Generation Plan: `docs/explanations/llm_architecture_command_plan.md`
-- Phase 4 Implementation: `docs/explanations/phase4_cli_integration_implementation.md`
+- Architecture Generation Plan: `docs/explanation/llm_architecture_command_plan.md`
+- Phase 4 Implementation: `docs/explanation/phase4_cli_integration_implementation.md`
 - Template Reference: `templates/architecture/`
 - Configuration Reference: `config.example.yaml`
 

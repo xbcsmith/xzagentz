@@ -767,7 +767,7 @@ Now that you have completed this tutorial, you can:
 
 - User Guide: `docs/how_to/generate_architecture_with_llm.md`
 - Architecture Templates: `docs/reference/architecture_templates.md`
-- Implementation Planning: `docs/explanations/implementation_planning.md`
+- Implementation Planning: `docs/explanation/implementation_planning.md`
 - AGENTS.md Best Practices: `AGENTS.md`
 
 ### Getting Help

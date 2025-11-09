@@ -373,6 +373,6 @@ After creating your AGENTS.md:
 
 For more information:
 
-- See `docs/explanations/interactive_component_selection_implementation.md` for technical details
+- See `docs/explanation/interactive_component_selection_implementation.md` for technical details
 - See `docs/tutorials/getting_started.md` for complete walkthrough
 - Run `xzagentz create --help` for all available options

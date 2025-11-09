@@ -59,7 +59,7 @@ xzagentz/
 │   └── ...
 ├── .implementation_progress          # Progress state file
 └── docs/
-    └── explanations/
+    └── explanation/
         └── implementation_plan.md    # Final implementation plan
 ```
 
@@ -524,7 +524,7 @@ pub struct Section {
 use xzagentz::prompts::parser::ImplementationPlanParser;
 
 let parser = ImplementationPlanParser::new();
-let plan = parser.parse_file("docs/explanations/implementation_plan.md")?;
+let plan = parser.parse_file("docs/explanation/implementation_plan.md")?;
 
 for phase in plan.phases {
     for section in phase.sections {
@@ -564,7 +564,7 @@ impl PromptGenerator {
 use xzagentz::prompts::generator::PromptGenerator;
 
 let generator = PromptGenerator::new()?;
-let plan = parser.parse_file("docs/explanations/implementation_plan.md")?;
+let plan = parser.parse_file("docs/explanation/implementation_plan.md")?;
 
 // Batch generation
 let generated = generator.generate_all(&plan, Path::new("prompts/"))?;
@@ -605,7 +605,7 @@ pub enum TemplateSection {
 
 ## Context
 
-- **Implementation Plan**: `docs/explanations/implementation_plan.md`
+- **Implementation Plan**: `docs/explanation/implementation_plan.md`
 - **Section**: X.Y - Section Name
 - **Phase**: Phase X (Week Y-Z)
 - **Files to Reference**: AGENTS.md, existing code
@@ -1015,7 +1015,7 @@ jobs:
 
 ```bash
 # Check specific file
-xzagentz prompt verify --file docs/explanations/example.md
+xzagentz prompt verify --file docs/explanation/example.md
 
 # Check all markdown
 xzagentz prompt verify --category markdown
@@ -1085,7 +1085,7 @@ Generated: 2024-01-15 10:30:00 UTC
 
 ### [MD-001] Markdown File Naming
 
-**File**: `docs/explanations/DistributedTracing.md`
+**File**: `docs/explanation/DistributedTracing.md`
 **Issue**: Filename uses CamelCase instead of snake_case
 **Suggestion**: Rename to `distributed_tracing.md`
 
@@ -1341,7 +1341,7 @@ fn test_generate_and_verify_workflow() {
 
 ```bash
 # Check implementation plan exists
-ls docs/explanations/implementation_plan.md
+ls docs/explanation/implementation_plan.md
 
 # Verify plan format
 xzagentz prompt generate --verbose
@@ -1490,5 +1490,5 @@ By using this integrated system, you ensure well-planned, high-quality implement
 
 - [AGENTS.md](./AGENTS.md) - Project rules and conventions
 - [Template System](./agents_template_system.md) - AGENTS.md template generation
-- [Implementation Plan](./docs/explanations/implementation_plan.md) - xzagentz phased implementation
+- [Implementation Plan](./docs/explanation/implementation_plan.md) - xzagentz phased implementation
 - [Plan Templates](./templates/plans/) - Architecture and implementation plan templates

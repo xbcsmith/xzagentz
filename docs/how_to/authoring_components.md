@@ -478,7 +478,7 @@ See `examples/components/` for reference implementations:
 
 ### Documentation
 
-- **Architecture**: `docs/explanations/language_agnostic_component_system_implementation_plan.md`
+- **Architecture**: `docs/explanation/language_agnostic_component_system_implementation_plan.md`
 - **Configuration**: `docs/reference/component_configuration.md`
 - **Troubleshooting**: `docs/reference/troubleshooting.md`
 - **Migration**: `docs/how_to/migrating_to_v2.md`

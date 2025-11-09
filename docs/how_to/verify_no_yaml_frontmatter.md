@@ -183,8 +183,8 @@ rm test_output.md
 
 ## Related Documentation
 
-- Implementation: `docs/explanations/yaml_frontmatter_stripping.md`
-- Component System: `docs/explanations/component_system.md`
+- Implementation: `docs/explanation/yaml_frontmatter_stripping.md`
+- Component System: `docs/explanation/component_system.md`
 - Interactive Mode: `docs/how_to/use_interactive_mode.md`
 
 ## Quick Success Checklist
