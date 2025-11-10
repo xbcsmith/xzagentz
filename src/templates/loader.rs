@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2025 Brett Smith <xbcsmith@gmail.com>
+// SPDX-License-Identifier: Apache-2.0
+
 //! Template loader with filesystem support and caching
 //!
 //! This module provides the `TemplateLoader` for loading templates from the filesystem

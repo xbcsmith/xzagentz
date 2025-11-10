@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2025 Brett Smith <xbcsmith@gmail.com>
+// SPDX-License-Identifier: Apache-2.0
+
 //! Template system for managing project templates
 //!
 //! This module provides functionality for loading, parsing, validating, and rendering

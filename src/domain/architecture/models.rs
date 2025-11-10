@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2025 Brett Smith <xbcsmith@gmail.com>
+// SPDX-License-Identifier: Apache-2.0
+
 //! Core domain models for software architecture documentation
 //!
 //! This module defines the complete domain model for representing software architecture

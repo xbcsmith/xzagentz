@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2025 Brett Smith <xbcsmith@gmail.com>
+// SPDX-License-Identifier: Apache-2.0
+
 //! File-based template repository implementation
 //!
 //! This module provides a file-based implementation of the `TemplateRepository` trait

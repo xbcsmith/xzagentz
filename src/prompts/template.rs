@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2025 Brett Smith <xbcsmith@gmail.com>
+// SPDX-License-Identifier: Apache-2.0
+
 //! Prompt template rendering module
 //!
 //! This module provides functionality for rendering prompt templates with context data.

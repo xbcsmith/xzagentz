@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2025 Brett Smith <xbcsmith@gmail.com>
+// SPDX-License-Identifier: Apache-2.0
+
 //! Update command for modifying existing AGENTS.md sections
 //!
 //! This module provides functionality to update specific sections in an existing

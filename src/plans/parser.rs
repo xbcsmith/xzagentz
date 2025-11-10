@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2025 Brett Smith <xbcsmith@gmail.com>
+// SPDX-License-Identifier: Apache-2.0
+
 //! Plan parser for extracting architecture and implementation plans from markdown
 //!
 //! This module provides parsers for extracting structured plan data from

@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2025 Brett Smith <xbcsmith@gmail.com>
+// SPDX-License-Identifier: Apache-2.0
+
 //! Add command for inserting new sections into AGENTS.md
 //!
 //! This module provides functionality to add new sections to an existing

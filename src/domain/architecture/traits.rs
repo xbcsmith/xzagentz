@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2025 Brett Smith <xbcsmith@gmail.com>
+// SPDX-License-Identifier: Apache-2.0
+
 //! Domain traits for architecture generation and management
 //!
 //! This module defines the core contracts (traits) that infrastructure implementations

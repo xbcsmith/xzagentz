@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2025 Brett Smith <xbcsmith@gmail.com>
+// SPDX-License-Identifier: Apache-2.0
+
 //! Context extraction from plans for prompt generation
 //!
 //! This module provides functionality to extract and build prompt context

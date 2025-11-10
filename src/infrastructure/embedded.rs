@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2025 Brett Smith <xbcsmith@gmail.com>
+// SPDX-License-Identifier: Apache-2.0
+
 //! Embedded resources module for xzagentz
 //!
 //! This module provides access to components and templates embedded in the binary

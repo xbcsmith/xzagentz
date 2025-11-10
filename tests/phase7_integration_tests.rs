@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2025 Brett Smith <xbcsmith@gmail.com>
+// SPDX-License-Identifier: Apache-2.0
+
 //! Phase 7: Integration Tests for Planning Service and File I/O
 //!
 //! This module provides integration tests that verify the interaction

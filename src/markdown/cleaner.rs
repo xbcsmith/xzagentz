@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2025 Brett Smith <xbcsmith@gmail.com>
+// SPDX-License-Identifier: Apache-2.0
+
 //! Markdown cleaner module for normalizing generated content
 //!
 //! This module provides utilities to clean and normalize markdown content

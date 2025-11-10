@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2025 Brett Smith <xbcsmith@gmail.com>
+// SPDX-License-Identifier: Apache-2.0
+
 //! Component loader with caching and filesystem support
 //!
 //! This module provides the `ComponentLoader` which loads components from

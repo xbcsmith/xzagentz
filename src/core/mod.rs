@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2025 Brett Smith <xbcsmith@gmail.com>
+// SPDX-License-Identifier: Apache-2.0
+
 //! Core data structures for xzagentz
 //!
 //! This module contains the fundamental data types used throughout the application,

@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2025 Brett Smith <xbcsmith@gmail.com>
+// SPDX-License-Identifier: Apache-2.0
+
 //! Validation logic for architecture documents
 //!
 //! This module provides validation for architecture documents to ensure they are

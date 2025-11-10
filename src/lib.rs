@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2025 Brett Smith <xbcsmith@gmail.com>
+// SPDX-License-Identifier: Apache-2.0
+
 //! xzagentz - AI Agent Development Guidelines and Template Manager
 //!
 //! This crate provides functionality for managing AI agent development guidelines,

@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2025 Brett Smith <xbcsmith@gmail.com>
+// SPDX-License-Identifier: Apache-2.0
+
 //! Plan writer implementation for markdown format
 //!
 //! This module implements the PlanWriter trait to serialize and write

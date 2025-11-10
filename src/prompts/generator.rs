@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2025 Brett Smith <xbcsmith@gmail.com>
+// SPDX-License-Identifier: Apache-2.0
+
 //! Prompt generation orchestrator
 //!
 //! This module provides the main prompt generation functionality, orchestrating

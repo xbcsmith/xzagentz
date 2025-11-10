@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2025 Brett Smith <xbcsmith@gmail.com>
+// SPDX-License-Identifier: Apache-2.0
+
 //! Placeholder rendering with case transformations
 //!
 //! This module provides the `PlaceholderRenderer` for replacing placeholders

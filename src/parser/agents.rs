@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2025 Brett Smith <xbcsmith@gmail.com>
+// SPDX-License-Identifier: Apache-2.0
+
 //! AGENTS.md parser for section extraction and manipulation
 //!
 //! This module provides functionality to parse AGENTS.md files, extract sections,

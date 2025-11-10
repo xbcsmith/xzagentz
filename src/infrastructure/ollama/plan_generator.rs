@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2025 Brett Smith <xbcsmith@gmail.com>
+// SPDX-License-Identifier: Apache-2.0
+
 //! Ollama-based plan generator implementation
 //!
 //! This module implements the PlanGenerator trait using Ollama LLM services.

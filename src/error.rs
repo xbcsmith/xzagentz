@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2025 Brett Smith <xbcsmith@gmail.com>
+// SPDX-License-Identifier: Apache-2.0
+
 //! Error handling framework for xzagentz
 //!
 //! This module provides a comprehensive error hierarchy using thiserror

@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2025 Brett Smith <xbcsmith@gmail.com>
+// SPDX-License-Identifier: Apache-2.0
+
 //! Comprehensive unit tests for architecture domain models and validation
 //!
 //! This module provides extensive test coverage for the architecture domain layer,
