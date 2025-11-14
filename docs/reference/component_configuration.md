@@ -18,12 +18,12 @@ Every component must include these fields in YAML frontmatter:
 ```yaml
 ---
 component:
-  name: string                    # Component identifier
-  category: string                # Component category
-  version: string                 # Semantic version
-  description: string             # Brief description
-  languages: array                # Supported languages
-  sections: array                 # Content structure
+  name: string # Component identifier
+  category: string # Component category
+  version: string # Semantic version
+  description: string # Brief description
+  languages: array # Supported languages
+  sections: array # Content structure
 ---
 ```
 
@@ -38,12 +38,14 @@ component:
 **Description**: Unique identifier for the component
 
 **Rules**:
+
 - Must be unique within category
 - Only lowercase letters, numbers, and underscores
 - No spaces or special characters
 - Should be descriptive and concise
 
 **Examples**:
+
 ```yaml
 name: error_handling          # Good
 name: git_essential           # Good
@@ -61,12 +63,14 @@ name: error handling          # Bad: spaces
 **Description**: Classification determining size limits and organization
 
 **Categories**:
+
 - `core`: Fundamental development practices (error handling, testing, etc.)
 - `general`: Project management and workflow (git, documentation, CI/CD)
 - `languages`: Language-specific features and idioms
 - `tools`: Tool-specific guidance with tier support
 
 **Example**:
+
 ```yaml
 category: core
 ```
@@ -80,6 +84,7 @@ category: core
 **Description**: Component version for tracking changes
 
 **Rules**:
+
 - Must follow semver format: `X.Y.Z`
 - Start at `2.0.0` for v2 components
 - Increment based on change type:
@@ -88,6 +93,7 @@ category: core
   - PATCH: Bug fixes, clarifications
 
 **Examples**:
+
 ```yaml
 version: 2.0.0                # Initial v2 version
 version: 2.1.0                # Added new section
@@ -105,13 +111,15 @@ version: 2.1.1                # Fixed typo
 **Description**: Tool complexity tier affecting size limits
 
 **Tiers**:
+
 - `essential`: Core functionality only (300 line limit)
 - `comprehensive`: Complete reference (800 line limit)
 
 **Example**:
+
 ```yaml
 category: tools
-tier: essential               # Required for tools
+tier: essential # Required for tools
 ```
 
 #### description
@@ -123,12 +131,14 @@ tier: essential               # Required for tools
 **Description**: Brief summary of component purpose
 
 **Rules**:
+
 - Single sentence or short phrase
 - Descriptive and specific
 - No marketing language
 - Avoid redundancy with name
 
 **Examples**:
+
 ```yaml
 description: Error handling standards and patterns for robust code
 description: Essential Git commands and workflows
@@ -144,12 +154,14 @@ description: Kubernetes deployment and management guide
 **Description**: Languages supported by this component
 
 **Rules**:
+
 - List all languages with content in component
 - Must match language markers in content
 - Order doesn't matter
 - At least one language required
 
 **Example**:
+
 ```yaml
 languages:
   - rust
@@ -165,11 +177,12 @@ languages:
 **Description**: Defines content structure and requirements
 
 **Section object**:
+
 ```yaml
 sections:
-  - id: string                # Section identifier
-    language_specific: bool   # Whether content varies by language
-    required: bool            # Whether section must exist
+  - id: string # Section identifier
+    language_specific: bool # Whether content varies by language
+    required: bool # Whether section must exist
 ```
 
 **Section fields**:
@@ -183,6 +196,7 @@ sections:
   - `false`: Section is optional
 
 **Example**:
+
 ```yaml
 sections:
   - id: principles
@@ -234,24 +248,26 @@ component:
 ### Syntax
 
 **Opening marker**:
+
 ```markdown
 <!-- LANG:language_name -->
 ```
 
 **Closing marker**:
+
 ```markdown
 <!-- /LANG:language_name -->
 ```
 
 ### Supported Languages
 
-| Marker | Language | Use Case |
-|--------|----------|----------|
-| `LANG:rust` | Rust | System programming, CLI tools |
-| `LANG:python` | Python | Scripting, data processing |
-| `LANG:golang` | Go | Services, concurrent systems |
-| `LANG:typescript` | TypeScript | Web applications, Node.js |
-| `LANG:bash` | Bash | Shell scripts, automation |
+| Marker            | Language   | Use Case                      |
+| ----------------- | ---------- | ----------------------------- |
+| `LANG:rust`       | Rust       | System programming, CLI tools |
+| `LANG:python`     | Python     | Scripting, data processing    |
+| `LANG:golang`     | Go         | Services, concurrent systems  |
+| `LANG:typescript` | TypeScript | Web applications, Node.js     |
+| `LANG:bash`       | Bash       | Shell scripts, automation     |
 
 ### Marker Rules
 
@@ -262,13 +278,17 @@ component:
 5. **Whitespace**: No extra spaces inside marker syntax
 
 **Valid**:
+
 ```markdown
 <!-- LANG:rust -->
+
 Content here
+
 <!-- /LANG:rust -->
 ```
 
 **Invalid**:
+
 ```markdown
 <!-- LANG:Rust -->                    # Wrong: capital R
 <!--LANG:rust-->                      # Wrong: no spaces
@@ -278,7 +298,7 @@ Content here
 
 ### Usage Example
 
-```markdown
+````markdown
 ## Error Handling Patterns
 
 Universal content here applies to all languages.
@@ -296,6 +316,7 @@ pub fn example() -> Result<(), Error> {
     Ok(())
 }
 ```
+````
 
 <!-- /LANG:rust -->
 
@@ -314,7 +335,8 @@ def example() -> None:
 ```
 
 <!-- /LANG:python -->
-```
+
+````
 
 ## Size Limits
 
@@ -360,7 +382,7 @@ cargo test size_validation_test
 
 # Generate size report
 cargo run -- validate --report
-```
+````
 
 ### Exceeding Limits
 
@@ -379,23 +401,23 @@ Location: `config/project.yaml`
 
 ```yaml
 project:
-  type: cli                           # Project type
-  language: rust                      # Primary language
+  type: cli # Project type
+  language: rust # Primary language
 
 components:
   tools:
-    git: essential                    # Tool tier selection
+    git: essential # Tool tier selection
     kubernetes: comprehensive
     docker: essential
   include:
-    - core/*                          # Include patterns
+    - core/* # Include patterns
     - general/*
   exclude:
-    - tools/deprecated_*              # Exclude patterns
+    - tools/deprecated_* # Exclude patterns
 
 limits:
-  max_total_lines: 10000              # Total project limit
-  warn_at_lines: 8000                 # Warning threshold
+  max_total_lines: 10000 # Total project limit
+  warn_at_lines: 8000 # Warning threshold
   per_component_max:
     core: 500
     general: 800
@@ -404,9 +426,9 @@ limits:
     tools_comprehensive: 800
 
 rendering:
-  strict_language: true               # Enforce exact language match
-  fallback_to_agnostic: true          # Fall back to universal content
-  include_metadata: false             # Include frontmatter in output
+  strict_language: true # Enforce exact language match
+  fallback_to_agnostic: true # Fall back to universal content
+  include_metadata: false # Include frontmatter in output
 ```
 
 ### Configuration Fields
@@ -432,6 +454,7 @@ rendering:
 **Format**: `tool_name: essential|comprehensive|none`
 
 **Example**:
+
 ```yaml
 components:
   tools:
@@ -447,6 +470,7 @@ components:
 **Description**: Components to include
 
 **Example**:
+
 ```yaml
 include:
   - core/*
@@ -461,6 +485,7 @@ include:
 **Description**: Components to exclude
 
 **Example**:
+
 ```yaml
 exclude:
   - tools/deprecated_*
@@ -472,6 +497,7 @@ exclude:
 **Description**: Size enforcement configuration
 
 **Fields**:
+
 - `max_total_lines`: Project-wide line limit
 - `warn_at_lines`: Warning threshold (typically 80% of max)
 - `per_component_max`: Override per-category limits
@@ -481,6 +507,7 @@ exclude:
 **Description**: Rendering behavior configuration
 
 **Fields**:
+
 - `strict_language`: Require exact language match
 - `fallback_to_agnostic`: Use universal content if language not found
 - `include_metadata`: Include YAML frontmatter in rendered output
@@ -524,12 +551,14 @@ jobs:
 ### Validation Checks
 
 1. **Frontmatter validation**:
+
    - YAML syntax correct
    - All required fields present
    - Field values valid
    - Version format correct
 
 2. **Marker validation**:
+
    - All opening markers closed
    - No unclosed sections
    - Language names valid
@@ -563,18 +592,18 @@ XZAGENTZ_CONFIG=custom_config.yaml cargo run
 
 ### Validation Errors
 
-| Code | Error | Description |
-|------|-------|-------------|
-| `E001` | Missing frontmatter | Component lacks YAML frontmatter |
-| `E002` | Invalid frontmatter | YAML syntax error |
+| Code   | Error                  | Description                        |
+| ------ | ---------------------- | ---------------------------------- |
+| `E001` | Missing frontmatter    | Component lacks YAML frontmatter   |
+| `E002` | Invalid frontmatter    | YAML syntax error                  |
 | `E003` | Missing required field | Required frontmatter field missing |
-| `E004` | Invalid category | Category not recognized |
-| `E005` | Invalid version | Version not semver format |
-| `E006` | Unbalanced markers | Opening marker without closing |
-| `E007` | Invalid language | Language not supported |
-| `E008` | Size exceeded | Component exceeds size limit |
-| `E009` | Missing section | Required section not found |
-| `E010` | Invalid tier | Tier invalid for category |
+| `E004` | Invalid category       | Category not recognized            |
+| `E005` | Invalid version        | Version not semver format          |
+| `E006` | Unbalanced markers     | Opening marker without closing     |
+| `E007` | Invalid language       | Language not supported             |
+| `E008` | Size exceeded          | Component exceeds size limit       |
+| `E009` | Missing section        | Required section not found         |
+| `E010` | Invalid tier           | Tier invalid for category          |
 
 ## Best Practices
 
@@ -623,5 +652,5 @@ See `examples/components/` for reference implementations:
 
 - **Authoring Guide**: `docs/how_to/authoring_components.md`
 - **Migration Guide**: `docs/how_to/migrating_to_v2.md`
-- **Troubleshooting**: `docs/reference/troubleshooting.md`
+- **Troubleshooting**: `docs/how_to/troubleshooting.md`
 - **Architecture**: `docs/explanation/language_agnostic_component_system_implementation_plan.md`

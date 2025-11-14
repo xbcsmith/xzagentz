@@ -111,18 +111,18 @@ Use this template for all components:
 ```yaml
 ---
 component:
-  name: component_name              # Lowercase with underscores
-  category: core                    # core|general|languages|tools
-  version: 2.0.0                    # Start at 2.0.0 for migrated components
-  tier: essential                   # Only for tools category
-  description: Brief description    # One-line summary
-  languages:                        # List all supported languages
+  name: component_name # Lowercase with underscores
+  category: core # core|general|languages|tools
+  version: 2.0.0 # Start at 2.0.0 for migrated components
+  tier: essential # Only for tools category
+  description: Brief description # One-line summary
+  languages: # List all supported languages
     - rust
     - python
     - golang
     - typescript
     - bash
-  sections:                         # Define content structure
+  sections: # Define content structure
     - id: section_id
       language_specific: true|false
       required: true|false
@@ -135,17 +135,20 @@ Wrap language-specific content in markers:
 
 **Legacy format:**
 
-```markdown
+````markdown
 ## Error Handling Patterns
 
 In Rust, use Result types:
+
 ```rust
 fn process() -> Result<(), Error> {
     // code
 }
 ```
+````
 
 In Python, use exceptions:
+
 ```python
 def process():
     try:
@@ -153,7 +156,8 @@ def process():
     except Exception as e:
         raise
 ```
-```
+
+````
 
 **v2 format:**
 
@@ -168,7 +172,7 @@ In Rust, use Result types:
 fn process() -> Result<(), Error> {
     // code
 }
-```
+````
 
 <!-- /LANG:rust -->
 
@@ -185,7 +189,8 @@ def process():
 ```
 
 <!-- /LANG:python -->
-```
+
+````
 
 ### Step 5: Restructure Content
 
@@ -214,17 +219,17 @@ grep -cv '^[[:space:]]*$' components/core/your_component.md
 # - Splitting into multiple components
 # - Moving details to reference docs
 # - Creating essential vs comprehensive versions (tools only)
-```
+````
 
 Size limits:
 
-| Category | Tier | Max Lines |
-|----------|------|-----------|
-| core | - | 500 |
-| general | - | 800 |
-| languages | - | 600 |
-| tools | essential | 300 |
-| tools | comprehensive | 800 |
+| Category  | Tier          | Max Lines |
+| --------- | ------------- | --------- |
+| core      | -             | 500       |
+| general   | -             | 800       |
+| languages | -             | 600       |
+| tools     | essential     | 300       |
+| tools     | comprehensive | 800       |
 
 ### Step 7: Validate Migration
 
@@ -274,7 +279,7 @@ For Go, use the testing package.
 
 **After (v2):**
 
-```markdown
+````markdown
 ---
 component:
   name: testing_standards
@@ -301,6 +306,7 @@ component:
 All code must have tests to ensure correctness and prevent regressions.
 
 Key testing principles:
+
 - Write tests before fixing bugs
 - Aim for high code coverage
 - Test edge cases and error conditions
@@ -324,6 +330,7 @@ mod tests {
     }
 }
 ```
+````
 
 <!-- /LANG:rust -->
 
@@ -351,7 +358,8 @@ func TestExample(t *testing.T) {
 ```
 
 <!-- /LANG:golang -->
-```
+
+````
 
 ### Example 2: Tool Component with Tiers
 
@@ -362,7 +370,7 @@ func TestExample(t *testing.T) {
 
 Basic commands, advanced workflows, rebasing, cherry-picking,
 submodules, hooks, etc. (1000+ lines)
-```
+````
 
 **After (split into tiers):**
 
@@ -552,17 +560,20 @@ grep -n "<!-- /LANG:" components/core/your_component.md
 After completing migration:
 
 1. **Archive legacy components**:
+
    ```bash
    mkdir -p archive/legacy
    mv components/legacy/* archive/legacy/
    ```
 
 2. **Update references**:
+
    - Update README.md
    - Update documentation links
    - Update CI configuration
 
 3. **Validate entire system**:
+
    ```bash
    cargo test --all-features
    cargo clippy --all-targets --all-features -- -D warnings
@@ -582,15 +593,18 @@ After completing migration:
 If you encounter migration issues:
 
 1. **Review documentation**:
+
    - `docs/how_to/authoring_components.md`
    - `docs/reference/component_configuration.md`
-   - `docs/reference/troubleshooting.md`
+   - `docs/how_to/troubleshooting.md`
 
 2. **Check examples**:
+
    - `examples/components/core_example.md`
    - `examples/components/tool_essential_example.md`
 
 3. **Review existing migrations**:
+
    - Look at successfully migrated components in `components/core/`
    - Compare before/after for patterns
 

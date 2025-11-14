@@ -18,7 +18,7 @@ component:
   name: component_name
   category: core|general|languages|tools
   version: 2.0.0
-  tier: essential|comprehensive  # Only for tools category
+  tier: essential|comprehensive # Only for tools category
   description: Brief description of the component
   languages:
     - rust
@@ -94,23 +94,23 @@ The frontmatter defines component metadata:
 ```yaml
 ---
 component:
-  name: your_component_name          # Unique identifier (lowercase_with_underscores)
-  category: core                      # Category (see Step 1)
-  version: 2.0.0                      # Version (use semantic versioning)
-  tier: essential                     # Only for tools: essential or comprehensive
-  description: What this component provides  # One-line description
-  languages:                          # Supported languages
+  name: your_component_name # Unique identifier (lowercase_with_underscores)
+  category: core # Category (see Step 1)
+  version: 2.0.0 # Version (use semantic versioning)
+  tier: essential # Only for tools: essential or comprehensive
+  description: What this component provides # One-line description
+  languages: # Supported languages
     - rust
     - python
     - golang
     - typescript
     - bash
-  sections:                           # Define content sections
-    - id: principles                  # Section identifier
-      language_specific: false        # Universal or language-specific
-      required: true                  # Whether section is mandatory
+  sections: # Define content sections
+    - id: principles # Section identifier
+      language_specific: false # Universal or language-specific
+      required: true # Whether section is mandatory
     - id: patterns
-      language_specific: true         # This section has per-language content
+      language_specific: true # This section has per-language content
       required: true
 ---
 ```
@@ -137,7 +137,7 @@ Key concepts that every developer should understand.
 
 Use language markers to separate content by language:
 
-```markdown
+````markdown
 ---
 
 ## Language-Specific Patterns
@@ -154,8 +154,10 @@ pub fn example() -> Result<(), Error> {
     Ok(())
 }
 ```
+````
 
 Key Rust considerations:
+
 - Use Result for error handling
 - Leverage the type system
 - Follow Rust idioms
@@ -175,12 +177,14 @@ def example() -> None:
 ```
 
 Key Python considerations:
+
 - Use type hints
 - Follow PEP 8
 - Use context managers
 
 <!-- /LANG:python -->
-```
+
+````
 
 ### Step 6: Validate Your Component
 
@@ -198,19 +202,19 @@ cargo test size_validation_test
 
 # Check specific component
 cargo run -- validate components/core/your_component.md
-```
+````
 
 ## Size Limits by Category
 
 Stay within these limits to ensure components remain focused:
 
-| Category | Tier | Maximum Lines | Warning Threshold |
-|----------|------|---------------|-------------------|
-| core | - | 500 | 400 (80%) |
-| general | - | 800 | 640 (80%) |
-| languages | - | 600 | 480 (80%) |
-| tools | essential | 300 | 240 (80%) |
-| tools | comprehensive | 800 | 640 (80%) |
+| Category  | Tier          | Maximum Lines | Warning Threshold |
+| --------- | ------------- | ------------- | ----------------- |
+| core      | -             | 500           | 400 (80%)         |
+| general   | -             | 800           | 640 (80%)         |
+| languages | -             | 600           | 480 (80%)         |
+| tools     | essential     | 300           | 240 (80%)         |
+| tools     | comprehensive | 800           | 640 (80%)         |
 
 **Total project limit**: 10,000 lines across all components
 
@@ -257,11 +261,13 @@ pub fn process_file(path: &str) -> Result<String, std::io::Error> {
 ### 3. Use Consistent Section IDs
 
 Section IDs should be:
+
 - Lowercase with underscores
 - Descriptive of content
 - Consistent across components
 
 Good section IDs:
+
 - `core_principles`
 - `error_patterns`
 - `testing_strategies`
@@ -289,12 +295,14 @@ sections:
 For tool components, distinguish between tiers:
 
 **Essential tier** (300 lines max):
+
 - Core commands only
 - Most common workflows
 - Critical safety practices
 - Minimal but sufficient
 
 **Comprehensive tier** (800 lines max):
+
 - Advanced features
 - Edge cases
 - Performance optimization
@@ -349,13 +357,17 @@ Use these exact marker names:
 4. **Whitespace**: Markers must be on their own line
 
 Valid:
+
 ```markdown
 <!-- LANG:rust -->
+
 Content here
+
 <!-- /LANG:rust -->
 ```
 
 Invalid:
+
 ```markdown
 <!-- LANG:Rust --> (wrong case)
 <!-- LANG:rust --> content on same line
@@ -368,16 +380,20 @@ Invalid:
 
 ```markdown
 <!-- LANG:rust -->
+
 Content here
+
 <!-- Forgot closing marker! -->
 
 <!-- LANG:python -->
+
 This will cause validation errors
 ```
 
 ### 2. Exceeding Size Limits
 
 If your component exceeds limits:
+
 - Split into multiple focused components
 - Move some content to reference documentation
 - For tools, move advanced content to comprehensive tier
@@ -386,15 +402,21 @@ If your component exceeds limits:
 
 ```markdown
 <!-- LANG:rust -->
+
 # Bad: This principle applies to all languages
+
 Always validate user input before processing.
+
 <!-- /LANG:rust -->
 
 # Good: Put universal content outside language sections
+
 Always validate user input before processing.
 
 <!-- LANG:rust -->
+
 Use the validator crate for input validation.
+
 <!-- /LANG:rust -->
 ```
 
@@ -419,6 +441,7 @@ component:
 ### Automated Validation
 
 The CI system validates:
+
 - YAML frontmatter presence and correctness
 - Required fields (name, category, version, description)
 - Language marker balance (all opened markers are closed)
@@ -428,11 +451,13 @@ The CI system validates:
 ### Manual Testing
 
 1. **Render test**: Ensure component renders correctly
+
    ```bash
    cargo run -- render --component your_component --language rust
    ```
 
 2. **Validation test**: Check for errors
+
    ```bash
    cargo test -- your_component
    ```
@@ -463,6 +488,7 @@ The CI system validates:
 ### Validation Errors
 
 If validation fails, check:
+
 1. YAML frontmatter syntax (use a YAML validator)
 2. All required fields present
 3. Language markers balanced and closed
@@ -472,6 +498,7 @@ If validation fails, check:
 ### Examples and Templates
 
 See `examples/components/` for reference implementations:
+
 - `examples/components/core_example.md`
 - `examples/components/tool_essential_example.md`
 - `examples/components/tool_comprehensive_example.md`
@@ -480,7 +507,7 @@ See `examples/components/` for reference implementations:
 
 - **Architecture**: `docs/explanation/language_agnostic_component_system_implementation_plan.md`
 - **Configuration**: `docs/reference/component_configuration.md`
-- **Troubleshooting**: `docs/reference/troubleshooting.md`
+- **Troubleshooting**: `docs/how_to/troubleshooting.md`
 - **Migration**: `docs/how_to/migrating_to_v2.md`
 
 ## Summary

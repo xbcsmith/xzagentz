@@ -386,11 +386,11 @@ xzagentz/
 - **[Authoring Components](docs/how_to/authoring_components.md)**: Complete guide to creating components with examples and best practices
 - **[Migrating to v2](docs/how_to/migrating_to_v2.md)**: Step-by-step upgrade guide from legacy components to v2 format
 - **[Configuration Reference](docs/reference/component_configuration.md)**: Complete configuration documentation with schema reference
-- **[Troubleshooting](docs/reference/troubleshooting.md)**: Common issues, diagnostics, and solutions
+- **[Troubleshooting](docs/how_to/troubleshooting.md)**: Common issues, diagnostics, and solutions
 
 ### For Developers
 
-- **[Architecture Reference](docs/reference/architecture.md)**: Comprehensive system architecture and design patterns
+- **[Architecture Reference](docs/explanation/architecture.md)**: Comprehensive system architecture and design patterns
 - **[Implementation Guide](docs/explanation/implementation.md)**: Consolidated implementation documentation covering all 6 phases
 - **[Implementation Plan](docs/explanation/language_agnostic_component_system_implementation_plan.md)**: Original design decisions and requirements
 - **[AGENTS.md](AGENTS.md)**: AI agent development guidelines and quality standards
