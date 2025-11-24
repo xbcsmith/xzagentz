@@ -635,83 +635,9 @@ mod tests {
 
 ## Git Conventions
 
-### Branch Naming (MANDATORY FORMAT)
+**DO NOT RUN GIT COMMANDS**
 
-**YOU MUST use this format:**
-
-```text
-pr-<feat>-<issue>
-```
-
-**Examples:**
-
-```text
-✅ CORRECT:
-   pr-cpipe-1234
-   pr-xzagentz-5678
-   pr-proj-9012
-
-❌ WRONG:
-   PR-CPIPE-1234        (uppercase)
-   feature/cpipe-1234   (wrong format)
-   cpipe-1234           (missing pr- prefix)
-   pr_cpipe_1234        (underscore instead of dash)
-```
-
-### Commit Messages (MANDATORY FORMAT)
-
-**Format:**
-
-```text
-<type>(<scope>): <description> (<JIRA-ISSUE>)
-
-[optional body explaining why change was made]
-
-[optional footer with breaking changes]
-```
-
-**Rules (MUST FOLLOW ALL):**
-
-1. Type MUST be one of: `feat|fix|docs|style|refactor|perf|test|chore`
-2. Scope is optional but recommended
-3. Description MUST be lowercase
-4. Description MUST use imperative mood ("add" not "added")
-5. JIRA issue MUST be uppercase in parentheses
-6. First line MUST be ≤72 characters (including JIRA issue)
-
-**Types Explained:**
-
-- `feat` - New feature (triggers minor version bump)
-- `fix` - Bug fix (triggers patch version bump)
-- `docs` - Documentation only (no code changes)
-- `style` - Code formatting (no logic changes)
-- `refactor` - Code restructuring (no behavior changes)
-- `perf` - Performance improvements
-- `test` - Adding/fixing tests
-- `chore` - Build process, dependencies, tools
-
-**Examples:**
-
-```text
-✅ CORRECT:
-feat(auth): add JWT token refresh endpoint (CPIPE-1234)
-fix(api): handle edge case in event validation (CPIPE-5678)
-docs(readme): update installation instructions (xzagentz-9012)
-refactor(metrics): simplify prometheus integration (CPIPE-3456)
-
-With body:
-feat(tracing): add distributed tracing support (xzagentz-4567)
-
-Implements OpenTelemetry integration with Jaeger exporter.
-Adds automatic span creation for all HTTP requests.
-
-❌ WRONG:
-Added JWT token refresh (CPIPE-1234)              # Wrong mood, no type
-feat(auth): Add JWT Token (cpipe-1234)            # Wrong case
-feat: add JWT (CPIPE-1234)                        # Missing scope
-add jwt refresh (CPIPE-1234)                      # No type
-feat(auth): add JWT token refresh feature that allows users to... (CPIPE-1234)  # Too long
-```
+User will handle all git interaction
 
 ---
 

@@ -1,158 +1,53 @@
-# Layered Architecture Template
-#
-# This template provides a foundation for traditional layered architectures
-# with clear separation of concerns and dependency management.
-
 info:
-  name: "layered"
-  pattern: "Layered"
-  description: "Traditional layered architecture with clear separation between presentation, business logic, and data access layers"
+  name: layered
+  pattern: Layered
+  description: Traditional layered architecture with clear separation of concerns
   use_cases:
-    - "Enterprise applications with well-defined layers"
-    - "Applications requiring clear separation of concerns"
-    - "Systems with stable requirements and gradual evolution"
-    - "Teams familiar with traditional n-tier architecture"
-
+  - Enterprise applications
+  - Well-structured codebases
+  - Team-based development
 structure:
   layers:
-    - "Presentation Layer"
-    - "Application Layer"
-    - "Domain Layer"
-    - "Infrastructure Layer"
-
+  - Presentation Layer
+  - Application Layer
+  - Domain Layer
+  - Infrastructure Layer
   integration_patterns:
-    - "Top-down dependency flow (presentation -> application -> domain)"
-    - "Domain layer has no dependencies on infrastructure"
-    - "Infrastructure implements domain interfaces"
-
+  - Layer-to-layer calls
   required_components:
-    - "User Interface or API"
-    - "Application Services"
-    - "Domain Models"
-    - "Data Access"
-
+  - ui
+  - application-services
+  - domain-model
+  - data-access
 default_components:
-  - name: "REST API"
-    layer: "Presentation Layer"
-    role: "HTTP endpoints for external clients"
-    typical_technologies:
-      - "Spring Boot REST"
-      - "ASP.NET Core Web API"
-      - "FastAPI"
-      - "Express.js"
-
-  - name: "Web UI"
-    layer: "Presentation Layer"
-    role: "User interface for web browsers"
-    typical_technologies:
-      - "React"
-      - "Angular"
-      - "Vue.js"
-      - "Server-side rendering (Thymeleaf, Razor)"
-
-  - name: "API Gateway"
-    layer: "Presentation Layer"
-    role: "Single entry point for API requests"
-    typical_technologies:
-      - "Kong"
-      - "Nginx"
-      - "Spring Cloud Gateway"
-      - "Ocelot"
-
-  - name: "Application Services"
-    layer: "Application Layer"
-    role: "Orchestrates business operations and use cases"
-    typical_technologies:
-      - "Service classes"
-      - "Use case implementations"
-      - "Application DTOs"
-      - "Transaction coordination"
-
-  - name: "Authentication Service"
-    layer: "Application Layer"
-    role: "User authentication and authorization"
-    typical_technologies:
-      - "JWT"
-      - "OAuth2/OIDC"
-      - "Session management"
-      - "Role-based access control"
-
-  - name: "Domain Models"
-    layer: "Domain Layer"
-    role: "Core business entities and logic"
-    typical_technologies:
-      - "Entity classes"
-      - "Value objects"
-      - "Domain services"
-      - "Business rules"
-
-  - name: "Domain Services"
-    layer: "Domain Layer"
-    role: "Complex business logic that doesn't fit in entities"
-    typical_technologies:
-      - "Domain service classes"
-      - "Business rule engines"
-      - "Validation services"
-      - "Domain events"
-
-  - name: "Repository Interfaces"
-    layer: "Domain Layer"
-    role: "Abstractions for data access"
-    typical_technologies:
-      - "Repository pattern interfaces"
-      - "Specifications"
-      - "Unit of work pattern"
-      - "Query objects"
-
-  - name: "Repository Implementations"
-    layer: "Infrastructure Layer"
-    role: "Concrete data access implementations"
-    typical_technologies:
-      - "JPA/Hibernate repositories"
-      - "Entity Framework repositories"
-      - "Dapper"
-      - "Custom SQL repositories"
-
-  - name: "Database"
-    layer: "Infrastructure Layer"
-    role: "Data persistence"
-    typical_technologies:
-      - "PostgreSQL"
-      - "MySQL"
-      - "SQL Server"
-      - "Oracle"
-
-  - name: "External Service Adapters"
-    layer: "Infrastructure Layer"
-    role: "Integration with third-party services"
-    typical_technologies:
-      - "HTTP clients"
-      - "gRPC clients"
-      - "Message queue clients"
-      - "API wrappers"
-
-  - name: "Caching Layer"
-    layer: "Infrastructure Layer"
-    role: "Performance optimization through caching"
-    typical_technologies:
-      - "Redis"
-      - "Memcached"
-      - "In-memory cache"
-      - "Distributed cache"
-
-  - name: "Logging and Monitoring"
-    layer: "Infrastructure Layer"
-    role: "Application observability"
-    typical_technologies:
-      - "Structured logging"
-      - "Application metrics"
-      - "Health checks"
-      - "Distributed tracing"
-
+- name: User Interface
+  layer: Presentation Layer
+  role: User interaction and display
+  typical_technologies:
+  - React
+  - Angular
+  - Vue.js
+- name: Application Services
+  layer: Application Layer
+  role: Orchestrates business workflows
+  typical_technologies:
+  - REST APIs
+  - GraphQL
+  - gRPC
+- name: Domain Model
+  layer: Domain Layer
+  role: Core business logic and entities
+  typical_technologies:
+  - Domain Models
+  - Business Rules
+- name: Data Access
+  layer: Infrastructure Layer
+  role: Database operations and persistence
+  typical_technologies:
+  - ORM
+  - Repository Pattern
+  - SQL
 customization_points:
-  - "Number and granularity of layers"
-  - "Dependency injection framework and patterns"
-  - "Data access patterns (Repository, Active Record, DAO)"
-  - "Domain model richness (anemic vs rich domain model)"
-  - "Cross-cutting concerns (logging, validation, transaction management)"
-  - "API style (REST, GraphQL, gRPC)"
+- Add authentication and authorization layer
+- Implement caching strategy
+- Add logging and monitoring

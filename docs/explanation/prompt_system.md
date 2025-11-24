@@ -1488,7 +1488,6 @@ By using this integrated system, you ensure well-planned, high-quality implement
 
 ## See Also
 
-- [AGENTS.md](./AGENTS.md) - Project rules and conventions
-- [Template System](./agents_template_system.md) - AGENTS.md template generation
-- [Implementation Plan](./docs/explanation/implementation_plan.md) - xzagentz phased implementation
-- [Plan Templates](./templates/plans/) - Architecture and implementation plan templates
+- [AGENTS.md](../../AGENTS.md) - Project rules and conventions
+- [Template System](./template_system.md) - Template generation system
+- [Document Cleanup Implementation Plan](./document_cleanup_implementation_plan.md) - Documentation cleanup strategy

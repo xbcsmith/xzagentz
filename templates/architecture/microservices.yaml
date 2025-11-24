@@ -1,131 +1,47 @@
-# Microservices Architecture Template
-#
-# This template provides a foundation for microservices-based architectures
-# with service discovery, API gateway, and distributed system patterns.
-
 info:
-  name: "microservices"
-  pattern: "Microservices"
-  description: "Distributed architecture with independently deployable services, API gateway, and service mesh capabilities"
+  name: microservices
+  pattern: Microservices
+  description: Cloud-native microservices architecture with independent services
   use_cases:
-    - "Large-scale web applications with multiple teams"
-    - "Systems requiring independent scaling of components"
-    - "Applications with diverse technology stack requirements"
-    - "Cloud-native applications with containerized deployments"
-
+  - Scalable web applications
+  - Distributed systems
+  - Multi-team development
 structure:
   layers:
-    - "API Gateway Layer"
-    - "Service Layer"
-    - "Data Layer"
-    - "Infrastructure Layer"
-
+  - API Gateway
+  - Service Layer
+  - Data Layer
   integration_patterns:
-    - "Synchronous REST/gRPC between services"
-    - "Asynchronous message queues for event-driven communication"
-    - "Service discovery for dynamic service location"
-
+  - REST APIs
+  - Message Queue
+  - Event Bus
   required_components:
-    - "API Gateway"
-    - "At least 2 business services"
-    - "Service registry/discovery"
-    - "Message broker for async communication"
-
+  - api-gateway
+  - service-discovery
+  - message-broker
 default_components:
-  - name: "API Gateway"
-    layer: "API Gateway Layer"
-    role: "Entry point for all client requests, routing, authentication, rate limiting"
-    typical_technologies:
-      - "Kong"
-      - "Nginx"
-      - "AWS API Gateway"
-      - "Traefik"
-
-  - name: "Service Registry"
-    layer: "Infrastructure Layer"
-    role: "Service discovery and health checking"
-    typical_technologies:
-      - "Consul"
-      - "Eureka"
-      - "Kubernetes DNS"
-      - "etcd"
-
-  - name: "Authentication Service"
-    layer: "Service Layer"
-    role: "Centralized authentication and authorization"
-    typical_technologies:
-      - "OAuth2/OIDC"
-      - "Keycloak"
-      - "Auth0"
-      - "Custom JWT service"
-
-  - name: "Business Service 1"
-    layer: "Service Layer"
-    role: "Core business logic for specific domain"
-    typical_technologies:
-      - "Spring Boot"
-      - "Node.js/Express"
-      - "Python/FastAPI"
-      - "Go/Gin"
-
-  - name: "Business Service 2"
-    layer: "Service Layer"
-    role: "Core business logic for different domain"
-    typical_technologies:
-      - "Spring Boot"
-      - "Node.js/Express"
-      - "Python/FastAPI"
-      - "Go/Gin"
-
-  - name: "Message Broker"
-    layer: "Infrastructure Layer"
-    role: "Asynchronous communication and event streaming"
-    typical_technologies:
-      - "RabbitMQ"
-      - "Apache Kafka"
-      - "AWS SQS/SNS"
-      - "Redis Streams"
-
-  - name: "Service Database 1"
-    layer: "Data Layer"
-    role: "Dedicated database for Business Service 1"
-    typical_technologies:
-      - "PostgreSQL"
-      - "MongoDB"
-      - "MySQL"
-      - "DynamoDB"
-
-  - name: "Service Database 2"
-    layer: "Data Layer"
-    role: "Dedicated database for Business Service 2"
-    typical_technologies:
-      - "PostgreSQL"
-      - "MongoDB"
-      - "MySQL"
-      - "DynamoDB"
-
-  - name: "Configuration Service"
-    layer: "Infrastructure Layer"
-    role: "Centralized configuration management"
-    typical_technologies:
-      - "Spring Cloud Config"
-      - "Consul KV"
-      - "AWS Parameter Store"
-      - "etcd"
-
-  - name: "Monitoring and Observability"
-    layer: "Infrastructure Layer"
-    role: "Distributed tracing, metrics, and logging"
-    typical_technologies:
-      - "Prometheus + Grafana"
-      - "Jaeger/Zipkin"
-      - "ELK Stack"
-      - "DataDog"
-
+- name: API Gateway
+  layer: API Gateway
+  role: Entry point for all client requests, handles routing and authentication
+  typical_technologies:
+  - Kong
+  - Nginx
+  - Traefik
+- name: Service Discovery
+  layer: Service Layer
+  role: Dynamic service registration and discovery
+  typical_technologies:
+  - Consul
+  - Eureka
+  - etcd
+- name: Message Broker
+  layer: Service Layer
+  role: Asynchronous communication between services
+  typical_technologies:
+  - RabbitMQ
+  - Kafka
+  - Redis
 customization_points:
-  - "Number and types of business services based on domain boundaries"
-  - "Communication patterns (REST vs gRPC vs message queues)"
-  - "Database per service vs shared databases"
-  - "Service mesh implementation (Istio, Linkerd, or none)"
-  - "Container orchestration platform (Kubernetes, Docker Swarm, ECS)"
-  - "API Gateway features and technology choice"
+- Add specific microservices based on business domains
+- Configure service mesh for advanced networking
+- Add monitoring and tracing components

@@ -58,7 +58,6 @@ document architecture design changes made for a project. Projects should contain
 at least a _README.md_ file describing the project. Optional files are
 _TODO.md_, _CHANGELOG.md_, _INSTALL.md_, and _AUTHORS_ files.
 
-
 ## Repositories
 
 Repositories will have standardized layouts based on the type. The CI files will
@@ -90,9 +89,7 @@ Rust projects should use the latest stable version of Rust.
 
 ## Pre-Commit Hooks and Linters
 
-All projects should use
-[pre-commit hooks](../how-to/github/pre_commit_hooks.md)
-and the language appropriate linters in the CI
+All projects should use pre-commit hooks and the language appropriate linters in the CI
 as part of the evaluation of a pull request.
 
 ## Architectural Design Record (ADR)
@@ -126,8 +123,7 @@ following command:
 git tag -a v1.2.3 -m "Descriptive message 1.2.3"
 ```
 
-where 1.2.3 is the semantic version. See the
-[GitHub Workflow](../how-to/github/github_workflow.md) for more specific steps.
+where 1.2.3 is the semantic version.
 
 ## Commits
 
@@ -172,7 +168,6 @@ For Rust
 // SPDX-FileCopyrightText: 2025, SAS Institute Inc., Cary, NC, USA.  All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 ```
-
 
 ### When to Update Copyright Headers
 

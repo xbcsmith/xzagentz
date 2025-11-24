@@ -1,134 +1,45 @@
-# Monolithic Architecture Template
-#
-# This template provides a foundation for monolithic layered architectures
-# with centralized deployment and simplified operations.
-
 info:
-  name: "monolithic"
-  pattern: "Monolithic"
-  description: "Single deployable unit with layered architecture, centralized data, and simplified deployment"
+  name: monolithic
+  pattern: Monolithic
+  description: Traditional single-deployment monolithic architecture
   use_cases:
-    - "Small to medium-sized applications with single team"
-    - "Applications with tightly coupled business logic"
-    - "Startups requiring rapid development and deployment"
-    - "Internal tools and enterprise applications"
-
+  - Small to medium applications
+  - Rapid prototyping
+  - Simple deployment requirements
 structure:
   layers:
-    - "Presentation Layer"
-    - "Application Layer"
-    - "Domain Layer"
-    - "Data Access Layer"
-    - "Infrastructure Layer"
-
+  - Presentation Layer
+  - Business Logic Layer
+  - Data Access Layer
   integration_patterns:
-    - "In-process method calls between layers"
-    - "Direct database access via ORM"
-    - "Synchronous request-response patterns"
-
+  - Direct method calls
   required_components:
-    - "Web Application Server"
-    - "Database"
-    - "Application Logic"
-    - "Data Access Layer"
-
+  - web-server
+  - application
+  - database
 default_components:
-  - name: "Web Server / API Layer"
-    layer: "Presentation Layer"
-    role: "HTTP server handling incoming requests, routing, and response rendering"
-    typical_technologies:
-      - "Spring MVC"
-      - "ASP.NET Core"
-      - "Django"
-      - "Ruby on Rails"
-      - "Express.js"
-
-  - name: "Authentication Module"
-    layer: "Application Layer"
-    role: "User authentication and session management"
-    typical_technologies:
-      - "Spring Security"
-      - "Passport.js"
-      - "Django Auth"
-      - "ASP.NET Identity"
-
-  - name: "Business Logic Layer"
-    layer: "Domain Layer"
-    role: "Core business rules and domain models"
-    typical_technologies:
-      - "Domain models"
-      - "Business services"
-      - "Validation logic"
-      - "Domain events"
-
-  - name: "Service Layer"
-    layer: "Application Layer"
-    role: "Application services coordinating business operations"
-    typical_technologies:
-      - "Application services"
-      - "Use case implementations"
-      - "Transaction management"
-      - "DTO mappings"
-
-  - name: "Data Access Layer"
-    layer: "Data Access Layer"
-    role: "Database access and ORM mapping"
-    typical_technologies:
-      - "Hibernate/JPA"
-      - "Entity Framework"
-      - "SQLAlchemy"
-      - "ActiveRecord"
-      - "TypeORM"
-
-  - name: "Relational Database"
-    layer: "Infrastructure Layer"
-    role: "Centralized data storage"
-    typical_technologies:
-      - "PostgreSQL"
-      - "MySQL"
-      - "SQL Server"
-      - "Oracle"
-
-  - name: "Cache Layer"
-    layer: "Infrastructure Layer"
-    role: "Application-level caching for performance"
-    typical_technologies:
-      - "Redis"
-      - "Memcached"
-      - "In-memory cache"
-      - "Hazelcast"
-
-  - name: "Background Job Processor"
-    layer: "Application Layer"
-    role: "Asynchronous task processing"
-    typical_technologies:
-      - "Quartz"
-      - "Hangfire"
-      - "Celery"
-      - "Sidekiq"
-
-  - name: "Email Service"
-    layer: "Infrastructure Layer"
-    role: "Email sending and templating"
-    typical_technologies:
-      - "SMTP"
-      - "SendGrid"
-      - "AWS SES"
-      - "Mailgun"
-
-  - name: "File Storage"
-    layer: "Infrastructure Layer"
-    role: "File upload and storage management"
-    typical_technologies:
-      - "Local filesystem"
-      - "AWS S3"
-      - "Azure Blob Storage"
-      - "MinIO"
-
+- name: Web Server
+  layer: Presentation Layer
+  role: Handles HTTP requests and serves web pages
+  typical_technologies:
+  - Nginx
+  - Apache
+  - IIS
+- name: Application
+  layer: Business Logic Layer
+  role: Core application logic and business rules
+  typical_technologies:
+  - Spring Boot
+  - Django
+  - Rails
+- name: Database
+  layer: Data Access Layer
+  role: Persistent data storage
+  typical_technologies:
+  - PostgreSQL
+  - MySQL
+  - SQLite
 customization_points:
-  - "Number of domain modules within the monolith"
-  - "Use of modular monolith pattern with clear boundaries"
-  - "Caching strategy and layers"
-  - "Background processing requirements"
-  - "API style (REST, GraphQL, or both)"
-  - "Database sharding or partitioning for scaling"
+- Add caching layer for performance
+- Implement background job processing
+- Add file storage integration

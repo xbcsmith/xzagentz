@@ -94,7 +94,7 @@ fn run(cli: Cli) -> Result<(), Error> {
             xzagentz::cli::validate::execute(&file, detailed, fix, cli.format, cli.verbose)?;
         }
         Commands::Create {
-            output,
+            file,
             template,
             force,
             interactive,
@@ -102,7 +102,7 @@ fn run(cli: Cli) -> Result<(), Error> {
             use xzagentz::cli::create::{CreateCommand, CreateConfig};
 
             let config = CreateConfig {
-                output: output.clone(),
+                file: file.clone(),
                 template: template.clone(),
                 force,
                 interactive,
@@ -111,7 +111,7 @@ fn run(cli: Cli) -> Result<(), Error> {
                 verbose: cli.verbose,
             };
 
-            let cmd = CreateCommand::new(output, template, force, interactive);
+            let cmd = CreateCommand::new(file, template, force, interactive);
             cmd.execute(&config)?;
         }
         Commands::Update {
@@ -219,7 +219,7 @@ mod tests {
 
     #[test]
     fn test_run_create_command() {
-        let cli = Cli::parse_from(["xzagentz", "create", "--output", "test_output.md"]);
+        let cli = Cli::parse_from(["xzagentz", "create", "test_output.md"]);
         // This will fail if components/templates don't exist, but that's expected in tests
         let _result = run(cli);
     }

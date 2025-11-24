@@ -48,20 +48,26 @@ cargo install --path .
 ### Basic Usage
 
 ```bash
-# Validate a component
-xzagentz validate components/core/error_handling.md
+# Validate an AGENTS.md file
+xzagentz validate AGENTS.md
 
-# Render component for specific language
-xzagentz render --component error_handling --language rust
+# Validate with detailed output
+xzagentz validate --detailed
 
-# Generate validation report
-xzagentz validate --report
-
-# Check all components
-cargo test size_validation_test
+# Validate and fix common issues
+xzagentz validate --detailed --fix
 
 # List available components
-xzagentz list --category core
+xzagentz list components
+
+# List components by category
+xzagentz list components --category core
+
+# List available templates
+xzagentz list templates
+
+# Check all components with tests
+cargo test size_validation_test
 ```
 
 ## Embedded Resources
@@ -73,8 +79,17 @@ xzagentz includes all components and templates embedded in the binary, allowing 
 No setup required - just run commands:
 
 ```bash
-# Create a new project using embedded resources
-xzagentz create my-project --template rust_binary --language rust
+# Create a new AGENTS.md file (default name)
+xzagentz create
+
+# Create with custom filename
+xzagentz create my-agents.md
+
+# Create with interactive mode
+xzagentz create --interactive
+
+# Create with custom filename and template
+xzagentz create my-agents.md --template rust
 
 # List embedded components
 xzagentz list components

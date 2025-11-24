@@ -24,7 +24,7 @@
 //! use std::path::PathBuf;
 //!
 //! let cmd = CreateCommand {
-//!     output: PathBuf::from("AGENTS.md"),
+//!     file: PathBuf::from("AGENTS.md"),
 //!     template: Some("rust-binary".to_string()),
 //!     force: false,
 //!     interactive: false,
@@ -47,7 +47,7 @@ use std::path::{Path, PathBuf};
 #[derive(Debug, Clone)]
 pub struct CreateConfig {
     /// Output file path
-    pub output: PathBuf,
+    pub file: PathBuf,
     /// Template name to use (optional)
     pub template: Option<String>,
     /// Force overwrite if file exists
@@ -66,7 +66,7 @@ pub struct CreateConfig {
 #[derive(Debug, Clone)]
 pub struct CreateCommand {
     /// Output file path
-    pub output: PathBuf,
+    pub file: PathBuf,
     /// Template to use
     pub template: Option<String>,
     /// Force overwrite if file exists
@@ -77,9 +77,9 @@ pub struct CreateCommand {
 
 impl CreateCommand {
     /// Creates a new CreateCommand
-    pub fn new(output: PathBuf, template: Option<String>, force: bool, interactive: bool) -> Self {
+    pub fn new(file: PathBuf, template: Option<String>, force: bool, interactive: bool) -> Self {
         Self {
-            output,
+            file,
             template,
             force,
             interactive,
@@ -105,8 +105,8 @@ impl CreateCommand {
     /// - File creation fails
     pub fn execute(&self, config: &CreateConfig) -> Result<()> {
         // Check if file exists
-        if self.output.exists() && !self.force {
-            return Err(Error::file_already_exists(self.output.clone()));
+        if self.file.exists() && !self.force {
+            return Err(Error::file_already_exists(self.file.clone()));
         }
 
         // Load project metadata from README if available
@@ -160,14 +160,14 @@ impl CreateCommand {
         }
 
         // Create backup if file exists
-        if self.output.exists() && self.force {
-            creator.create_backup(&self.output)?;
+        if self.file.exists() && self.force {
+            creator.create_backup(&self.file)?;
         }
 
         // Write file
-        creator.write_file(&self.output, &cleaned_content)?;
+        creator.write_file(&self.file, &cleaned_content)?;
 
-        println!("Successfully created: {}", self.output.display());
+        println!("Successfully created: {}", self.file.display());
         Ok(())
     }
 }
@@ -976,7 +976,7 @@ mod tests {
             false,
         );
 
-        assert_eq!(cmd.output, PathBuf::from("AGENTS.md"));
+        assert_eq!(cmd.file, PathBuf::from("AGENTS.md"));
         assert_eq!(cmd.template, Some("rust-binary".to_string()));
         assert!(!cmd.force);
         assert!(!cmd.interactive);

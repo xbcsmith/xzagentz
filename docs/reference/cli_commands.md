@@ -76,6 +76,7 @@ xzagentz --version
 Initialize xzagentz by extracting embedded resources.
 
 **Syntax**:
+
 ```bash
 xzagentz init [OPTIONS]
 ```
@@ -104,6 +105,7 @@ xzagentz init --force
 ```
 
 **Exit Codes**:
+
 - `0` - Success
 - `1` - Error during extraction
 
@@ -112,6 +114,7 @@ xzagentz init --force
 List available components or templates.
 
 **Syntax**:
+
 ```bash
 xzagentz list <TARGET> [OPTIONS]
 ```
@@ -127,6 +130,7 @@ xzagentz list components [OPTIONS]
 ```
 
 **Options**:
+
 - `--category <CATEGORY>`, `-c <CATEGORY>` - Filter by category
 
 **Examples**:
@@ -151,6 +155,7 @@ xzagentz list templates [OPTIONS]
 ```
 
 **Options**:
+
 - `--detailed`, `-d` - Show template details
 
 **Examples**:
@@ -164,6 +169,7 @@ xzagentz list templates --detailed
 ```
 
 **Exit Codes**:
+
 - `0` - Success
 - `1` - Error listing resources
 
@@ -172,14 +178,17 @@ xzagentz list templates --detailed
 Validate component or AGENTS.md file.
 
 **Syntax**:
+
 ```bash
 xzagentz validate [FILE] [OPTIONS]
 ```
 
 **Arguments**:
+
 - `FILE` - Path to file to validate (default: `AGENTS.md`)
 
 **Options**:
+
 - `--detailed`, `-d` - Show detailed validation report
 - `--fix`, `-f` - Fix common issues automatically
 
@@ -203,6 +212,7 @@ xzagentz --format json validate
 ```
 
 **Validation Checks**:
+
 - Valid YAML frontmatter
 - Required fields present
 - Size constraints met
@@ -211,6 +221,7 @@ xzagentz --format json validate
 - Code blocks have language specifiers
 
 **Exit Codes**:
+
 - `0` - Validation passed
 - `1` - Validation failed
 
@@ -219,12 +230,17 @@ xzagentz --format json validate
 Create new AGENTS.md file from components.
 
 **Syntax**:
+
 ```bash
-xzagentz create [OPTIONS]
+xzagentz create [FILE] [OPTIONS]
 ```
 
+**Arguments**:
+
+- `[FILE]` - Output file path (default: `AGENTS.md`)
+
 **Options**:
-- `--output <FILE>`, `-o <FILE>` - Output file path (default: `AGENTS.md`)
+
 - `--template <NAME>`, `-t <NAME>` - Template to use
 - `--force`, `-f` - Force overwrite if file exists
 - `--interactive`, `-i` - Interactive mode
@@ -232,23 +248,24 @@ xzagentz create [OPTIONS]
 **Examples**:
 
 ```bash
-# Create with defaults
+# Create with default name (AGENTS.md)
 xzagentz create
 
-# Create with custom output
-xzagentz create --output my_agents.md
+# Create with custom filename
+xzagentz create my-agents.md
 
 # Create using template
-xzagentz create --template rust_project
+xzagentz create my-agents.md --template rust_project
 
 # Interactive mode
 xzagentz create --interactive
 
-# Force overwrite
-xzagentz create --force
+# Force overwrite existing file
+xzagentz create AGENTS.md --force
 ```
 
 **Exit Codes**:
+
 - `0` - Success
 - `1` - Error during creation
 
@@ -257,14 +274,17 @@ xzagentz create --force
 Update existing AGENTS.md file section.
 
 **Syntax**:
+
 ```bash
 xzagentz update [FILE] [OPTIONS]
 ```
 
 **Arguments**:
+
 - `FILE` - Path to file to update (default: `AGENTS.md`)
 
 **Options**:
+
 - `--section <NAME>`, `-s <NAME>` - Section to update (required)
 - `--backup`, `-b` - Create backup before updating (default: true)
 
@@ -282,6 +302,7 @@ xzagentz update --section git_conventions --backup false
 ```
 
 **Exit Codes**:
+
 - `0` - Success
 - `1` - Error during update
 
@@ -290,18 +311,22 @@ xzagentz update --section git_conventions --backup false
 Add new section to AGENTS.md file.
 
 **Syntax**:
+
 ```bash
 xzagentz add [FILE] [OPTIONS]
 ```
 
 **Arguments**:
+
 - `FILE` - Path to file (default: `AGENTS.md`)
 
 **Options**:
+
 - `--component <NAME>`, `-c <NAME>` - Component to add (required)
 - `--position <POS>`, `-p <POS>` - Position to insert (default: `bottom`)
 
 **Position Values**:
+
 - `top` or `beginning` - Add at beginning
 - `bottom` or `end` - Add at end
 - `after:<section>` - Add after specific section
@@ -311,65 +336,254 @@ xzagentz add [FILE] [OPTIONS]
 
 ```bash
 # Add component at end
-xzagentz add --component security_guidelines
+xzagentz add --component Core/testing_standards
 
 # Add at beginning
-xzagentz add --component project_overview --position top
+xzagentz add --component Core/critical_rules --position top
 
 # Add after specific section
-xzagentz add --component logging_standards --position after:error_handling
+xzagentz add --component Tools/docker_essential --position after:error_handling
 
 # Add before specific section
-xzagentz add --component pre_commit_hooks --position before:git_conventions
+xzagentz add --component Tools/git_comprehensive --position before:git_conventions
 ```
 
 **Exit Codes**:
+
 - `0` - Success
 - `1` - Error during add
 
 ### prompt
 
-Generate and manage prompts for LLM interactions.
+Generate and manage prompts for implementation plan execution.
 
 **Syntax**:
+
 ```bash
-xzagentz prompt [SUBCOMMAND] [OPTIONS]
+xzagentz prompt <SUBCOMMAND> [OPTIONS]
 ```
 
 **Subcommands**:
 
 #### prompt generate
 
-Generate prompt from template.
+Generate prompts from implementation plan.
 
 ```bash
 xzagentz prompt generate [OPTIONS]
 ```
 
 **Options**:
-- `--template <NAME>`, `-t <NAME>` - Prompt template to use
-- `--output <FILE>`, `-o <FILE>` - Output file path
-- `--variables <JSON>`, `-v <JSON>` - Template variables as JSON
+
+- `--plan <FILE>`, `-p <FILE>` - Path to implementation plan (default: `docs/explanation/implementation_plan.md`)
+- `--architecture <FILE>`, `-a <FILE>` - Path to architecture plan (optional)
+- `--output <DIR>`, `-o <DIR>` - Output directory for prompts (default: `prompts`)
+- `--all` - Generate all prompts in batch mode
+- `--interactive`, `-i` - Interactive mode with preview
+- `--phase <NUMBER>` - Generate specific phase
+- `--section <NUMBER>` - Generate specific section (requires `--phase`)
+- `--force`, `-f` - Force overwrite existing files
+- `--no-backup` - Do not create backups when overwriting
+- `--jira-issue <ISSUE>` - JIRA issue for commit messages
 
 **Examples**:
 
 ```bash
-# Generate prompt
-xzagentz prompt generate --template code_review --output prompt.txt
+# Generate all prompts in batch mode
+xzagentz prompt generate --all
 
-# With variables
-xzagentz prompt generate --template architecture --variables '{"language":"rust"}'
+# Interactive mode with preview
+xzagentz prompt generate --interactive
+
+# Generate specific section
+xzagentz prompt generate --phase 1 --section 1.1
+
+# Custom plan and output directory
+xzagentz prompt generate --plan my_plan.md --output my_prompts
+
+# Include architecture context
+xzagentz prompt generate --all --architecture architecture.md
 ```
 
-#### prompt list
+#### prompt show
 
-List available prompt templates.
+Show a specific prompt without generating files.
 
 ```bash
-xzagentz prompt list
+xzagentz prompt show --phase <NUMBER> --section <NUMBER> [OPTIONS]
 ```
 
+**Options**:
+
+- `--plan <FILE>`, `-p <FILE>` - Path to implementation plan (default: `docs/explanation/implementation_plan.md`)
+- `--phase <NUMBER>` - Phase number (required)
+- `--section <NUMBER>` - Section number (required)
+
+**Examples**:
+
+```bash
+# Display prompt for section 1.1
+xzagentz prompt show --phase 1 --section 1.1
+
+# Use custom plan
+xzagentz prompt show --plan my_plan.md --phase 2 --section 2.3
+```
+
+#### prompt complete
+
+Mark a section as complete in progress tracking.
+
+```bash
+xzagentz prompt complete <SECTION> [OPTIONS]
+```
+
+**Arguments**:
+
+- `SECTION` - Section number to mark complete (e.g., `1.1`)
+
+**Options**:
+
+- `--project-root <PATH>`, `-p <PATH>` - Path to project root (default: `.`)
+
+**Examples**:
+
+```bash
+# Mark section 1.1 as complete
+xzagentz prompt complete 1.1
+
+# Custom project root
+xzagentz prompt complete 2.3 --project-root /path/to/project
+```
+
+#### prompt next
+
+Show the next section to work on.
+
+```bash
+xzagentz prompt next [OPTIONS]
+```
+
+**Options**:
+
+- `--plan <FILE>`, `-p <FILE>` - Path to implementation plan (default: `docs/explanation/implementation_plan.md`)
+- `--project-root <PATH>`, `-r <PATH>` - Path to project root (default: `.`)
+- `--generate`, `-g` - Generate prompt for next section
+
+**Examples**:
+
+```bash
+# Show next section
+xzagentz prompt next
+
+# Show next section and generate prompt
+xzagentz prompt next --generate
+
+# Custom plan location
+xzagentz prompt next --plan my_plan.md --project-root /path/to/project
+```
+
+#### prompt progress
+
+Show implementation progress statistics.
+
+```bash
+xzagentz prompt progress [OPTIONS]
+```
+
+**Options**:
+
+- `--project-root <PATH>`, `-p <PATH>` - Path to project root (default: `.`)
+- `--format <FORMAT>`, `-f <FORMAT>` - Output format: `text` or `json` (default: `text`)
+
+**Examples**:
+
+```bash
+# Show progress in human-readable format
+xzagentz prompt progress
+
+# JSON output for scripting
+xzagentz prompt progress --format json
+
+# Custom project root
+xzagentz prompt progress --project-root /path/to/project
+```
+
+**Example Output**:
+
+```
+Implementation Progress
+======================
+
+Current Section: 1.2
+Completed: 3 / 10
+Remaining: 7
+Progress: 30.0%
+
+[===============                                   ] 30.0%
+```
+
+#### prompt verify
+
+Verify compliance with AGENTS.md rules (planned feature).
+
+```bash
+xzagentz prompt verify [OPTIONS]
+```
+
+**Options**:
+
+- `--project-root <PATH>`, `-p <PATH>` - Path to project root (default: `.`)
+- `--phase <NUMBER>` - Specific phase to verify
+- `--output <FILE>`, `-o <FILE>` - Output report file
+- `--strict`, `-s` - Strict mode (fail on any violation)
+
+**Examples**:
+
+```bash
+# Verify entire project
+xzagentz prompt verify
+
+# Verify specific phase
+xzagentz prompt verify --phase 1
+
+# Generate report
+xzagentz prompt verify --output compliance_report.md --strict
+```
+
+**Note**: This command is planned but not yet fully implemented.
+
+#### prompt reset
+
+Reset progress tracking to start.
+
+```bash
+xzagentz prompt reset [OPTIONS]
+```
+
+**Options**:
+
+- `--project-root <PATH>`, `-p <PATH>` - Path to project root (default: `.`)
+- `--yes`, `-y` - Skip confirmation prompt
+
+**Examples**:
+
+```bash
+# Reset progress (with confirmation)
+xzagentz prompt reset
+
+# Reset without confirmation
+xzagentz prompt reset --yes
+
+# Custom project root
+xzagentz prompt reset --project-root /path/to/project
+```
+
+**Progress Tracking**:
+
+The prompt command maintains progress in a `.implementation_progress` file in your project root. This tracks which sections have been completed and helps you resume work where you left off.
+
 **Exit Codes**:
+
 - `0` - Success
 - `1` - Error during prompt operation
 
@@ -378,11 +592,13 @@ xzagentz prompt list
 Generate implementation plans from architecture documents.
 
 **Syntax**:
+
 ```bash
 xzagentz implementation [OPTIONS]
 ```
 
 **Options**:
+
 - `--input <FILE>`, `-i <FILE>` - Input architecture file (required)
 - `--output <FILE>`, `-o <FILE>` - Output implementation plan file
 - `--phases <NUMBER>`, `-p <NUMBER>` - Number of implementation phases
@@ -402,10 +618,12 @@ xzagentz implementation --input architecture.md --verbose
 ```
 
 **Exit Codes**:
+
 - `0` - Success
 - `1` - Error during generation
 
 **Requirements**:
+
 - LLM API key configured (OPENAI_API_KEY or ANTHROPIC_API_KEY)
 - Valid architecture document as input
 
@@ -414,11 +632,13 @@ xzagentz implementation --input architecture.md --verbose
 Generate and manage software architecture documents with LLM.
 
 **Syntax**:
+
 ```bash
 xzagentz architecture [OPTIONS]
 ```
 
 **Options**:
+
 - `--project <NAME>`, `-p <NAME>` - Project name
 - `--description <TEXT>`, `-d <TEXT>` - System description
 - `--output <FILE>`, `-o <FILE>` - Output file path (default: `architecture.md`)
@@ -430,6 +650,7 @@ xzagentz architecture [OPTIONS]
 - `--refine <TEXT>` - Refinement instructions
 
 **Architecture Patterns**:
+
 - `layered` - Traditional n-tier architecture
 - `hexagonal` - Ports and adapters architecture
 - `microservices` - Distributed services architecture
@@ -455,10 +676,12 @@ xzagentz architecture --project "My Service" --language rust --pattern hexagonal
 ```
 
 **Exit Codes**:
+
 - `0` - Success
 - `1` - Error during generation
 
 **Requirements**:
+
 - LLM API key configured (OPENAI_API_KEY or ANTHROPIC_API_KEY)
 
 ## Environment Variables
@@ -530,6 +753,7 @@ xzagentz list components
 ```
 
 Output:
+
 ```
 Available Components:
 
@@ -551,6 +775,7 @@ xzagentz --format json list components
 ```
 
 Output:
+
 ```json
 {
   "total": 4,
@@ -594,7 +819,7 @@ xzagentz create --output AGENTS.md
 xzagentz validate AGENTS.md --detailed
 
 # Add additional components
-xzagentz add AGENTS.md --component security_guidelines
+xzagentz add AGENTS.md --component Languages/rust
 ```
 
 ### Architecture-Driven Development

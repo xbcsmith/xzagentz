@@ -112,9 +112,9 @@ pub enum Commands {
 
     /// Create a new AGENTS.md file
     Create {
-        /// Output file path
-        #[arg(short, long, default_value = "AGENTS.md")]
-        output: PathBuf,
+        /// Output file path (defaults to AGENTS.md if not specified)
+        #[arg(default_value = "AGENTS.md")]
+        file: PathBuf,
 
         /// Template to use
         #[arg(short, long)]
@@ -260,5 +260,45 @@ mod tests {
         let cli = Cli::parse_from(["xzagentz", "--format", "json", "list", "components"]);
         assert_eq!(cli.format, OutputFormat::Json);
         assert!(cli.format.is_json());
+    }
+
+    #[test]
+    fn test_parse_create_with_file() {
+        let cli = Cli::parse_from(["xzagentz", "create", "my-agents.md"]);
+        if let Commands::Create {
+            file,
+            template,
+            force,
+            interactive,
+        } = cli.command
+        {
+            assert_eq!(file, PathBuf::from("my-agents.md"));
+            assert_eq!(template, None);
+            assert!(!force);
+            assert!(!interactive);
+        } else {
+            panic!("Expected Create command");
+        }
+    }
+
+    #[test]
+    fn test_parse_create_default_file() {
+        let cli = Cli::parse_from(["xzagentz", "create"]);
+        if let Commands::Create { file, .. } = cli.command {
+            assert_eq!(file, PathBuf::from("AGENTS.md"));
+        } else {
+            panic!("Expected Create command");
+        }
+    }
+
+    #[test]
+    fn test_parse_create_with_template() {
+        let cli = Cli::parse_from(["xzagentz", "create", "custom.md", "--template", "rust"]);
+        if let Commands::Create { file, template, .. } = cli.command {
+            assert_eq!(file, PathBuf::from("custom.md"));
+            assert_eq!(template, Some("rust".to_string()));
+        } else {
+            panic!("Expected Create command");
+        }
     }
 }

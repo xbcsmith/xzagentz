@@ -100,15 +100,27 @@ impl InitCommand {
     ///          result.components_extracted, result.templates_extracted);
     /// ```
     pub fn execute(&self) -> Result<InitResult> {
+        // Resolve directories with proper precedence: CLI args > env vars > defaults
         let components_dir = self
             .config
             .components_dir
             .clone()
+            .or_else(|| {
+                std::env::var("XZAGENTZ_COMPONENT_DIR")
+                    .ok()
+                    .map(PathBuf::from)
+            })
             .unwrap_or_else(default_components_dir);
+
         let templates_dir = self
             .config
             .templates_dir
             .clone()
+            .or_else(|| {
+                std::env::var("XZAGENTZ_TEMPLATE_DIR")
+                    .ok()
+                    .map(PathBuf::from)
+            })
             .unwrap_or_else(default_templates_dir);
 
         if self.config.verbose {
@@ -119,7 +131,12 @@ impl InitCommand {
             eprintln!("  Dry run:              {}", self.config.dry_run);
         }
 
-        // Check for conflicts before extraction
+        // In dry-run mode, skip conflict checking and just show what would be done
+        if self.config.dry_run {
+            return self.dry_run(&components_dir, &templates_dir, &Vec::new());
+        }
+
+        // Check for conflicts before extraction (only when not in dry-run mode)
         let conflicts = self.check_conflicts(&components_dir, &templates_dir)?;
 
         if !conflicts.is_empty() && !self.config.force {
@@ -128,10 +145,6 @@ impl InitCommand {
                 conflicts.len(),
                 conflicts.join("\n")
             )));
-        }
-
-        if self.config.dry_run {
-            return self.dry_run(&components_dir, &templates_dir, &conflicts);
         }
 
         // Extract components

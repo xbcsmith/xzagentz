@@ -1,0 +1,38 @@
+info:
+  name: event-driven
+  pattern: EventDriven
+  description: Event-driven architecture with publish-subscribe pattern
+  use_cases:
+  - Real-time data processing
+  - IoT systems
+  - Complex event processing
+structure:
+  layers:
+  - Event Producers
+  - Event Bus
+  - Event Consumers
+  integration_patterns:
+  - Publish-Subscribe
+  - Event Streaming
+  required_components:
+  - event-bus
+  - event-store
+default_components:
+- name: Event Bus
+  layer: Event Bus
+  role: Central event routing and delivery
+  typical_technologies:
+  - Apache Kafka
+  - RabbitMQ
+  - AWS EventBridge
+- name: Event Store
+  layer: Event Bus
+  role: Persistent event log storage
+  typical_technologies:
+  - EventStoreDB
+  - Kafka
+  - PostgreSQL
+customization_points:
+- Add event producers for different data sources
+- Add event consumers for specific processing needs
+- Implement event replay capabilities

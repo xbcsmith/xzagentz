@@ -152,11 +152,6 @@ Specify measurable outcomes:
    - Success criteria
    - Timeline estimates
 
-2. **This reusable prompt** saved as `docs/explanation/doc_cleanup_prompt.md`
-   - Can be used for other projects
-   - Documents the methodology
-   - Includes Diataxis decision tree
-
 ## Quality Standards
 
 Ensure the plan follows these standards:
