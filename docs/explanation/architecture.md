@@ -2,7 +2,10 @@
 
 ## Overview
 
-xzagentz is a Rust-based CLI tool for managing language-agnostic development components with intelligent rendering, validation, and code generation capabilities. The system uses a layered architecture that separates concerns across parsing, validation, rendering, and code generation domains.
+xzagentz is a Rust-based CLI tool for managing language-agnostic development
+components with intelligent rendering, validation, and code generation
+capabilities. The system uses a layered architecture that separates concerns
+across parsing, validation, rendering, and code generation domains.
 
 ## System Architecture
 
@@ -85,7 +88,8 @@ xzagentz is a Rust-based CLI tool for managing language-agnostic development com
 
 #### Domain Layer
 
-- **Location**: `src/components/`, `src/templates/`, `src/plans/`, `src/validator/`
+- **Location**: `src/components/`, `src/templates/`, `src/plans/`,
+  `src/validator/`
 - **Purpose**: Core business models and rules
 - **Responsibilities**:
   - Define domain entities
@@ -124,7 +128,8 @@ xzagentz is a Rust-based CLI tool for managing language-agnostic development com
 
 ### Component Structure
 
-Components are the fundamental unit of content in xzagentz. Each component consists of:
+Components are the fundamental unit of content in xzagentz. Each component
+consists of:
 
 1. **YAML Frontmatter**: Structured metadata
 2. **Universal Content**: Language-agnostic documentation
@@ -903,13 +908,12 @@ tests/
 
 ## Related Documentation
 
-- **Implementation Plan**: `docs/explanation/implementation/language_agnostic_component_system_implementation_plan.md`
+- **Implementation Plan**:
+  `docs/explanation/implementation/language_agnostic_component_system_implementation_plan.md`
 - **Configuration Reference**: `docs/reference/component_configuration.md`
 - **How-To Guide**: `docs/how_to/authoring_components.md`
 - **Troubleshooting**: `docs/how_to/troubleshooting.md`
 
 ---
 
-**Document Version**: 2.0.0
-**Last Updated**: 2024-12-19
-**Status**: Current
+**Document Version**: 2.0.0 **Last Updated**: 2024-12-19 **Status**: Current

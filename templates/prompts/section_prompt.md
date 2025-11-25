@@ -1,3 +1,10 @@
+#---
+# name: section_prompt
+# description: Implementation prompt template for a section
+# complexity: essential
+# category: prompts
+#---
+
 # Implementation Prompt - Section {{section_number}}: {{section_name}}
 
 ## Context

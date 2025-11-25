@@ -394,7 +394,20 @@ impl ComponentComposer {
             // Render placeholders in filtered content
             let rendered = renderer.render(&filtered)?;
 
-            output.push_str(&rendered);
+            // Normalize headings to keep a consistent hierarchy when components are combined.
+            // First component remains at base-level 1; core/language/general sections use base-level 2; tools use base-level 3.
+            let base = if i == 0 {
+                1u8
+            } else {
+                match component.component_type {
+                    ComponentType::Tools => 3u8,
+                    _ => 2u8,
+                }
+            };
+
+            let normalized = crate::markdown::normalize_headings(&rendered, base);
+
+            output.push_str(&normalized);
 
             // Add separator between components
             if i < components.len() - 1 {

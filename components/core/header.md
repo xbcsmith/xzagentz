@@ -1,3 +1,12 @@
+---
+component:
+	name: header
+	category: core
+	version: "1.0"
+	description: Project header containing name, version, and metadata placeholders
+	languages: []
+---
+
 # {{PROJECT_NAME}} - AI Agent Development Guidelines
 
 **Version**: {{VERSION}}

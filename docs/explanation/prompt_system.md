@@ -1,8 +1,10 @@
 # Prompt Generation and Plan Management System
 
-A Rust-based system for managing the complete project lifecycle from architecture planning to phased implementation with compliance verification.
+A Rust-based system for managing the complete project lifecycle from
+architecture planning to phased implementation with compliance verification.
 
-This document explains the integrated system that helps you plan and execute projects systematically while ensuring compliance with AGENTS.md rules.
+This document explains the integrated system that helps you plan and execute
+projects systematically while ensuring compliance with AGENTS.md rules.
 
 ## Overview
 
@@ -422,7 +424,9 @@ pub fn architecture_to_phases(arch: &ArchitecturePlan) -> Vec<Phase> {
 
 **Usage**:
 
-After generation, users can review and refine the implementation plan using their IDE's AI assistant for improvements to phase structure, timeline estimates, and risk assessment.
+After generation, users can review and refine the implementation plan using
+their IDE's AI assistant for improvements to phase structure, timeline
+estimates, and risk assessment.
 
 #### 3. Plan Templates
 
@@ -1085,23 +1089,21 @@ Generated: 2024-01-15 10:30:00 UTC
 
 ### [MD-001] Markdown File Naming
 
-**File**: `docs/explanation/DistributedTracing.md`
-**Issue**: Filename uses CamelCase instead of snake_case
-**Suggestion**: Rename to `distributed_tracing.md`
+**File**: `docs/explanation/DistributedTracing.md` **Issue**: Filename uses
+CamelCase instead of snake_case **Suggestion**: Rename to
+`distributed_tracing.md`
 
 ### [MD-040] Missing Language Identifier
 
-**File**: `docs/how_to/setup_guide.md:45`
-**Issue**: Code block missing language identifier
-**Suggestion**: Change `to`bash
+**File**: `docs/how_to/setup_guide.md:45` **Issue**: Code block missing language
+identifier **Suggestion**: Change `to`bash
 
 ## Passed Rules
 
 - ✓ [YAML-001] YAML file extensions
 - ✓ [RUST-001] Code formatting
 - ✓ [RUST-002] Clippy warnings
-- ✓ [GIT-001] Branch naming
-  ...
+- ✓ [GIT-001] Branch naming ...
 
 ## Recommendations
 
@@ -1484,10 +1486,13 @@ The integrated plan management and prompt generation system provides:
 - **Efficiency**: Reduced planning overhead, focused execution
 - **Consistency**: Uniform approach from planning to completion
 
-By using this integrated system, you ensure well-planned, high-quality implementation with automated plan generation and compliance verification throughout the entire project lifecycle.
+By using this integrated system, you ensure well-planned, high-quality
+implementation with automated plan generation and compliance verification
+throughout the entire project lifecycle.
 
 ## See Also
 
 - [AGENTS.md](../../AGENTS.md) - Project rules and conventions
 - [Template System](./template_system.md) - Template generation system
-- [Document Cleanup Implementation Plan](./document_cleanup_implementation_plan.md) - Documentation cleanup strategy
+- [Document Cleanup Implementation Plan](./document_cleanup_implementation_plan.md) -
+  Documentation cleanup strategy

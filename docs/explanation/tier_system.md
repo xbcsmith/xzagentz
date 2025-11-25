@@ -2,16 +2,21 @@
 
 ## Overview
 
-This document explains the design and rationale behind xzagentz's tier system for tool components. The tier system provides flexibility in component complexity while maintaining focused, maintainable documentation.
+This document explains the design and rationale behind xzagentz's tier system
+for tool components. The tier system provides flexibility in component
+complexity while maintaining focused, maintainable documentation.
 
 ## What is the Tier System?
 
-The tier system categorizes tool-specific components by complexity and target audience:
+The tier system categorizes tool-specific components by complexity and target
+audience:
 
 - **Essential**: Minimal, focused guidance for common use cases (100 lines)
-- **Comprehensive**: Detailed, advanced guidance for complex scenarios (200 lines)
+- **Comprehensive**: Detailed, advanced guidance for complex scenarios (200
+  lines)
 
-Tiers apply only to components in the `tools` category. Other categories (core, general, languages) do not use tiers.
+Tiers apply only to components in the `tools` category. Other categories (core,
+general, languages) do not use tiers.
 
 ## Why Tiers Exist
 
@@ -19,12 +24,16 @@ Tiers apply only to components in the `tools` category. Other categories (core, 
 
 Tool components have highly variable complexity requirements:
 
-- **Docker basics**: Container concepts, basic commands, simple Dockerfile (fits in 100 lines)
-- **Docker advanced**: Multi-stage builds, networking, volumes, security, optimization (needs 200 lines)
+- **Docker basics**: Container concepts, basic commands, simple Dockerfile (fits
+  in 100 lines)
+- **Docker advanced**: Multi-stage builds, networking, volumes, security,
+  optimization (needs 200 lines)
 - **Git basics**: Clone, commit, push, pull, branch (fits in 100 lines)
-- **Git advanced**: Rebasing, submodules, hooks, bisect, reflog (needs 200 lines)
+- **Git advanced**: Rebasing, submodules, hooks, bisect, reflog (needs 200
+  lines)
 
 A single size limit for all tool components would either:
+
 - Be too small (can't cover advanced tools adequately)
 - Be too large (allows bloated basic tool documentation)
 
@@ -33,6 +42,7 @@ A single size limit for all tool components would either:
 Two tiers with different size limits allow appropriate documentation depth:
 
 **Essential Tier** (100 lines):
+
 - Getting started quickly
 - Common patterns only
 - Standard configurations
@@ -40,6 +50,7 @@ Two tiers with different size limits allow appropriate documentation depth:
 - 80% use cases
 
 **Comprehensive Tier** (200 lines):
+
 - Advanced features
 - Edge cases
 - Performance tuning
@@ -50,7 +61,8 @@ Two tiers with different size limits allow appropriate documentation depth:
 
 ### 1. Progressive Disclosure
 
-Users start with essential components and graduate to comprehensive as expertise grows:
+Users start with essential components and graduate to comprehensive as expertise
+grows:
 
 ```
 Day 1: docker_essentials (basic containers)
@@ -60,7 +72,8 @@ Week 2: docker_essentials (mastered basics)
 Month 3: docker_advanced (need optimization)
 ```
 
-This prevents information overload for beginners while supporting advanced users.
+This prevents information overload for beginners while supporting advanced
+users.
 
 ### 2. Audience Targeting
 
@@ -83,18 +96,21 @@ xzagentz create --component docker_essentials
 xzagentz add --component docker_advanced
 ```
 
-Users consciously choose complexity level rather than getting overwhelmed by default.
+Users consciously choose complexity level rather than getting overwhelmed by
+default.
 
 ### 4. Forced Focus
 
 Size limits enforce quality:
 
 **Essential (100 lines)**: Must focus on absolute essentials
+
 - Forces prioritization
 - Eliminates nice-to-have content
 - Results in lean, focused documentation
 
 **Comprehensive (200 lines)**: Allows depth but still constrained
+
 - Prevents documentation bloat
 - Encourages splitting into multiple components
 - Maintains readability
@@ -109,11 +125,12 @@ component:
   name: "docker_essentials"
   category: "tools"
   version: "1.0.0"
-  tier: "essential"  # Required for tools category
+  tier: "essential" # Required for tools category
 ---
 ```
 
 Tier field is:
+
 - **Required** for tools category
 - **Invalid** for other categories
 - **Validated** during component validation
@@ -167,6 +184,7 @@ Naming makes tier immediately obvious from filename.
 - **Documentation goal**: Get productive quickly
 
 **Examples of essential-tier tools**:
+
 - Docker basics (run, build, push)
 - Git fundamentals (clone, commit, push)
 - Make basics (targets, variables)
@@ -181,6 +199,7 @@ Naming makes tier immediately obvious from filename.
 - **Documentation goal**: Master the tool
 
 **Examples of comprehensive-tier tools**:
+
 - Docker advanced (networking, volumes, security)
 - Git advanced (rebase, submodules, internals)
 - Kubernetes (complex deployments, operators)
@@ -194,6 +213,7 @@ Naming makes tier immediately obvious from filename.
 - **Documentation completeness**: Want full coverage
 
 **Examples of tools benefiting from both tiers**:
+
 - Docker (very common, wide skill range)
 - Git (universal tool, deep complexity)
 - Kubernetes (starts simple, grows complex)
@@ -203,24 +223,28 @@ Naming makes tier immediately obvious from filename.
 ### Why Core/General/Languages Don't Use Tiers
 
 **Core components** (200 lines):
+
 - Always essential to development
 - Complexity is inherent to topic
 - No "basic" vs "advanced" error handling
 - All developers need full guidance
 
 **General components** (150 lines):
+
 - Moderate complexity naturally
 - Topics are inherently focused
 - Single limit sufficient
 - Splitting by tier would be artificial
 
 **Language components** (300 lines):
+
 - Language-specific content needs examples
 - Idioms require demonstration
 - Single comprehensive treatment better
 - Language docs naturally detailed
 
 **Tool components** (100-200 lines):
+
 - Complexity varies dramatically by tool
 - Clear basic vs advanced distinction
 - Users opt into complexity
@@ -264,8 +288,8 @@ When essential component covers basics well but users need more:
 
 ## Next Steps
 
-For advanced Docker usage including networking, volumes, and security,
-see `docker_advanced.md`.
+For advanced Docker usage including networking, volumes, and security, see
+`docker_advanced.md`.
 ```
 
 ## Trade-offs and Alternatives
@@ -275,6 +299,7 @@ see `docker_advanced.md`.
 **Approach**: All tool components have same limit (e.g., 150 lines)
 
 **Rejected because**:
+
 - Too restrictive for complex tools
 - Too permissive for simple tools
 - No guidance for appropriate depth
@@ -285,6 +310,7 @@ see `docker_advanced.md`.
 **Approach**: Let tool components be any size
 
 **Rejected because**:
+
 - Components become unwieldy
 - Hard to maintain
 - Information overload
@@ -295,6 +321,7 @@ see `docker_advanced.md`.
 **Approach**: Essential, intermediate, comprehensive
 
 **Rejected because**:
+
 - Added complexity without clear benefit
 - Intermediate tier poorly defined
 - Two tiers cover usage patterns
@@ -303,6 +330,7 @@ see `docker_advanced.md`.
 ### Chosen Approach: Two Tiers
 
 **Benefits**:
+
 - Simple binary choice
 - Clear size constraints
 - Matches user mental models
@@ -377,12 +405,14 @@ xzagentz create --output OPS_GUIDE.md \
 ### Component Quality Metrics
 
 **Essential tier quality**:
+
 - Covers 80% of use cases
 - User can complete task in 5 minutes
 - No more than 3 examples
 - All beginners can understand
 
 **Comprehensive tier quality**:
+
 - Covers 95% of use cases
 - Includes troubleshooting
 - Multiple detailed examples
@@ -391,6 +421,7 @@ xzagentz create --output OPS_GUIDE.md \
 ### Usage Metrics
 
 Track which tier is used more:
+
 - Essential tier dominates → Good (appropriate defaults)
 - Comprehensive tier dominates → May indicate essential insufficient
 - Both used equally → Good (meeting diverse needs)
@@ -398,13 +429,15 @@ Track which tier is used more:
 ## Summary
 
 The tier system provides:
+
 - **Flexibility**: Appropriate complexity for different needs
 - **Clarity**: Clear distinction between basic and advanced
 - **Quality**: Size constraints enforce focused content
 - **Usability**: Users opt into complexity
 - **Maintainability**: Smaller components easier to update
 
-Tiers recognize that tools vary in complexity and users vary in expertise, providing the right level of guidance for each situation.
+Tiers recognize that tools vary in complexity and users vary in expertise,
+providing the right level of guidance for each situation.
 
 ## Related Documentation
 

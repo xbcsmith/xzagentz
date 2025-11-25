@@ -1,3 +1,14 @@
+---
+name: rust_cli_architecture_plan
+description: Architecture plan template for Rust CLI / binary applications
+complexity: beginner
+technologies:
+   - Rust
+   - Clap
+   - Tokio
+   - Serde
+---
+
 # Architecture Plan: @project-name@
 
 ## Project Overview

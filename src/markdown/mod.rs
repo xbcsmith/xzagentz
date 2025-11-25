@@ -20,6 +20,8 @@
 //! ```
 
 pub mod cleaner;
+pub mod heading;
 
 // Re-export commonly used items
 pub use cleaner::MarkdownCleaner;
+pub use heading::normalize_headings;

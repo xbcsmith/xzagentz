@@ -1,3 +1,16 @@
+---
+component:
+    name: learning_resources
+    category: core
+    version: "1.0"
+    description: Curated learning resources and references for agents and developers
+    languages:
+        - rust
+        - python
+        - golang
+        - typescript
+---
+
 # Learning Resources and References
 
 This section provides curated learning resources, references, and guides for AI agents working on this project.

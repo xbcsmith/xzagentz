@@ -2,13 +2,18 @@
 
 ## Overview
 
-The xzagentz template system provides a flexible, reliable, and user-friendly way to manage templates for plans, prompts, and other generated content. The system uses a hybrid approach that embeds templates directly in the binary while allowing filesystem-based overrides for customization.
+The xzagentz template system provides a flexible, reliable, and user-friendly
+way to manage templates for plans, prompts, and other generated content. The
+system uses a hybrid approach that embeds templates directly in the binary while
+allowing filesystem-based overrides for customization.
 
 ## Design Goals
 
-1. **Zero Setup**: Tool works out-of-box with no installation or configuration required
+1. **Zero Setup**: Tool works out-of-box with no installation or configuration
+   required
 2. **Offline Operation**: No network dependency - critical for developer tools
-3. **Version Consistency**: Templates are version-locked to the binary to prevent mismatches
+3. **Version Consistency**: Templates are version-locked to the binary to
+   prevent mismatches
 4. **Single Artifact**: Distribution is just one binary file
 5. **Customizable**: Power users can override or extend templates
 6. **Fast Access**: No network latency, minimal I/O operations
@@ -28,6 +33,7 @@ Priority 3: Embedded Templates (compiled into binary)
 ```
 
 This approach provides:
+
 - Default embedded templates ensure the tool always works
 - User config directory allows permanent customization
 - Command-line flag enables project-specific or team-shared templates
@@ -473,26 +479,26 @@ xzagentz --template-dir .xzagentz/templates plan create architecture
 
 ### Embedded vs Remote URL
 
-| Aspect | Embedded (Chosen) | Remote URL |
-|--------|------------------|------------|
-| **Works offline** | ✅ Yes | ❌ No |
-| **Zero setup** | ✅ Yes | ✅ Yes |
-| **Version consistency** | ✅ Perfect | ❌ Can mismatch |
-| **Network dependency** | ✅ None | ❌ Required |
-| **Security** | ✅ No remote code | ⚠️ Trust remote source |
-| **Speed** | ✅ Instant | ⚠️ Network latency |
-| **Binary size** | ⚠️ +50KB | ✅ Small |
-| **Update templates** | Recompile | Automatic |
+| Aspect                  | Embedded (Chosen) | Remote URL             |
+| ----------------------- | ----------------- | ---------------------- |
+| **Works offline**       | ✅ Yes            | ❌ No                  |
+| **Zero setup**          | ✅ Yes            | ✅ Yes                 |
+| **Version consistency** | ✅ Perfect        | ❌ Can mismatch        |
+| **Network dependency**  | ✅ None           | ❌ Required            |
+| **Security**            | ✅ No remote code | ⚠️ Trust remote source |
+| **Speed**               | ✅ Instant        | ⚠️ Network latency     |
+| **Binary size**         | ⚠️ +50KB          | ✅ Small               |
+| **Update templates**    | Recompile         | Automatic              |
 
 ### Embedded vs Filesystem Only
 
-| Aspect | Embedded (Chosen) | Filesystem Only |
-|--------|------------------|-----------------|
-| **Works out-of-box** | ✅ Yes | ❌ Requires setup |
-| **Installation complexity** | ✅ Single file | ⚠️ Multiple files |
-| **Version consistency** | ✅ Perfect | ⚠️ Manual sync |
-| **User customization** | ✅ Via override | ✅ Direct edit |
-| **Distribution** | ✅ Single artifact | ❌ Multiple artifacts |
+| Aspect                      | Embedded (Chosen)  | Filesystem Only       |
+| --------------------------- | ------------------ | --------------------- |
+| **Works out-of-box**        | ✅ Yes             | ❌ Requires setup     |
+| **Installation complexity** | ✅ Single file     | ⚠️ Multiple files     |
+| **Version consistency**     | ✅ Perfect         | ⚠️ Manual sync        |
+| **User customization**      | ✅ Via override    | ✅ Direct edit        |
+| **Distribution**            | ✅ Single artifact | ❌ Multiple artifacts |
 
 ### Why Hybrid Approach Wins
 
@@ -508,6 +514,7 @@ The hybrid embedded + filesystem override approach provides:
 ## Binary Size Impact
 
 Estimated template sizes:
+
 - Architecture plan templates: ~5KB each × 4 templates = 20KB
 - Implementation plan template: ~8KB
 - Prompt templates: ~3KB each × 3 templates = 9KB
@@ -516,6 +523,7 @@ Estimated template sizes:
 Total embedded template size: ~50KB
 
 This is negligible compared to:
+
 - Rust runtime and stdlib: ~500KB
 - Dependencies (clap, serde, etc.): ~2-3MB
 - Total binary size: ~3-5MB
@@ -699,12 +707,14 @@ predicates = "3.0"     # Test assertions
 The following documentation must be created:
 
 1. **User Guide** (`docs/how_to/customize_templates.md`)
+
    - How to export templates
    - How to modify templates
    - Template variable reference
    - Custom template directory setup
 
 2. **Template Reference** (`docs/reference/template_format.md`)
+
    - Template metadata format
    - Available placeholders
    - Template validation rules
@@ -729,12 +739,14 @@ Potential future improvements (not in initial implementation):
 
 ## References
 
-- Rust `include_str!` macro: https://doc.rust-lang.org/std/macro.include_str.html
-- XDG Base Directory Specification: https://specifications.freedesktop.org/basedir-spec/latest/
-- Template design patterns: Similar to tools like `cargo-generate`, `cookiecutter`
+- Rust `include_str!` macro:
+  <https://doc.rust-lang.org/std/macro.include_str.html>
+- XDG Base Directory Specification:
+  <https://specifications.freedesktop.org/basedir-spec/latest/>
+- Template design patterns: Similar to tools like `cargo-generate`,
+  `cookiecutter`
 
 ---
 
-**Created**: 2024
-**Author**: xzagentz development team
-**Status**: Design approved, ready for implementation
+**Created**: 2024 **Author**: xzagentz development team **Status**: Design
+approved, ready for implementation

@@ -1,3 +1,8 @@
+#---
+# name: task_prompt
+# description: Prompt template for a task
+#---
+
 # Task Prompt - {{task_title}}
 
 ## Task Information

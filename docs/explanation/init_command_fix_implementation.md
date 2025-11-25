@@ -2,7 +2,11 @@
 
 ## Overview
 
-Fixed the `init` command to properly respect environment variables and CLI arguments when resolving target directories. Previously, the command ignored `XZAGENTZ_COMPONENT_DIR` and `XZAGENTZ_TEMPLATE_DIR` environment variables, causing all 9 init-related tests to fail. Additionally fixed dry-run mode to skip validation checks and always succeed.
+Fixed the `init` command to properly respect environment variables and CLI
+arguments when resolving target directories. Previously, the command ignored
+`XZAGENTZ_COMPONENT_DIR` and `XZAGENTZ_TEMPLATE_DIR` environment variables,
+causing all 9 init-related tests to fail. Additionally fixed dry-run mode to
+skip validation checks and always succeed.
 
 ## Components Delivered
 
@@ -15,9 +19,12 @@ Total changes: 18 lines modified
 
 ### Issue 1: Environment Variables Ignored
 
-The init command was using `default_components_dir()` and `default_templates_dir()` functions which return hardcoded paths without checking environment variables.
+The init command was using `default_components_dir()` and
+`default_templates_dir()` functions which return hardcoded paths without
+checking environment variables.
 
 **Before**:
+
 ```rust
 let components_dir = self
     .config
@@ -27,15 +34,18 @@ let components_dir = self
 ```
 
 This meant:
+
 - CLI arguments worked (via `config.components_dir`)
 - Environment variables were completely ignored
 - Always fell back to `~/.config/xzagentz/components`
 
 ### Issue 2: Dry-Run Mode Still Validated
 
-Dry-run mode was checking for file conflicts and failing with the same error as normal mode, defeating its purpose as a preview-only operation.
+Dry-run mode was checking for file conflicts and failing with the same error as
+normal mode, defeating its purpose as a preview-only operation.
 
 **Before**:
+
 ```rust
 // Check for conflicts before extraction
 let conflicts = self.check_conflicts(&components_dir, &templates_dir)?;
@@ -56,7 +66,9 @@ This caused dry-run to fail when existing files were present.
 
 ### Issue 3: Force Flag Not Applied
 
-While the force flag was being checked, it was only preventing the error message. The actual file extraction still needed to honor the force setting during dry-run preview.
+While the force flag was being checked, it was only preventing the error
+message. The actual file extraction still needed to honor the force setting
+during dry-run preview.
 
 ## Solution Implemented
 
@@ -69,6 +81,7 @@ Implemented correct precedence hierarchy:
 3. System defaults (lowest priority)
 
 **After**:
+
 ```rust
 // Resolve directories with proper precedence: CLI args > env vars > defaults
 let components_dir = self.config.components_dir.clone().or_else(|| {
@@ -85,15 +98,19 @@ let templates_dir = self.config.templates_dir.clone().or_else(|| {
 ```
 
 This correctly implements the resolution hierarchy:
+
 - `config.components_dir` (from CLI `--components-dir` flag) takes precedence
-- Falls back to `XZAGENTZ_COMPONENT_DIR` environment variable if CLI arg not provided
+- Falls back to `XZAGENTZ_COMPONENT_DIR` environment variable if CLI arg not
+  provided
 - Falls back to default path if neither CLI arg nor env var provided
 
 ### Fix 2: Dry-Run Mode Skips Validation
 
-Moved dry-run check before conflict checking so preview mode never fails on existing files:
+Moved dry-run check before conflict checking so preview mode never fails on
+existing files:
 
 **After**:
+
 ```rust
 // In dry-run mode, skip conflict checking and just show what would be done
 if self.config.dry_run {
@@ -112,19 +129,22 @@ if !conflicts.is_empty() && !self.config.force {
 ```
 
 Benefits:
+
 - Dry-run always succeeds and shows preview
 - No false negatives from existing files
 - Users can preview extraction without errors
 
 ### Fix 3: Force Flag Properly Honored
 
-The force flag was already being checked correctly in the main execution path. The fix to dry-run mode ensures the entire flow works as intended.
+The force flag was already being checked correctly in the main execution path.
+The fix to dry-run mode ensures the entire flow works as intended.
 
 ## Implementation Details
 
 ### Directory Resolution Logic
 
-The resolution uses Rust's `Option::or_else()` combinator to implement fallback logic:
+The resolution uses Rust's `Option::or_else()` combinator to implement fallback
+logic:
 
 ```rust
 self.config.components_dir.clone()  // Try CLI argument first
@@ -137,6 +157,7 @@ self.config.components_dir.clone()  // Try CLI argument first
 ```
 
 This provides:
+
 - Clean, functional-style code
 - Proper precedence without nested if statements
 - Type-safe resolution with no unwraps on potentially missing values
@@ -144,12 +165,14 @@ This provides:
 ### Dry-Run Execution Flow
 
 **Before**:
+
 1. Resolve directories
 2. Check conflicts (FAIL if conflicts exist)
 3. Check if dry-run
 4. Return dry-run result
 
 **After**:
+
 1. Resolve directories
 2. Check if dry-run (return immediately)
 3. Check conflicts (only in normal mode)
@@ -205,6 +228,7 @@ test result: ok. 64 passed; 0 failed; 7 ignored
 ```
 
 Complete success:
+
 - 64 non-ignored tests passing (100% pass rate)
 - 7 tests ignored (require LLM API keys)
 - 0 failures
@@ -249,6 +273,7 @@ All AGENTS.md quality gates passed:
 ### Behavior Examples
 
 **CLI argument takes precedence**:
+
 ```bash
 export XZAGENTZ_COMPONENT_DIR=/env/components
 xzagentz init --components-dir /cli/components
@@ -256,6 +281,7 @@ xzagentz init --components-dir /cli/components
 ```
 
 **Environment variable as fallback**:
+
 ```bash
 export XZAGENTZ_COMPONENT_DIR=/env/components
 xzagentz init
@@ -263,6 +289,7 @@ xzagentz init
 ```
 
 **Default as final fallback**:
+
 ```bash
 unset XZAGENTZ_COMPONENT_DIR
 xzagentz init
@@ -270,6 +297,7 @@ xzagentz init
 ```
 
 **Dry-run never fails**:
+
 ```bash
 # Even with existing files
 xzagentz init --dry-run
@@ -339,7 +367,8 @@ This fix complements the earlier documentation updates:
 1. Prompt command documentation (3 tests fixed)
 2. Init command implementation (9 tests fixed)
 
-Combined impact: 12 failing tests resolved, bringing pass rate from 73.2% to 100% (excluding LLM-dependent tests).
+Combined impact: 12 failing tests resolved, bringing pass rate from 73.2% to
+100% (excluding LLM-dependent tests).
 
 ## References
 
@@ -352,13 +381,20 @@ Combined impact: 12 failing tests resolved, bringing pass rate from 73.2% to 100
 
 ## Conclusion
 
-Successfully fixed the init command to properly respect the documented configuration hierarchy. The fix is minimal (18 lines changed), focused, and well-tested. All CLI validation tests now pass, providing comprehensive regression protection.
+Successfully fixed the init command to properly respect the documented
+configuration hierarchy. The fix is minimal (18 lines changed), focused, and
+well-tested. All CLI validation tests now pass, providing comprehensive
+regression protection.
 
 The implementation correctly balances three concerns:
+
 1. User control via CLI arguments
 2. Environment-based configuration for automation
 3. Sensible defaults for simplicity
 
-Dry-run mode now works as intended, providing preview functionality without false failures. The force flag properly overrides conflict detection. Environment variables are respected throughout the resolution chain.
+Dry-run mode now works as intended, providing preview functionality without
+false failures. The force flag properly overrides conflict detection.
+Environment variables are respected throughout the resolution chain.
 
-With this fix complete, the xzagentz CLI has 100% test coverage for all documented commands (excluding those requiring external LLM API credentials).
+With this fix complete, the xzagentz CLI has 100% test coverage for all
+documented commands (excluding those requiring external LLM API credentials).

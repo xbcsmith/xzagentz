@@ -11,7 +11,9 @@ use std::collections::HashMap;
 use std::fs;
 use std::path::{Path, PathBuf};
 
+use crate::core::ComponentType;
 use crate::{Error, Result};
+use std::str::FromStr;
 
 use super::Template;
 
@@ -136,15 +138,32 @@ impl TemplateLoader {
     /// Returns `Error::TemplateNotFound` if the file doesn't exist
     /// Returns `Error::TemplateParse` if the TOML is invalid
     fn load_from_file(&self, name: &str) -> Result<Template> {
-        let file_path = self.template_dir.join(format!("{}.toml", name));
+        // Try multiple extensions in a prioritized order: toml, yaml, md
+        let candidates = vec![
+            self.template_dir.join(format!("{}.toml", name)),
+            self.template_dir.join(format!("{}.yaml", name)),
+            self.template_dir.join(format!("{}.md", name)),
+            self.template_dir.join(format!("{}.markdown", name)),
+        ];
 
-        if !file_path.exists() {
-            return Err(Error::TemplateNotFound(format!(
-                "Template '{}' not found at {}",
-                name,
-                file_path.display()
-            )));
+        let mut found: Option<PathBuf> = None;
+        for path in candidates {
+            if path.exists() {
+                found = Some(path);
+                break;
+            }
         }
+
+        let file_path = match found {
+            Some(p) => p,
+            None => {
+                return Err(Error::TemplateNotFound(format!(
+                    "Template '{}' not found in {}",
+                    name,
+                    self.template_dir.display()
+                )))
+            }
+        };
 
         let contents = fs::read_to_string(&file_path).map_err(|e| {
             Error::Io(format!(
@@ -154,11 +173,130 @@ impl TemplateLoader {
             ))
         })?;
 
-        let template: Template = toml::from_str(&contents).map_err(|e| {
-            Error::TemplateParse(format!("Failed to parse template '{}': {}", name, e))
-        })?;
+        // Determine parsing strategy based on file extension
+        match file_path.extension().and_then(|s| s.to_str()) {
+            Some("toml") => {
+                let template: Template = toml::from_str(&contents).map_err(|e| {
+                    Error::TemplateParse(format!("Failed to parse template '{}': {}", name, e))
+                })?;
+                Ok(template)
+            }
+            Some("yaml") => {
+                let template: Template = serde_yaml::from_str(&contents).map_err(|e| {
+                    Error::TemplateParse(format!("Failed to parse YAML template '{}': {}", name, e))
+                })?;
+                Ok(template)
+            }
+            Some("md") | Some("markdown") => {
+                // Try to extract YAML frontmatter between leading '---' markers
+                let mut template = Template::new(name.to_string(), String::new());
 
-        Ok(template)
+                if contents.starts_with("---") {
+                    // Split into lines and find the closing frontmatter delimiter on its own line
+                    let lines: Vec<&str> = contents.lines().collect();
+                    let mut end_line = None;
+                    for (i, line) in lines.iter().enumerate().skip(1) {
+                        if line.trim() == "---" {
+                            end_line = Some(i);
+                            break;
+                        }
+                    }
+
+                    if let Some(idx) = end_line {
+                        let fm = lines[1..idx].join("\n");
+                        let meta: serde_yaml::Value = serde_yaml::from_str(&fm).map_err(|e| {
+                            Error::TemplateParse(format!(
+                                "Failed to parse frontmatter for '{}': {}",
+                                name, e
+                            ))
+                        })?;
+
+                        if let Some(n) = meta.get("name").and_then(|v| v.as_str()) {
+                            template.name = n.to_string();
+                        }
+
+                        if let Some(d) = meta.get("description").and_then(|v| v.as_str()) {
+                            template.description = d.to_string();
+                        }
+
+                        if let Some(v) = meta.get("version").and_then(|v| v.as_str()) {
+                            template.version = Some(v.to_string());
+                        }
+
+                        if let Some(a) = meta.get("author").and_then(|v| v.as_str()) {
+                            template.author = Some(a.to_string());
+                        }
+
+                        if let Some(map) = meta.get("metadata") {
+                            if let Some(obj) = map.as_mapping() {
+                                for (k, v) in obj {
+                                    if let (Some(ks), Some(vs)) = (k.as_str(), v.as_str()) {
+                                        template.metadata.insert(ks.to_string(), vs.to_string());
+                                    }
+                                }
+                            }
+                        }
+
+                        // Optionally parse components list from frontmatter if present
+                        if let Some(comps) = meta.get("components") {
+                            if let Some(arr) = comps.as_sequence() {
+                                for comp in arr {
+                                    if let Some(obj) = comp.as_mapping() {
+                                        let typ = obj
+                                            .get(serde_yaml::Value::String("type".to_string()))
+                                            .and_then(|v| v.as_str())
+                                            .unwrap_or("core");
+                                        let name = obj
+                                            .get(serde_yaml::Value::String("name".to_string()))
+                                            .and_then(|v| v.as_str())
+                                            .unwrap_or("")
+                                            .to_string();
+
+                                        // best effort: try to parse component type
+                                        if !name.is_empty() {
+                                            if let Ok(component_type) = ComponentType::from_str(typ)
+                                            {
+                                                template.components.push(
+                                                    crate::templates::TemplateComponent::new(
+                                                        component_type,
+                                                        name,
+                                                    ),
+                                                );
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        // If description is empty try to derive from following content
+                        if template.description.is_empty() {
+                            template.description = lines[idx + 1..]
+                                .iter()
+                                .find(|l| !l.trim().is_empty())
+                                .map(|s| s.trim().to_string())
+                                .unwrap_or_else(|| "".to_string());
+                        }
+
+                        Ok(template)
+                    } else {
+                        Err(Error::TemplateParse(format!(
+                            "Markdown template '{}' missing closing frontmatter marker",
+                            name
+                        )))
+                    }
+                } else {
+                    Err(Error::TemplateParse(format!(
+                        "Markdown template '{}' has no frontmatter",
+                        name
+                    )))
+                }
+            }
+            other => Err(Error::TemplateParse(format!(
+                "Unsupported template file extension {:?} for '{}'",
+                other, name
+            ))),
+        }
     }
 
     /// Lists all available template names
@@ -191,25 +329,40 @@ impl TemplateLoader {
             return Ok(Vec::new());
         }
 
-        let entries = fs::read_dir(&self.template_dir).map_err(|e| {
-            Error::Io(format!(
-                "Failed to read templates directory {}: {}",
-                self.template_dir.display(),
-                e
-            ))
-        })?;
-
         let mut templates = Vec::new();
 
-        for entry in entries {
-            let entry =
-                entry.map_err(|e| Error::Io(format!("Failed to read directory entry: {}", e)))?;
+        for entry in walkdir::WalkDir::new(&self.template_dir)
+            .into_iter()
+            .filter_map(|e| e.ok())
+            .filter(|e| e.path().is_file())
+        {
+            let path = entry.path().to_path_buf();
 
-            let path = entry.path();
+            if let Some(ext) = path.extension().and_then(|s| s.to_str()) {
+                // derive a relative name (path without extension, relative to template_dir)
+                if let Ok(rel) = path.strip_prefix(&self.template_dir) {
+                    let stem = path.file_stem().and_then(|s| s.to_str()).unwrap_or("");
+                    let rel_name = if let Some(parent) = rel.parent() {
+                        if parent.as_os_str().is_empty() {
+                            stem.to_string()
+                        } else {
+                            format!("{}/{}", parent.to_string_lossy(), stem)
+                        }
+                    } else {
+                        stem.to_string()
+                    };
 
-            if path.is_file() && path.extension().and_then(|s| s.to_str()) == Some("toml") {
-                if let Some(name) = path.file_stem().and_then(|s| s.to_str()) {
-                    templates.push(name.to_string());
+                    match ext {
+                        "toml" | "yaml" => templates.push(rel_name),
+                        "md" | "markdown" => {
+                            if let Ok(contents) = fs::read_to_string(&path) {
+                                if contents.starts_with("---") {
+                                    templates.push(rel_name);
+                                }
+                            }
+                        }
+                        _ => {}
+                    }
                 }
             }
         }
@@ -308,6 +461,12 @@ mod tests {
 
     fn create_test_template_file(dir: &Path, name: &str, content: &str) -> PathBuf {
         let file_path = dir.join(format!("{}.toml", name));
+        fs::write(&file_path, content).unwrap();
+        file_path
+    }
+
+    fn create_test_markdown_file(dir: &Path, name: &str, content: &str) -> PathBuf {
+        let file_path = dir.join(format!("{}.md", name));
         fs::write(&file_path, content).unwrap();
         file_path
     }
@@ -457,6 +616,61 @@ required = true
 
         assert_eq!(templates.len(), 1);
         assert_eq!(templates[0], "template1");
+    }
+
+    #[test]
+    fn test_list_templates_includes_markdown_with_frontmatter() {
+        let temp_dir = TempDir::new().unwrap();
+
+        let md_content = r#"---
+name: md-template
+description: A markdown template
+---
+
+# Md Template
+
+This is a template in markdown with frontmatter.
+"#;
+
+        create_test_template_file(temp_dir.path(), "template1", &create_valid_template_toml());
+        create_test_markdown_file(temp_dir.path(), "md_template", md_content);
+
+        let loader = TemplateLoader::with_directory(temp_dir.path());
+        let templates = loader.list().unwrap();
+
+        // we expect both the toml and md template to be listed
+        assert!(templates.contains(&"template1".to_string()));
+        assert!(templates.contains(&"md_template".to_string()));
+    }
+
+    #[test]
+    fn test_load_markdown_template_frontmatter() {
+        let temp_dir = TempDir::new().unwrap();
+
+        let md_content = r#"---
+name: md-template
+description: A markdown template
+version: 0.1.0
+author: Tester
+metadata:
+    category: prompts
+    complexity: essential
+---
+
+# Md Template
+"#;
+
+        create_test_markdown_file(temp_dir.path(), "md_template", md_content);
+
+        let loader = TemplateLoader::with_directory(temp_dir.path());
+        let tmpl = loader.load("md_template").unwrap();
+
+        assert_eq!(tmpl.name, "md-template");
+        assert_eq!(tmpl.description, "A markdown template");
+        assert_eq!(tmpl.version, Some("0.1.0".to_string()));
+        assert_eq!(tmpl.author, Some("Tester".to_string()));
+        assert_eq!(tmpl.metadata.get("category"), Some(&"prompts".to_string()));
+        assert_eq!(tmpl.components.len(), 0);
     }
 
     #[test]

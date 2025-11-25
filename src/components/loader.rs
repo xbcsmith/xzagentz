@@ -23,6 +23,7 @@
 //! // Load components from default location or embedded resources
 //! ```
 
+use crate::components::metadata::ComponentMetadata;
 use crate::components::Component;
 use crate::core::ComponentType;
 use crate::error::{Error, Result};
@@ -122,11 +123,34 @@ impl ComponentLoader {
         // Read file content
         let raw_content = fs::read_to_string(&path).map_err(|e| Error::file_io(path.clone(), e))?;
 
-        // Strip YAML frontmatter if present
-        let content = Self::strip_yaml_frontmatter(&raw_content);
+        // Parse YAML frontmatter if present and capture metadata
+        let (content, metadata_map) = if ComponentMetadata::has_frontmatter(&raw_content) {
+            match ComponentMetadata::parse_frontmatter(&raw_content) {
+                Ok((meta, body)) => {
+                    let mut map: HashMap<String, String> = HashMap::new();
+                    map.insert("name".to_string(), meta.component.name.clone());
+                    map.insert("category".to_string(), meta.component.category.clone());
+                    map.insert("version".to_string(), meta.component.version.clone());
+                    if let Some(ref desc) = meta.component.description {
+                        map.insert("description".to_string(), desc.clone());
+                    }
+                    if let Some(ref tier) = meta.component.tier {
+                        map.insert("tier".to_string(), tier.clone());
+                    }
+                    if !meta.component.languages.is_empty() {
+                        map.insert("languages".to_string(), meta.component.languages.join(","));
+                    }
 
-        // Create component
-        let component = Component::new(name, component_type, content);
+                    (body, map)
+                }
+                Err(_) => (Self::strip_yaml_frontmatter(&raw_content), HashMap::new()),
+            }
+        } else {
+            (Self::strip_yaml_frontmatter(&raw_content), HashMap::new())
+        };
+
+        // Create component with metadata map
+        let component = Component::with_metadata(name, component_type, content, metadata_map);
 
         // Cache the component
         self.cache.borrow_mut().insert(cache_key, component.clone());

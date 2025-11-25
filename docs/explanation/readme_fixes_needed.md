@@ -2,8 +2,8 @@
 
 ## Critical Issues Summary
 
-The README.md contains **5 broken commands** out of 7 examples (71% failure rate).
-Users following the documented examples will encounter immediate errors.
+The README.md contains **5 broken commands** out of 7 examples (71% failure
+rate). Users following the documented examples will encounter immediate errors.
 
 ---
 
@@ -12,7 +12,9 @@ Users following the documented examples will encounter immediate errors.
 ### Priority 1: Remove Non-Existent Commands
 
 #### Line 54: Remove `render` Command
+
 **Current (BROKEN)**:
+
 ```bash
 # Render component for specific language
 xzagentz render --component error_handling --language rust
@@ -25,13 +27,16 @@ xzagentz render --component error_handling --language rust
 ### Priority 2: Fix Incorrect Command Syntax
 
 #### Line 76: Fix `create` Command
+
 **Current (BROKEN)**:
+
 ```bash
 # Create a new project using embedded resources
 xzagentz create my-project --template rust_binary --language rust
 ```
 
 **Replace With**:
+
 ```bash
 # Create a new AGENTS.md file using a template
 xzagentz create --output AGENTS.md --template default
@@ -45,13 +50,16 @@ xzagentz create --interactive
 ---
 
 #### Line 57: Fix `validate` Command
+
 **Current (BROKEN)**:
+
 ```bash
 # Generate validation report
 xzagentz validate --report
 ```
 
 **Replace With**:
+
 ```bash
 # Generate detailed validation report
 xzagentz validate --detailed
@@ -63,13 +71,16 @@ xzagentz validate --detailed --fix
 ---
 
 #### Line 63: Fix `list` Command
+
 **Current (BROKEN)**:
+
 ```bash
 # List available components
 xzagentz list --category core
 ```
 
 **Replace With**:
+
 ```bash
 # List available components
 xzagentz list components
@@ -85,9 +96,10 @@ xzagentz list components --category core
 #### Lines 67-70: Update "Embedded Resources" Section Description
 
 **Current Text**:
-> xzagentz includes all components and templates embedded in the binary, allowing
-> it to work out of the box without any setup. You can also customize resources
-> by extracting and modifying them.
+
+> xzagentz includes all components and templates embedded in the binary,
+> allowing it to work out of the box without any setup. You can also customize
+> resources by extracting and modifying them.
 
 **Action**: This text is accurate - keep as-is.
 
@@ -99,7 +111,7 @@ However, the **examples that follow** are broken (see Line 76 fix above).
 
 Replace lines 48-66 with:
 
-```markdown
+````markdown
 ### Basic Usage
 
 ```bash
@@ -121,7 +133,9 @@ xzagentz list templates
 # Check all components with tests
 cargo test size_validation_test
 ```
-```
+````
+
+````
 
 ---
 
@@ -146,8 +160,9 @@ xzagentz list components
 
 # List embedded templates
 xzagentz list templates
-```
-```
+````
+
+````
 
 ---
 
@@ -186,7 +201,7 @@ rm test-agents.md
 
 # Test init
 cargo run -- init --dry-run
-```
+````
 
 **Expected**: All commands should execute without "error: unexpected argument"
 or "error: unrecognized subcommand" messages.
@@ -212,6 +227,7 @@ fn test_readme_examples_are_valid() {
 ### Cross-Reference Documentation
 
 Ensure consistency between:
+
 - `README.md` (user-facing quick start)
 - `docs/reference/cli_commands.md` (complete reference - already accurate)
 - `tests/cli_commands_validation_tests.rs` (integration tests - already passing)
@@ -223,26 +239,26 @@ A "Common Mistakes" section in README.md:
 ```markdown
 ## Common Mistakes
 
-**❌ Wrong**: `xzagentz list --category core`
-**✅ Correct**: `xzagentz list components --category core`
+**❌ Wrong**: `xzagentz list --category core` **✅ Correct**:
+`xzagentz list components --category core`
 
-**❌ Wrong**: `xzagentz validate --report`
-**✅ Correct**: `xzagentz validate --detailed`
+**❌ Wrong**: `xzagentz validate --report` **✅ Correct**:
+`xzagentz validate --detailed`
 
-**❌ Wrong**: `xzagentz render --component X`
-**✅ Correct**: Command does not exist (use `list` and `validate` instead)
+**❌ Wrong**: `xzagentz render --component X` **✅ Correct**: Command does not
+exist (use `list` and `validate` instead)
 ```
 
 ---
 
 ## Summary
 
-| Section | Lines | Action | Effort |
-|---------|-------|--------|--------|
-| Basic Usage | 48-66 | Replace with corrected examples | 5 min |
-| Embedded Resources | 71-84 | Replace with corrected examples | 5 min |
-| Remove render | 54-55 | Delete lines | 1 min |
-| **Total** | - | - | **~15 min** |
+| Section            | Lines | Action                          | Effort      |
+| ------------------ | ----- | ------------------------------- | ----------- |
+| Basic Usage        | 48-66 | Replace with corrected examples | 5 min       |
+| Embedded Resources | 71-84 | Replace with corrected examples | 5 min       |
+| Remove render      | 54-55 | Delete lines                    | 1 min       |
+| **Total**          | -     | -                               | **~15 min** |
 
 **Impact**: Fixes 71% failure rate → 0% failure rate for documented commands.
 

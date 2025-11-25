@@ -1,3 +1,12 @@
+---
+component:
+   name: git
+   category: tools
+   version: "1.0"
+   description: Core Git workflows and conventions for daily development tasks
+   languages: []
+---
+
 # Git Guidelines and Workflows
 
 This section provides Git-specific guidelines, workflows, and best practices for version control in this project.

@@ -2,20 +2,20 @@
 
 ## Overview
 
-This document provides a comprehensive plan to improve CLI UX by using positional
-arguments for file paths instead of `--output` flags. This makes commands more
-intuitive and follows common CLI patterns.
+This document provides a comprehensive plan to improve CLI UX by using
+positional arguments for file paths instead of `--output` flags. This makes
+commands more intuitive and follows common CLI patterns.
 
 ## Current State Analysis
 
 ### Commands with File Path Arguments
 
-| Command | Current Signature | File Arg Type | Status |
-|---------|------------------|---------------|---------|
-| `validate` | `validate [FILE]` | Positional | ✅ Good |
-| `create` | `create --output <PATH>` | Flag | ❌ Needs fix |
-| `update` | `update [FILE]` | Positional | ✅ Good |
-| `add` | `add [FILE]` | Positional | ✅ Good |
+| Command    | Current Signature        | File Arg Type | Status       |
+| ---------- | ------------------------ | ------------- | ------------ |
+| `validate` | `validate [FILE]`        | Positional    | ✅ Good      |
+| `create`   | `create --output <PATH>` | Flag          | ❌ Needs fix |
+| `update`   | `update [FILE]`          | Positional    | ✅ Good      |
+| `add`      | `add [FILE]`             | Positional    | ✅ Good      |
 
 **Conclusion**: Only `create` command needs to be changed.
 
@@ -26,12 +26,14 @@ intuitive and follows common CLI patterns.
 ### Create Command
 
 **Current (Unintuitive)**:
+
 ```bash
 xzagentz create --output AGENTS.md
 xzagentz create --output my-file.md --template default
 ```
 
 **Proposed (Intuitive)**:
+
 ```bash
 xzagentz create AGENTS.md
 xzagentz create my-file.md --template default
@@ -39,7 +41,9 @@ xzagentz create                              # Uses default: AGENTS.md
 ```
 
 **Benefits**:
-- Matches common CLI patterns (`cat file.txt`, `vim file.txt`, `git add file.txt`)
+
+- Matches common CLI patterns (`cat file.txt`, `vim file.txt`,
+  `git add file.txt`)
 - Shorter command
 - More intuitive - file path is the primary argument
 - Consistent with `validate`, `update`, `add` which already use positional args
@@ -51,6 +55,7 @@ xzagentz create                              # Uses default: AGENTS.md
 ### Step 1: Update CLI Definition (src/cli/mod.rs)
 
 **Current Code (Lines 109-122)**:
+
 ```rust
 /// Create a new AGENTS.md file
 Create {
@@ -73,6 +78,7 @@ Create {
 ```
 
 **New Code**:
+
 ```rust
 /// Create a new AGENTS.md file
 Create {
@@ -95,6 +101,7 @@ Create {
 ```
 
 **Changes**:
+
 - Remove `#[arg(short, long)]` attributes (makes it positional)
 - Rename `output` → `file` (consistent with other commands)
 - Keep `default_value = "AGENTS.md"` (preserves current default behavior)
@@ -106,6 +113,7 @@ Create {
 **Location**: `src/main.rs` (find the `Commands::Create` match arm)
 
 **Current Code** (estimated):
+
 ```rust
 Commands::Create {
     output,
@@ -119,6 +127,7 @@ Commands::Create {
 ```
 
 **New Code**:
+
 ```rust
 Commands::Create {
     file,
@@ -132,6 +141,7 @@ Commands::Create {
 ```
 
 **Changes**:
+
 - Rename `output` → `file`
 - No other changes needed
 
@@ -140,6 +150,7 @@ Commands::Create {
 ### Step 3: Update CreateCommand Struct (src/cli/create.rs)
 
 **Current Code (Lines 67-76)**:
+
 ```rust
 pub struct CreateCommand {
     /// Output file path
@@ -154,6 +165,7 @@ pub struct CreateCommand {
 ```
 
 **New Code**:
+
 ```rust
 pub struct CreateCommand {
     /// Output file path
@@ -168,6 +180,7 @@ pub struct CreateCommand {
 ```
 
 **Changes**:
+
 - Rename `output` → `file`
 
 ---
@@ -175,6 +188,7 @@ pub struct CreateCommand {
 ### Step 4: Update CreateCommand::new() (src/cli/create.rs)
 
 **Current Code (Lines 80-87)**:
+
 ```rust
 pub fn new(output: PathBuf, template: Option<String>, force: bool, interactive: bool) -> Self {
     Self {
@@ -187,6 +201,7 @@ pub fn new(output: PathBuf, template: Option<String>, force: bool, interactive: 
 ```
 
 **New Code**:
+
 ```rust
 pub fn new(file: PathBuf, template: Option<String>, force: bool, interactive: bool) -> Self {
     Self {
@@ -199,6 +214,7 @@ pub fn new(file: PathBuf, template: Option<String>, force: bool, interactive: bo
 ```
 
 **Changes**:
+
 - Rename `output` → `file`
 
 ---
@@ -208,10 +224,12 @@ pub fn new(file: PathBuf, template: Option<String>, force: bool, interactive: bo
 **Location**: `src/cli/create.rs` (throughout the `execute()` method)
 
 **Find and Replace**:
+
 - `self.output` → `self.file`
 - `config.output` → `config.file` (if CreateConfig also uses output)
 
 **Example Change**:
+
 ```rust
 // Before
 if self.output.exists() && !self.force {
@@ -229,6 +247,7 @@ if self.file.exists() && !self.force {
 ### Step 6: Update CreateConfig Struct (src/cli/create.rs)
 
 **Current Code (Lines 48-63)**:
+
 ```rust
 pub struct CreateConfig {
     /// Output file path
@@ -249,6 +268,7 @@ pub struct CreateConfig {
 ```
 
 **New Code**:
+
 ```rust
 pub struct CreateConfig {
     /// Output file path
@@ -269,6 +289,7 @@ pub struct CreateConfig {
 ```
 
 **Changes**:
+
 - Rename `output` → `file`
 
 ---
@@ -278,10 +299,12 @@ pub struct CreateConfig {
 **Location**: Lines 967-1143 (all test functions)
 
 **Find and Replace in Tests**:
+
 - `output:` → `file:`
 - `.output` → `.file`
 
 **Example Change**:
+
 ```rust
 // Before
 let cmd = CreateCommand::new(
@@ -307,6 +330,7 @@ assert_eq!(cmd.file, PathBuf::from("test.md"));
 ### Step 8: Update CLI Tests (src/cli/mod.rs)
 
 **Add New Test**:
+
 ```rust
 #[test]
 fn test_parse_create_with_file() {
@@ -361,9 +385,11 @@ fn test_parse_create_with_template() {
 **Location**: `tests/cli_commands_validation_tests.rs`
 
 **Find and Replace**:
+
 - `--output` → positional argument
 
 **Example Changes**:
+
 ```rust
 // Before
 #[test]
@@ -398,6 +424,7 @@ fn test_create_with_file() {
 #### README.md (Lines 79-90)
 
 **Current**:
+
 ```bash
 # Create a new AGENTS.md file
 xzagentz create --output AGENTS.md
@@ -407,6 +434,7 @@ xzagentz create --interactive
 ```
 
 **New**:
+
 ```bash
 # Create a new AGENTS.md file (default name)
 xzagentz create
@@ -424,6 +452,7 @@ xzagentz create my-agents.md --template rust
 #### docs/reference/cli_commands.md
 
 **Update the `create` command section**:
+
 - Change signature to `xzagentz create [FILE] [OPTIONS]`
 - Update all examples to use positional argument
 - Add note about default file name
@@ -435,6 +464,7 @@ xzagentz create my-agents.md --template rust
 The help text will automatically update based on clap attributes:
 
 **New Help Output**:
+
 ```text
 Create a new AGENTS.md file
 
@@ -459,24 +489,28 @@ Options:
 **YES** - This is a breaking change for users who use `--output` flag.
 
 **However**, the impact is minimal:
+
 1. Most users likely use the default (`xzagentz create`)
 2. The old flag can be detected and migrated with a deprecation warning
 
 ### Migration Strategy
 
 **Option 1: Hard Break (Recommended)**
+
 - Remove `--output` completely
 - Update documentation
 - Bump version to indicate breaking change
 - Rationale: Simple, clean, the tool is early stage
 
 **Option 2: Deprecation Period**
+
 - Support both `--output` and positional arg for 1-2 versions
 - Print deprecation warning when `--output` is used
 - Remove in future version
 - Rationale: Gentler transition, more work
 
 **Recommendation**: Use Option 1 (hard break) because:
+
 - Tool appears to be pre-1.0 or early stage
 - Command is rarely used in scripts (more interactive)
 - Clean slate is better than technical debt
@@ -554,6 +588,7 @@ Options:
 **Total Time**: 1-2 hours
 
 **Breakdown**:
+
 - Code changes: 30 minutes
 - Test updates: 30 minutes
 - Documentation updates: 15 minutes
@@ -561,6 +596,7 @@ Options:
 - Manual testing: 15 minutes
 
 **Complexity**: LOW
+
 - Mostly find-and-replace operations
 - Well-defined scope
 - Minimal risk
@@ -572,10 +608,12 @@ Options:
 If issues are discovered after release:
 
 1. **Immediate Rollback**:
+
    - Revert commit
    - Redeploy previous version
 
 2. **Forward Fix**:
+
    - Add back `--output` as alias
    - Keep positional arg as primary
    - Both work simultaneously
@@ -605,11 +643,13 @@ If issues are discovered after release:
 ### Examples
 
 **Before**:
+
 ```bash
 xzagentz create --output AGENTS.md --template rust --force
 ```
 
 **After**:
+
 ```bash
 xzagentz create AGENTS.md --template rust --force
 ```
@@ -622,12 +662,12 @@ xzagentz create AGENTS.md --template rust --force
 
 After this change, all file-related commands will have consistent signatures:
 
-| Command | Signature | Consistency |
-|---------|-----------|-------------|
-| `validate` | `validate [FILE]` | ✅ Consistent |
-| `create` | `create [FILE]` | ✅ Consistent (after change) |
-| `update` | `update [FILE]` | ✅ Consistent |
-| `add` | `add [FILE]` | ✅ Consistent |
+| Command    | Signature         | Consistency                  |
+| ---------- | ----------------- | ---------------------------- |
+| `validate` | `validate [FILE]` | ✅ Consistent                |
+| `create`   | `create [FILE]`   | ✅ Consistent (after change) |
+| `update`   | `update [FILE]`   | ✅ Consistent                |
+| `add`      | `add [FILE]`      | ✅ Consistent                |
 
 **Result**: Perfect consistency across all file operations.
 
@@ -638,10 +678,12 @@ After this change, all file-related commands will have consistent signatures:
 ### Alternative 1: Keep --output Flag
 
 **Pros**:
+
 - No breaking changes
 - Explicit flag name
 
 **Cons**:
+
 - Inconsistent with validate/update/add
 - More verbose
 - Less intuitive
@@ -651,10 +693,12 @@ After this change, all file-related commands will have consistent signatures:
 ### Alternative 2: Support Both Patterns
 
 **Pros**:
+
 - Backward compatible
 - Flexibility
 
 **Cons**:
+
 - Confusing documentation
 - Two ways to do same thing
 - Technical debt
@@ -664,10 +708,12 @@ After this change, all file-related commands will have consistent signatures:
 ### Alternative 3: Make All Commands Use Flags (Proposed Pattern)
 
 **Pros**:
+
 - Consistent (all use flags)
 - No breaking changes
 
 **Cons**:
+
 - Would require changing validate/update/add
 - Goes against CLI best practices
 - More verbose for all commands
@@ -681,6 +727,7 @@ After this change, all file-related commands will have consistent signatures:
 **PROCEED WITH IMPLEMENTATION**
 
 The proposed change:
+
 - Improves UX significantly
 - Minimal implementation effort
 - Low risk
@@ -688,6 +735,7 @@ The proposed change:
 - Follows industry best practices
 
 Next steps:
+
 1. Get approval from maintainer
 2. Implement code changes
 3. Update tests

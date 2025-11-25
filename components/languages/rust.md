@@ -1,3 +1,13 @@
+---
+component:
+    name: rust
+    category: languages
+    version: "1.0"
+    description: Rust-specific development guidelines, patterns, and best practices
+    languages:
+        - rust
+---
+
 # Rust Language Guidelines
 
 This section provides Rust-specific guidelines, patterns, and best practices for this project.

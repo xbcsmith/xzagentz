@@ -28,16 +28,19 @@ xzagentz create my-agents.md --template rust # With template
 ### Files Modified
 
 1. **src/cli/mod.rs** (Lines 112-120)
+
    - Changed `Create` enum variant
    - Removed `#[arg(short, long)]` to make argument positional
    - Renamed field: `output` → `file`
    - Added 3 new CLI parsing tests
 
 2. **src/main.rs** (Lines 94-113)
+
    - Updated `Commands::Create` match arm
    - Changed all `output` references to `file`
 
 3. **src/cli/create.rs** (Multiple locations)
+
    - `CreateConfig` struct: `output` → `file`
    - `CreateCommand` struct: `output` → `file`
    - `CreateCommand::new()`: Parameter renamed
@@ -45,11 +48,13 @@ xzagentz create my-agents.md --template rust # With template
    - Unit test: Updated assertion
 
 4. **tests/cli_commands_validation_tests.rs** (Lines 459-560)
+
    - Removed all `--output` and `-o` flags
    - Updated test names for clarity
    - All 7 create tests now use positional syntax
 
 5. **README.md** (Lines 79-95)
+
    - Updated examples to show new syntax
    - Added more usage examples
    - Clarified default behavior
@@ -62,9 +67,9 @@ xzagentz create my-agents.md --template rust # With template
 
 ### Code Changes Summary
 
-**Total Lines Changed**: ~50 lines across 6 files
-**Breaking Change**: Yes (removed `--output` flag)
-**Backward Compatibility**: None (hard break, as requested)
+**Total Lines Changed**: ~50 lines across 6 files **Breaking Change**: Yes
+(removed `--output` flag) **Backward Compatibility**: None (hard break, as
+requested)
 
 ### Key Implementation Decisions
 
@@ -95,6 +100,7 @@ cargo test --lib create::tests
 ```
 
 **New Tests Added**:
+
 - `test_parse_create_with_file` - Test with custom filename
 - `test_parse_create_default_file` - Test default (no file specified)
 - `test_parse_create_with_template` - Test with filename and template
@@ -109,6 +115,7 @@ cargo test --test cli_commands_validation_tests test_create
 ```
 
 **Tests Updated**:
+
 - `test_create_default` - Positional arg instead of `--output`
 - `test_create_with_custom_file` - Renamed from `test_create_with_output_short`
 - `test_create_with_template` - Removed `--output` flag
@@ -170,12 +177,12 @@ Options:
 
 After this change, all file-related commands now have consistent signatures:
 
-| Command | Signature | Consistency |
-|---------|-----------|-------------|
+| Command    | Signature         | Consistency   |
+| ---------- | ----------------- | ------------- |
 | `validate` | `validate [FILE]` | ✅ Consistent |
-| `create` | `create [FILE]` | ✅ Consistent |
-| `update` | `update [FILE]` | ✅ Consistent |
-| `add` | `add [FILE]` | ✅ Consistent |
+| `create`   | `create [FILE]`   | ✅ Consistent |
+| `update`   | `update [FILE]`   | ✅ Consistent |
+| `add`      | `add [FILE]`      | ✅ Consistent |
 
 **Result**: Perfect consistency across all file operations.
 
@@ -183,7 +190,8 @@ After this change, all file-related commands now have consistent signatures:
 
 ### User Experience
 
-- ✅ More intuitive: Matches common CLI patterns (`cat file.txt`, `vim file.txt`)
+- ✅ More intuitive: Matches common CLI patterns (`cat file.txt`,
+  `vim file.txt`)
 - ✅ Shorter commands: 9 fewer characters on average
 - ✅ Consistent: All file commands use same pattern
 - ✅ Discoverable: Help text clearly shows usage
@@ -209,6 +217,7 @@ xzagentz create my-agents.md --template rust
 ```
 
 **Cognitive Load**:
+
 - Before: "What flag do I use for output? -o or --output?"
 - After: "Just put the filename after create, like any other command"
 
@@ -216,7 +225,8 @@ xzagentz create my-agents.md --template rust
 
 ### Impact
 
-**HIGH** - This is a breaking change that will affect existing users and scripts.
+**HIGH** - This is a breaking change that will affect existing users and
+scripts.
 
 ### Mitigation
 
@@ -240,14 +250,16 @@ xzagentz create AGENTS.md
 ```
 
 Find and replace:
-- `create --output ` → `create `
-- `create -o ` → `create `
+
+- `create --output` → `create`
+- `create -o` → `create`
 
 ## Documentation Updated
 
 ### User-Facing Documentation
 
 1. **README.md** - Quick Start section
+
    - Added examples showing default behavior
    - Added examples with custom filenames
    - Added examples combining options
@@ -260,6 +272,7 @@ Find and replace:
 ### Developer Documentation
 
 3. **docs/explanation/cli_positional_args_plan.md** (715 lines)
+
    - Complete implementation plan
    - Rationale and alternatives considered
    - Step-by-step implementation guide
@@ -296,6 +309,7 @@ Find and replace:
 ### Related Commands
 
 All other file-based commands already use positional arguments:
+
 - ✅ `validate` - No changes needed
 - ✅ `update` - No changes needed
 - ✅ `add` - No changes needed

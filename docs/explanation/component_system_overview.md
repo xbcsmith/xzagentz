@@ -1,8 +1,10 @@
 # Modular AGENTS.md Template System
 
-A component-based system for building project-specific AGENTS.md files using Rust.
+A component-based system for building project-specific AGENTS.md files using
+Rust.
 
-This document explains a component-based system for building project-specific AGENTS.md using Rust.
+This document explains a component-based system for building project-specific
+AGENTS.md using Rust.
 
 ## Directory Structure
 

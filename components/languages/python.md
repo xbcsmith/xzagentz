@@ -1,3 +1,13 @@
+---
+component:
+    name: python
+    category: languages
+    version: "1.0"
+    description: Python-specific development guidelines and best practices
+    languages:
+        - python
+---
+
 # Python Language Guidelines
 
 This section provides Python-specific guidelines for projects that include Python components.

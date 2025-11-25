@@ -39,10 +39,46 @@ pub struct ComponentList {
 impl fmt::Display for ComponentList {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         writeln!(f, "Available Components ({})", self.total)?;
-        writeln!(f, "{}", "=".repeat(50))?;
+        writeln!(f, "{}", "━".repeat(60))?;
+
+        use std::collections::HashMap;
+
+        // Group components by their category string
+        let mut groups: HashMap<String, Vec<&ComponentInfo>> = HashMap::new();
         for comp in &self.components {
-            writeln!(f, "  {}", comp)?;
+            groups
+                .entry(comp.component_type.clone())
+                .or_default()
+                .push(comp);
         }
+
+        // Preferred display order
+        let order = vec!["Core", "Languages", "Tools", "General"];
+
+        for key in order {
+            if let Some(items) = groups.get(key) {
+                writeln!(f, "\n{}", key)?;
+                writeln!(f, "{}", "─".repeat(4))?;
+
+                // sort items by name
+                let mut items_sorted = items.clone();
+                items_sorted.sort_by(|a, b| a.name.cmp(&b.name));
+
+                // compute max name length
+                let max_name = items_sorted.iter().map(|c| c.name.len()).max().unwrap_or(0);
+
+                for item in items_sorted {
+                    writeln!(
+                        f,
+                        "  {name:<width$}  {desc}",
+                        name = item.name,
+                        width = max_name,
+                        desc = item.summary
+                    )?;
+                }
+            }
+        }
+
         Ok(())
     }
 }
@@ -76,8 +112,59 @@ impl fmt::Display for TemplateList {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         writeln!(f, "Available Templates ({})", self.total)?;
         writeln!(f, "{}", "=".repeat(50))?;
+
+        use std::collections::HashMap;
+
+        let mut groups: HashMap<String, Vec<&TemplateInfo>> = HashMap::new();
         for tmpl in &self.templates {
-            writeln!(f, "  {}", tmpl)?;
+            let key = tmpl.name.split('/').next().unwrap_or("root").to_string();
+            groups.entry(key).or_default().push(tmpl);
+        }
+
+        let mut keys: Vec<String> = groups.keys().cloned().collect();
+        keys.sort();
+
+        for key in keys {
+            if let Some(items) = groups.get(&key) {
+                writeln!(f, "\n{}", key)?;
+                writeln!(f, "{}", "-".repeat(4))?;
+
+                // sort items by display name (last segment)
+                let mut items_sorted = items.clone();
+                items_sorted.sort_by(|a, b| {
+                    let an = a.name.rsplit_once('/').map(|(_, s)| s).unwrap_or(&a.name);
+                    let bn = b.name.rsplit_once('/').map(|(_, s)| s).unwrap_or(&b.name);
+                    an.cmp(bn)
+                });
+
+                let max_name = items_sorted
+                    .iter()
+                    .map(|c| {
+                        c.name
+                            .rsplit_once('/')
+                            .map(|(_, s)| s.len())
+                            .unwrap_or(c.name.len())
+                    })
+                    .max()
+                    .unwrap_or(0);
+
+                for item in items_sorted {
+                    let display = item
+                        .name
+                        .rsplit_once('/')
+                        .map(|(_, s)| s)
+                        .unwrap_or(&item.name);
+
+                    writeln!(
+                        f,
+                        "  {name:<width$}  {desc}  ({count} components)",
+                        name = display,
+                        width = max_name,
+                        desc = item.description,
+                        count = item.component_count
+                    )?;
+                }
+            }
         }
         Ok(())
     }
@@ -149,13 +236,21 @@ fn list_components(
     let component_infos: Vec<ComponentInfo> = all_components
         .iter()
         .map(|c| {
-            let summary = c
-                .content
-                .lines()
-                .find(|line| !line.trim().is_empty() && !line.starts_with('#'))
-                .unwrap_or("")
-                .trim()
-                .to_string();
+            // Prefer structured description from metadata if present
+            let raw_summary = c.metadata.get("description").cloned().unwrap_or_else(|| {
+                c.content
+                    .lines()
+                    .find(|line| !line.trim().is_empty() && !line.starts_with('#'))
+                    .unwrap_or("")
+                    .trim()
+                    .to_string()
+            });
+
+            let summary = if raw_summary.len() > 60 {
+                format!("{}...", &raw_summary[..57])
+            } else {
+                raw_summary
+            };
 
             ComponentInfo {
                 name: c.name.clone(),
@@ -206,10 +301,24 @@ fn list_templates(
         template_names
             .iter()
             .filter_map(|name| {
-                loader.load(name).ok().map(|tmpl| TemplateInfo {
-                    name: tmpl.name.clone(),
-                    description: tmpl.description.clone(),
-                    component_count: tmpl.components.len(),
+                loader.load(name).ok().map(|tmpl| {
+                    let mut desc = tmpl.description.clone();
+                    if let Some(c) = tmpl.metadata.get("complexity") {
+                        if !c.is_empty() {
+                            desc = format!("{} [{}]", desc, c);
+                        }
+                    }
+                    if let Some(t) = tmpl.metadata.get("technologies") {
+                        if !t.is_empty() {
+                            desc = format!("{} ({})", desc, t);
+                        }
+                    }
+
+                    TemplateInfo {
+                        name: name.clone(),
+                        description: desc,
+                        component_count: tmpl.components.len(),
+                    }
                 })
             })
             .collect()

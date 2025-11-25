@@ -1,3 +1,8 @@
+#---
+# name: phase_prompt
+# description: Prompt template for an implementation phase
+#---
+
 # Phase {{phase_number}}: {{phase_title}}
 
 ## Overview

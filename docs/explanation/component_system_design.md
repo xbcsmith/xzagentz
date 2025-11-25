@@ -2,13 +2,17 @@
 
 ## Overview
 
-This document explains the design philosophy, architecture, and implementation decisions behind xzagentz's component system. Understanding these concepts helps you create effective components and leverage the system's full capabilities.
+This document explains the design philosophy, architecture, and implementation
+decisions behind xzagentz's component system. Understanding these concepts helps
+you create effective components and leverage the system's full capabilities.
 
 ## Design Philosophy
 
 ### Why Language-Agnostic Components?
 
-Traditional development guidelines are tightly coupled to specific languages or frameworks, requiring separate documentation for each technology stack. This creates:
+Traditional development guidelines are tightly coupled to specific languages or
+frameworks, requiring separate documentation for each technology stack. This
+creates:
 
 - **Duplication**: Same concepts repeated across language-specific guides
 - **Maintenance burden**: Updates must be synchronized across multiple documents
@@ -27,6 +31,7 @@ xzagentz solves this with language-agnostic components that:
 **1. Single Responsibility**
 
 Each component focuses on one specific topic:
+
 - Error handling (not error handling + logging + monitoring)
 - Testing standards (not testing + CI/CD + deployment)
 - Git conventions (not Git + version control + branching + releases)
@@ -37,20 +42,22 @@ This ensures components remain focused, maintainable, and reusable.
 
 Components enforce size limits based on category:
 
-| Category  | Limit | Rationale |
-|-----------|-------|-----------|
-| Core      | 200   | Essential practices need depth |
-| General   | 150   | Common topics stay concise |
-| Languages | 300   | Language specifics need examples |
-| Tools     | 100-200 | Tools vary by complexity tier |
+| Category  | Limit   | Rationale                        |
+| --------- | ------- | -------------------------------- |
+| Core      | 200     | Essential practices need depth   |
+| General   | 150     | Common topics stay concise       |
+| Languages | 300     | Language specifics need examples |
+| Tools     | 100-200 | Tools vary by complexity tier    |
 
 Size limits prevent:
+
 - Information overload
 - Component sprawl
 - Maintenance nightmares
 - Analysis paralysis
 
-If a component exceeds its limit, it signals the need to split into focused units.
+If a component exceeds its limit, it signals the need to split into focused
+units.
 
 **3. Language Fallback**
 
@@ -70,7 +77,8 @@ Available: Python section only
 Result: Universal content (no cross-language fallback)
 ```
 
-This ensures users always get useful guidance, even when language-specific content is unavailable.
+This ensures users always get useful guidance, even when language-specific
+content is unavailable.
 
 **4. Composition Over Inheritance**
 
@@ -86,6 +94,7 @@ AGENTS.md =
 ```
 
 Benefits:
+
 - Flexible document structure
 - Reusable across projects
 - Mix different granularities
@@ -137,24 +146,28 @@ Component
 ### Category System
 
 **Core Components** (`core/`)
+
 - Purpose: Essential development practices
 - Examples: error_handling, testing_standards, security_fundamentals
 - Size limit: 200 lines
 - Rationale: Core concepts need comprehensive coverage
 
 **General Components** (`general/`)
+
 - Purpose: Common development topics
 - Examples: code_review, documentation_standards, performance_tips
 - Size limit: 150 lines
 - Rationale: General topics stay concise and focused
 
 **Language Components** (`languages/`)
+
 - Purpose: Language-specific best practices
 - Examples: rust_ownership, python_async, go_concurrency
 - Size limit: 300 lines
 - Rationale: Language specifics need code examples and idioms
 
 **Tool Components** (`tools/`)
+
 - Purpose: Tool usage and configuration
 - Examples: docker, kubernetes, ci_cd_pipelines
 - Size limit: 100 (essential) or 200 (comprehensive)
@@ -165,6 +178,7 @@ Component
 Applied only to `tools` category:
 
 **Essential Tier**
+
 - 100 line limit
 - Basic usage patterns
 - Common configurations
@@ -172,13 +186,16 @@ Applied only to `tools` category:
 - Beginner to intermediate users
 
 **Comprehensive Tier**
+
 - 200 line limit
 - Advanced features
 - Complex configurations
 - Troubleshooting
 - Advanced users
 
-Rationale: Tools vary widely in complexity. Docker basics fit in 100 lines, but advanced Docker patterns need 200 lines. Tiers provide flexibility without arbitrary limits.
+Rationale: Tools vary widely in complexity. Docker basics fit in 100 lines, but
+advanced Docker patterns need 200 lines. Tiers provide flexibility without
+arbitrary limits.
 
 ## Implementation Details
 
@@ -188,11 +205,14 @@ Rationale: Tools vary widely in complexity. Docker basics fit in 100 lines, but 
 
 ```markdown
 <!-- RUST_START -->
+
 Rust-specific content
+
 <!-- RUST_END -->
 ```
 
 **Why HTML comments?**
+
 - Valid Markdown (invisible in rendered output)
 - Easy to parse with regex
 - Clear visual distinction
@@ -200,6 +220,7 @@ Rust-specific content
 - No custom syntax to learn
 
 **Alternative considered**: Custom markers like `@RUST_START@`
+
 - Rejected: Not valid Markdown, visible in renders, confusing to users
 
 ### Size Validation
@@ -218,15 +239,18 @@ if size > category_limit {
 ```
 
 **Why lines, not characters or words?**
+
 - Language agnostic (works for all languages)
 - Editor-friendly (all editors show line counts)
 - Predictable (1 line = 1 count, simple)
 - Industry standard (most linters use line counts)
 
 **Alternative considered**: Character count
+
 - Rejected: Varies by language verbosity, hard to estimate
 
 **Alternative considered**: Word count
+
 - Rejected: Code blocks inflate counts unpredictably
 
 ### Frontmatter Validation
@@ -243,6 +267,7 @@ component:
 ```
 
 **Why YAML?**
+
 - Human readable and writable
 - Standard for Markdown frontmatter
 - Rich data types (arrays, nested objects)
@@ -250,9 +275,11 @@ component:
 - Industry standard (Jekyll, Hugo, etc.)
 
 **Alternative considered**: TOML
+
 - Rejected: Less common in Markdown ecosystem
 
 **Alternative considered**: JSON
+
 - Rejected: Not human-friendly (trailing commas, quotes everywhere)
 
 ### Embedded Resources
@@ -264,6 +291,7 @@ const CORE_ERROR_HANDLING: &str = include_str!("../components/core/error_handlin
 ```
 
 **Why compile-time embedding?**
+
 - Zero-dependency distribution (single binary)
 - No runtime file I/O for defaults
 - Guaranteed availability
@@ -271,6 +299,7 @@ const CORE_ERROR_HANDLING: &str = include_str!("../components/core/error_handlin
 - Fast access (no disk reads)
 
 **Override mechanism**:
+
 1. Check custom directory (highest priority)
 2. Check environment variable path
 3. Check XDG directories
@@ -291,6 +320,7 @@ pub struct ComponentLoader {
 ```
 
 **Why filesystem-based?**
+
 - Natural organization (directories = categories)
 - Easy to browse and edit
 - Version control friendly
@@ -298,6 +328,7 @@ pub struct ComponentLoader {
 - No database overhead
 
 **Why caching?**
+
 - Components rarely change during execution
 - Parsing YAML has overhead
 - Multiple renders of same component
@@ -314,6 +345,7 @@ pub struct ComponentLoader {
 **Decision**: Enforce limits strictly
 
 **Rationale**:
+
 - Forces focused, high-quality content
 - Prevents documentation bloat
 - Encourages splitting into logical units
@@ -324,11 +356,13 @@ pub struct ComponentLoader {
 
 ### Chosen: Markers vs AST Parsing
 
-**Trade-off**: HTML comment markers are simple but less powerful than AST parsing
+**Trade-off**: HTML comment markers are simple but less powerful than AST
+parsing
 
 **Decision**: Use markers
 
 **Rationale**:
+
 - Simplicity trumps power for this use case
 - Easy to write by hand
 - Clear visual feedback
@@ -339,11 +373,13 @@ pub struct ComponentLoader {
 
 ### Chosen: Embedded vs External Resources
 
-**Trade-off**: Embedded resources increase binary size vs external files more flexible
+**Trade-off**: Embedded resources increase binary size vs external files more
+flexible
 
 **Decision**: Embed with override mechanism
 
 **Rationale**:
+
 - Zero-config user experience
 - Single binary distribution
 - Guaranteed defaults
@@ -403,19 +439,25 @@ HTMLRenderer, PDFRenderer, ManPageRenderer
 
 ### Simplicity Wins
 
-Early designs included complex inheritance hierarchies and template systems. Current design uses simple composition and proved easier to understand, maintain, and extend.
+Early designs included complex inheritance hierarchies and template systems.
+Current design uses simple composition and proved easier to understand,
+maintain, and extend.
 
 ### Size Limits Are Essential
 
-Without size limits, components grew unwieldy. Strict enforcement improved quality dramatically by forcing authors to focus on essentials.
+Without size limits, components grew unwieldy. Strict enforcement improved
+quality dramatically by forcing authors to focus on essentials.
 
 ### Embedded Resources Matter
 
-Embedding resources makes xzagentz approachable. Users can start immediately without setup, then customize when needed. This "zero-to-productive" path is critical for adoption.
+Embedding resources makes xzagentz approachable. Users can start immediately
+without setup, then customize when needed. This "zero-to-productive" path is
+critical for adoption.
 
 ### Language Markers Work
 
-Simple HTML comment markers proved sufficient. No need for complex AST parsing or custom syntax. Simple tools are maintainable tools.
+Simple HTML comment markers proved sufficient. No need for complex AST parsing
+or custom syntax. Simple tools are maintainable tools.
 
 ## Future Directions
 
@@ -430,6 +472,7 @@ Simple HTML comment markers proved sufficient. No need for complex AST parsing o
 ### Backward Compatibility
 
 Design commits to:
+
 - Frontmatter schema stability (additions only, no breaking changes)
 - Marker syntax stability (HTML comments forever)
 - Category names stability (new categories OK, renames never)
@@ -440,13 +483,15 @@ This ensures components written today work with future xzagentz versions.
 ## Summary
 
 xzagentz component system design prioritizes:
+
 - **Simplicity**: Easy to understand and use
 - **Composability**: Mix and match components freely
 - **Maintainability**: Small, focused units
 - **Flexibility**: Language-agnostic with language-specific sections
 - **Usability**: Zero-config with customization options
 
-These design decisions create a robust, extensible system for managing development guidelines across projects and languages.
+These design decisions create a robust, extensible system for managing
+development guidelines across projects and languages.
 
 ## Related Documentation
 

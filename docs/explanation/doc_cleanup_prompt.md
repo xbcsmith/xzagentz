@@ -2,7 +2,9 @@
 
 ## Purpose
 
-This prompt guides AI agents or human contributors to audit and reorganize project documentation according to the Diataxis Framework, removing cruft while establishing clear, maintainable structure.
+This prompt guides AI agents or human contributors to audit and reorganize
+project documentation according to the Diataxis Framework, removing cruft while
+establishing clear, maintainable structure.
 
 ## When to Use This Prompt
 
@@ -207,9 +209,11 @@ Is it a step-by-step tutorial?
    │     │        └─ YES → docs/reference/
 ```
 
-Note: If project has AGENTS.md with documented Diataxis rules, use that decision tree instead as it contains project-specific guidance.
+Note: If project has AGENTS.md with documented Diataxis rules, use that decision
+tree instead as it contains project-specific guidance.
 
-Reference: See AGENTS.md section "Documentation Organization (Diataxis Framework)" for canonical project guidance.
+Reference: See AGENTS.md section "Documentation Organization (Diataxis
+Framework)" for canonical project guidance.
 
 ## Common Patterns
 
@@ -329,7 +333,8 @@ For Rust projects with AGENTS.md:
 
 ```markdown
 - [ ] cargo fmt --all passed
-- [ ] cargo clippy --all-targets --all-features -- -D warnings shows zero warnings
+- [ ] cargo clippy --all-targets --all-features -- -D warnings shows zero
+      warnings
 - [ ] All code examples compile
 - [ ] Follows AGENTS.md documentation standards
 ```
@@ -411,7 +416,8 @@ If the project has an AGENTS.md file or similar development guidelines:
 ### Critical Steps
 
 1. **Read AGENTS.md first**: Check for documentation standards and conventions
-2. **Follow file naming rules**: Use lowercase_with_underscores.md (except README.md)
+2. **Follow file naming rules**: Use lowercase_with_underscores.md (except
+   README.md)
 3. **Apply quality gates**: Run specified validation commands before committing
 4. **Use commit format**: Follow conventional commits or project-specific format
 5. **Reference decision tree**: Use project's Diataxis guidance if provided
@@ -451,9 +457,9 @@ docs(reference): add cli_commands reference
 
 ## References
 
-- Diataxis Framework: https://diataxis.fr/
-- Write the Docs: https://www.writethedocs.org/
-- The Documentation System: https://documentation.divio.com/
+- Diataxis Framework: <https://diataxis.fr/>
+- Write the Docs: <https://www.writethedocs.org/>
+- The Documentation System: <https://documentation.divio.com/>
 - AGENTS.md: Project-specific development guidelines (if present)
 
 ## Meta
@@ -466,4 +472,5 @@ This prompt document itself is:
 - **Usage**: Copy prompt section and adapt to specific project
 - **Following**: AGENTS.md rules for xzagentz project
 
-Save this file as `docs/explanation/doc_cleanup_prompt.md` for reuse across projects.
+Save this file as `docs/explanation/doc_cleanup_prompt.md` for reuse across
+projects.

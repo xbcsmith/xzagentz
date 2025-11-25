@@ -2,24 +2,29 @@
 
 ## Overview
 
-This document explains the software architecture patterns supported by xzagentz, their characteristics, trade-offs, and guidance for selecting the right pattern for your project.
+This document explains the software architecture patterns supported by xzagentz,
+their characteristics, trade-offs, and guidance for selecting the right pattern
+for your project.
 
 ## Supported Patterns
 
-xzagentz supports generation and guidance for four primary architecture patterns:
+xzagentz supports generation and guidance for four primary architecture
+patterns:
 
 1. Layered (n-tier) Architecture
 2. Hexagonal (Ports and Adapters) Architecture
 3. Microservices Architecture
 4. Event-Driven Architecture
 
-Each pattern addresses different concerns and scales differently based on project requirements.
+Each pattern addresses different concerns and scales differently based on
+project requirements.
 
 ## Layered Architecture
 
 ### Overview
 
-Layered architecture organizes code into horizontal layers, each with specific responsibilities. Higher layers depend on lower layers, but not vice versa.
+Layered architecture organizes code into horizontal layers, each with specific
+responsibilities. Higher layers depend on lower layers, but not vice versa.
 
 ### Structure
 
@@ -50,6 +55,7 @@ Layered architecture organizes code into horizontal layers, each with specific r
 ### When to Use
 
 **Use layered architecture for**:
+
 - CRUD applications
 - Traditional web applications
 - Team familiar with MVC/MVP patterns
@@ -57,6 +63,7 @@ Layered architecture organizes code into horizontal layers, each with specific r
 - Monolithic applications
 
 **Avoid layered architecture for**:
+
 - Complex domain logic
 - Highly distributed systems
 - Need for multiple UIs/interfaces
@@ -65,6 +72,7 @@ Layered architecture organizes code into horizontal layers, each with specific r
 ### Trade-offs
 
 **Advantages**:
+
 - Simple to understand and implement
 - Clear organization
 - Well-established pattern
@@ -72,6 +80,7 @@ Layered architecture organizes code into horizontal layers, each with specific r
 - Good for teams new to architecture patterns
 
 **Disadvantages**:
+
 - Can lead to anemic domain models
 - Changes often ripple across layers
 - Tight coupling to infrastructure
@@ -90,7 +99,9 @@ Layered architecture organizes code into horizontal layers, each with specific r
 
 ### Overview
 
-Hexagonal architecture (also called Ports and Adapters) isolates core business logic from external concerns. The domain is at the center, with ports defining interfaces and adapters implementing them.
+Hexagonal architecture (also called Ports and Adapters) isolates core business
+logic from external concerns. The domain is at the center, with ports defining
+interfaces and adapters implementing them.
 
 ### Structure
 
@@ -118,6 +129,7 @@ Hexagonal architecture (also called Ports and Adapters) isolates core business l
 ### When to Use
 
 **Use hexagonal architecture for**:
+
 - Complex business logic
 - Multiple data sources or UIs
 - High testability requirements
@@ -125,6 +137,7 @@ Hexagonal architecture (also called Ports and Adapters) isolates core business l
 - Long-lived systems
 
 **Avoid hexagonal architecture for**:
+
 - Simple CRUD applications
 - Tight deadlines with small teams
 - Projects with minimal business logic
@@ -133,6 +146,7 @@ Hexagonal architecture (also called Ports and Adapters) isolates core business l
 ### Trade-offs
 
 **Advantages**:
+
 - Domain independence from infrastructure
 - Easy to test (mock adapters)
 - Flexible to change external dependencies
@@ -140,6 +154,7 @@ Hexagonal architecture (also called Ports and Adapters) isolates core business l
 - Supports multiple interfaces
 
 **Disadvantages**:
+
 - Higher initial complexity
 - More boilerplate code
 - Requires discipline to maintain boundaries
@@ -158,7 +173,9 @@ Hexagonal architecture (also called Ports and Adapters) isolates core business l
 
 ### Overview
 
-Microservices architecture decomposes systems into small, independent services that communicate over networks. Each service owns its data and can be deployed independently.
+Microservices architecture decomposes systems into small, independent services
+that communicate over networks. Each service owns its data and can be deployed
+independently.
 
 ### Structure
 
@@ -189,6 +206,7 @@ Microservices architecture decomposes systems into small, independent services t
 ### When to Use
 
 **Use microservices architecture for**:
+
 - Large, complex systems
 - Multiple teams working independently
 - Need for independent scaling
@@ -196,6 +214,7 @@ Microservices architecture decomposes systems into small, independent services t
 - Continuous deployment requirements
 
 **Avoid microservices architecture for**:
+
 - Small applications
 - Single team projects
 - Limited operational expertise
@@ -205,6 +224,7 @@ Microservices architecture decomposes systems into small, independent services t
 ### Trade-offs
 
 **Advantages**:
+
 - Independent deployment and scaling
 - Technology diversity
 - Team autonomy
@@ -212,6 +232,7 @@ Microservices architecture decomposes systems into small, independent services t
 - Better suited for continuous delivery
 
 **Disadvantages**:
+
 - Operational complexity
 - Network latency and reliability
 - Data consistency challenges
@@ -230,7 +251,9 @@ Microservices architecture decomposes systems into small, independent services t
 
 ### Overview
 
-Event-driven architecture uses events as the primary mechanism for communication between components. Producers emit events, consumers react to events, enabling loose coupling and scalability.
+Event-driven architecture uses events as the primary mechanism for communication
+between components. Producers emit events, consumers react to events, enabling
+loose coupling and scalability.
 
 ### Structure
 
@@ -258,6 +281,7 @@ Event-driven architecture uses events as the primary mechanism for communication
 ### When to Use
 
 **Use event-driven architecture for**:
+
 - Real-time data processing
 - Highly scalable systems
 - Complex workflows
@@ -266,6 +290,7 @@ Event-driven architecture uses events as the primary mechanism for communication
 - Systems requiring loose coupling
 
 **Avoid event-driven architecture for**:
+
 - Simple request-response scenarios
 - Strong consistency requirements
 - Immediate feedback needed
@@ -275,6 +300,7 @@ Event-driven architecture uses events as the primary mechanism for communication
 ### Trade-offs
 
 **Advantages**:
+
 - Highly scalable
 - Loose coupling between services
 - Easy to add new consumers
@@ -282,6 +308,7 @@ Event-driven architecture uses events as the primary mechanism for communication
 - Supports complex workflows
 
 **Disadvantages**:
+
 - Eventual consistency complexity
 - Difficult debugging
 - Message ordering challenges
@@ -300,16 +327,16 @@ Event-driven architecture uses events as the primary mechanism for communication
 
 ### Decision Matrix
 
-| Requirement | Layered | Hexagonal | Microservices | Event-Driven |
-|-------------|---------|-----------|---------------|--------------|
-| Simple CRUD | ✓✓✓ | ✓ | ✗ | ✗ |
-| Complex Domain | ✓ | ✓✓✓ | ✓✓ | ✓✓ |
-| Multiple Teams | ✓ | ✓ | ✓✓✓ | ✓✓ |
-| Independent Scaling | ✗ | ✗ | ✓✓✓ | ✓✓✓ |
-| Real-time Processing | ✗ | ✗ | ✓ | ✓✓✓ |
-| Testability | ✓✓ | ✓✓✓ | ✓✓ | ✓ |
-| Operational Simplicity | ✓✓✓ | ✓✓ | ✗ | ✗ |
-| Quick to Market | ✓✓✓ | ✓ | ✗ | ✗ |
+| Requirement            | Layered | Hexagonal | Microservices | Event-Driven |
+| ---------------------- | ------- | --------- | ------------- | ------------ |
+| Simple CRUD            | ✓✓✓     | ✓         | ✗             | ✗            |
+| Complex Domain         | ✓       | ✓✓✓       | ✓✓            | ✓✓           |
+| Multiple Teams         | ✓       | ✓         | ✓✓✓           | ✓✓           |
+| Independent Scaling    | ✗       | ✗         | ✓✓✓           | ✓✓✓          |
+| Real-time Processing   | ✗       | ✗         | ✓             | ✓✓✓          |
+| Testability            | ✓✓      | ✓✓✓       | ✓✓            | ✓            |
+| Operational Simplicity | ✓✓✓     | ✓✓        | ✗             | ✗            |
+| Quick to Market        | ✓✓✓     | ✓         | ✗             | ✗            |
 
 ✓✓✓ = Excellent fit, ✓✓ = Good fit, ✓ = Acceptable, ✗ = Poor fit
 
@@ -318,18 +345,22 @@ Event-driven architecture uses events as the primary mechanism for communication
 **Start with these questions**:
 
 1. How complex is your domain logic?
+
    - Simple → Layered
    - Complex → Hexagonal or Event-Driven
 
 2. How many teams will work on the system?
+
    - Single team → Layered or Hexagonal
    - Multiple teams → Microservices
 
 3. What are your scaling requirements?
+
    - Uniform scaling → Layered or Hexagonal
    - Independent scaling → Microservices or Event-Driven
 
 4. What is your consistency requirement?
+
    - Strong consistency → Layered or Hexagonal
    - Eventual consistency OK → Microservices or Event-Driven
 
@@ -341,14 +372,14 @@ Event-driven architecture uses events as the primary mechanism for communication
 
 Patterns can be combined:
 
-**Microservices with Layered Services**:
-Each microservice internally uses layered architecture
+**Microservices with Layered Services**: Each microservice internally uses
+layered architecture
 
-**Hexagonal with Event-Driven**:
-Core domain uses hexagonal, communication uses events
+**Hexagonal with Event-Driven**: Core domain uses hexagonal, communication uses
+events
 
-**Layered with Event-Driven**:
-Traditional layers with event bus for cross-cutting concerns
+**Layered with Event-Driven**: Traditional layers with event bus for
+cross-cutting concerns
 
 ## Migration Strategies
 
@@ -405,13 +436,15 @@ Traditional layers with event bus for cross-cutting concerns
 ## Summary
 
 Architecture pattern selection depends on:
+
 - Domain complexity
 - Team structure
 - Scaling requirements
 - Operational capabilities
 - Time to market constraints
 
-Start simple (layered), evolve as needed (hexagonal, microservices, event-driven). No pattern is universally best.
+Start simple (layered), evolve as needed (hexagonal, microservices,
+event-driven). No pattern is universally best.
 
 ## Related Documentation
 

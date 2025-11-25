@@ -1,3 +1,12 @@
+---
+component:
+   name: markdown
+   category: tools
+   version: "1.0"
+   description: Markdown writing standards and linting guidelines
+   languages: []
+---
+
 # Markdown Guidelines and Best Practices
 
 This section provides Markdown-specific guidelines for documentation in this project.

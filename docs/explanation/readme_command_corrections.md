@@ -2,8 +2,9 @@
 
 ## Overview
 
-This document provides a quick reference of all command corrections made to README.md.
-Use this as a cheat sheet when updating documentation or helping users.
+This document provides a quick reference of all command corrections made to
+README.md. Use this as a cheat sheet when updating documentation or helping
+users.
 
 ---
 
@@ -12,10 +13,12 @@ Use this as a cheat sheet when updating documentation or helping users.
 ### ❌ REMOVED: Non-Existent Commands
 
 **Line 54-55 (DELETED)**:
+
 ```bash
 # Render component for specific language
 xzagentz render --component error_handling --language rust
 ```
+
 **Reason**: The `render` subcommand does not exist in the CLI implementation.
 
 ---
@@ -25,11 +28,13 @@ xzagentz render --component error_handling --language rust
 ### 1. Validate Command
 
 **OLD (BROKEN)**:
+
 ```bash
 xzagentz validate --report
 ```
 
 **NEW (WORKING)**:
+
 ```bash
 # Validate with detailed output
 xzagentz validate --detailed
@@ -45,11 +50,13 @@ xzagentz validate --detailed --fix
 ### 2. List Command
 
 **OLD (BROKEN)**:
+
 ```bash
 xzagentz list --category core
 ```
 
 **NEW (WORKING)**:
+
 ```bash
 # List all components
 xzagentz list components
@@ -66,11 +73,13 @@ The `--category` flag belongs to the subcommand, not the root command.
 ### 3. Create Command
 
 **OLD (BROKEN)**:
+
 ```bash
 xzagentz create my-project --template rust_binary --language rust
 ```
 
 **NEW (WORKING)**:
+
 ```bash
 # Create a new AGENTS.md file
 xzagentz create --output AGENTS.md
@@ -80,6 +89,7 @@ xzagentz create --interactive
 ```
 
 **Why**:
+
 - No positional project name argument accepted
 - No `--language` flag exists
 - Creates AGENTS.md files, not project directories
@@ -147,6 +157,7 @@ xzagentz init --config-dir ./my-config
 Users might still make these mistakes based on intuition:
 
 ### Mistake 1: Forgetting Subcommand
+
 ```bash
 # ❌ WRONG
 xzagentz list --category core
@@ -156,6 +167,7 @@ xzagentz list components --category core
 ```
 
 ### Mistake 2: Using Old Flag Names
+
 ```bash
 # ❌ WRONG
 xzagentz validate --report
@@ -165,6 +177,7 @@ xzagentz validate --detailed
 ```
 
 ### Mistake 3: Trying to Create Projects
+
 ```bash
 # ❌ WRONG (users might think this creates a directory)
 xzagentz create my-project
@@ -244,16 +257,16 @@ Global Options:
 
 ## Before/After Summary
 
-| Old Command | Status | New Command |
-|-------------|--------|-------------|
-| `render --component X --language Y` | ❌ Removed | N/A - command does not exist |
-| `validate --report` | ❌ Fixed | `validate --detailed` |
-| `list --category core` | ❌ Fixed | `list components --category core` |
-| `create my-project --template X --language Y` | ❌ Fixed | `create --output AGENTS.md` |
-| `list components` | ✅ Unchanged | `list components` |
-| `list templates` | ✅ Unchanged | `list templates` |
-| `validate AGENTS.md` | ✅ Unchanged | `validate AGENTS.md` |
-| `init` | ✅ Unchanged | `init` |
+| Old Command                                   | Status       | New Command                       |
+| --------------------------------------------- | ------------ | --------------------------------- |
+| `render --component X --language Y`           | ❌ Removed   | N/A - command does not exist      |
+| `validate --report`                           | ❌ Fixed     | `validate --detailed`             |
+| `list --category core`                        | ❌ Fixed     | `list components --category core` |
+| `create my-project --template X --language Y` | ❌ Fixed     | `create --output AGENTS.md`       |
+| `list components`                             | ✅ Unchanged | `list components`                 |
+| `list templates`                              | ✅ Unchanged | `list templates`                  |
+| `validate AGENTS.md`                          | ✅ Unchanged | `validate AGENTS.md`              |
+| `init`                                        | ✅ Unchanged | `init`                            |
 
 ---
 
@@ -296,6 +309,5 @@ Expected: No "unexpected argument" or "unrecognized subcommand" errors.
 
 ---
 
-**Last Updated**: 2024
-**Status**: All corrections applied and validated
+**Last Updated**: 2024 **Status**: All corrections applied and validated
 **Success Rate**: 100% (9/9 commands working)

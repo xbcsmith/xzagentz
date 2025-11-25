@@ -1,3 +1,13 @@
+---
+component:
+    name: golang
+    category: languages
+    version: "1.0"
+    description: Go-specific development guidelines and best practices
+    languages:
+        - golang
+---
+
 # Go Language Guidelines
 
 This section provides Go-specific guidelines for projects that include Go components.
