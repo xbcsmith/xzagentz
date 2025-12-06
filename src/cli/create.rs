@@ -21,6 +21,7 @@
 //!
 //! ```no_run
 //! use xzagentz::cli::create::CreateCommand;
+//! use xzagentz::cli::Tier;
 //! use std::path::PathBuf;
 //!
 //! let cmd = CreateCommand {
@@ -28,15 +29,20 @@
 //!     template: Some("rust-binary".to_string()),
 //!     force: false,
 //!     interactive: false,
+//!     tier: Tier::Essential,
+//!     dry_run: false,
+//!     diff: false,
 //! };
 //!
 //! // cmd.execute(&config)?;
 //! ```
 
+use crate::components::language_filter::LanguageFilter;
 use crate::components::{Component, ComponentLoader};
 use crate::core::ComponentType;
 use crate::error::{Error, Result};
 use crate::markdown::MarkdownCleaner;
+use crate::parser::readme::ReadmeParser;
 use crate::templates::{PlaceholderRenderer, Template, TemplateLoader};
 use std::collections::{HashMap, HashSet};
 use std::fs;
@@ -54,6 +60,14 @@ pub struct CreateConfig {
     pub force: bool,
     /// Interactive mode
     pub interactive: bool,
+    /// Tier to use for language components
+    pub tier: super::Tier,
+
+    /// Dry-run: show selections and excerpts without writing file
+    pub dry_run: bool,
+
+    /// Show a small composed diff against target file
+    pub diff: bool,
     /// Template directory
     pub template_dir: PathBuf,
     /// Component directory
@@ -73,16 +87,35 @@ pub struct CreateCommand {
     pub force: bool,
     /// Interactive mode
     pub interactive: bool,
+    /// Tier to use for language components
+    pub tier: super::Tier,
+
+    /// Dry-run: show selections and excerpts without writing file
+    pub dry_run: bool,
+
+    /// Show a small composed diff against target file
+    pub diff: bool,
 }
 
 impl CreateCommand {
     /// Creates a new CreateCommand
-    pub fn new(file: PathBuf, template: Option<String>, force: bool, interactive: bool) -> Self {
+    pub fn new(
+        file: PathBuf,
+        template: Option<String>,
+        force: bool,
+        interactive: bool,
+        tier: super::Tier,
+        dry_run: bool,
+        diff: bool,
+    ) -> Self {
         Self {
             file,
             template,
             force,
             interactive,
+            tier,
+            dry_run,
+            diff,
         }
     }
 
@@ -144,11 +177,56 @@ impl CreateCommand {
             None
         };
 
-        // Generate content
-        let content = creator.generate_content(&template, &metadata, &selected_components)?;
+        // Generate content and return components used
+        let (content, components_used) =
+            creator.generate_content(&template, &metadata, &selected_components)?;
 
         // Clean markdown content
         let cleaned_content = MarkdownCleaner::clean(&content)?;
+
+        // If dry-run, show selected components and heading excerpts and do not write
+        if self.dry_run || config.dry_run {
+            println!("Dry-run: components selected (no file written):");
+            for (i, comp) in components_used.iter().enumerate() {
+                let title = comp.title().unwrap_or_else(|| "(no title)".to_string());
+                println!(
+                    "  - {} ({:?}) -> file: {}",
+                    title, comp.component_type, comp.name
+                );
+
+                // Show small excerpt after normalizing headings
+                let base = if i == 0 {
+                    1u8
+                } else {
+                    match comp.component_type {
+                        ComponentType::Tools => 3u8,
+                        _ => 2u8,
+                    }
+                };
+                let excerpt = crate::markdown::normalize_headings(&comp.content, base);
+                let first_lines: Vec<&str> = excerpt.lines().take(6).collect();
+                for line in first_lines {
+                    println!("    {}", line);
+                }
+                println!("    --\n");
+            }
+
+            // If diff requested and file exists, show unified diff preview
+            if self.diff || config.diff {
+                if self.file.exists() {
+                    if let Ok(old) = fs::read_to_string(&self.file) {
+                        println!("Unified diff (first changes):");
+                        print_small_diff(&old, &cleaned_content, 3);
+                    } else {
+                        println!("Existing file present but could not be read for diff preview");
+                    }
+                } else {
+                    println!("No existing target file present to diff against");
+                }
+            }
+
+            return Ok(());
+        }
 
         // Preview in interactive mode
         if self.interactive {
@@ -156,6 +234,14 @@ impl CreateCommand {
             if !InteractivePrompt::confirm_write()? {
                 println!("Create cancelled by user");
                 return Ok(());
+            }
+        }
+
+        // If diff requested, show a small composed diff against existing file
+        if (self.diff || config.diff) && self.file.exists() {
+            if let Ok(old) = fs::read_to_string(&self.file) {
+                println!("Unified diff (first changes):");
+                print_small_diff(&old, &cleaned_content, 5);
             }
         }
 
@@ -203,7 +289,7 @@ impl FileCreator {
         template: &Option<Template>,
         metadata: &ProjectMetadata,
         selected_components: &Option<Vec<(ComponentType, String)>>,
-    ) -> Result<String> {
+    ) -> Result<(String, Vec<Component>)> {
         let loader = ComponentLoader::new(Some(self.config.component_dir.clone()));
 
         let components = if let Some(tmpl) = template {
@@ -223,7 +309,7 @@ impl FileCreator {
         // Compose components
         let content = ComponentComposer::compose(&components, &placeholders)?;
 
-        Ok(content)
+        Ok((content, components))
     }
 
     /// Loads components specified in template
@@ -239,7 +325,11 @@ impl FileCreator {
         template_components.sort_by_key(|c| c.order.unwrap_or(usize::MAX));
 
         for tmpl_comp in &template_components {
-            match loader.load(&tmpl_comp.name, tmpl_comp.component_type) {
+            match loader.load_with_tier(
+                &tmpl_comp.name,
+                tmpl_comp.component_type,
+                matches!(self.config.tier, super::Tier::Comprehensive),
+            ) {
                 Ok(comp) => components.push(comp),
                 Err(e) => {
                     if tmpl_comp.required {
@@ -267,7 +357,11 @@ impl FileCreator {
         ];
 
         for name in core_names {
-            if let Ok(comp) = loader.load(name, ComponentType::Core) {
+            if let Ok(comp) = loader.load_with_tier(
+                name,
+                ComponentType::Core,
+                matches!(self.config.tier, super::Tier::Comprehensive),
+            ) {
                 components.push(comp);
             }
         }
@@ -284,7 +378,11 @@ impl FileCreator {
         let mut components = Vec::new();
 
         for (comp_type, name) in selected {
-            match loader.load(name, *comp_type) {
+            match loader.load_with_tier(
+                name,
+                *comp_type,
+                matches!(self.config.tier, super::Tier::Comprehensive),
+            ) {
                 Ok(comp) => components.push(comp),
                 Err(e) => {
                     if self.config.verbose {
@@ -352,6 +450,32 @@ impl FileCreator {
             Error::file_create_error(path.to_path_buf(), format!("Write failed: {}", e))
         })?;
         Ok(())
+    }
+}
+
+/// Print a tiny unified-style diff showing first N differences
+fn print_small_diff(old: &str, new: &str, max_changes: usize) {
+    let old_lines: Vec<&str> = old.lines().collect();
+    let new_lines: Vec<&str> = new.lines().collect();
+    let max_len = old_lines.len().max(new_lines.len());
+
+    let mut changes = 0usize;
+    for i in 0..max_len {
+        let o = old_lines.get(i).copied().unwrap_or("");
+        let n = new_lines.get(i).copied().unwrap_or("");
+        if o != n {
+            println!("@@ line {} @@", i + 1);
+            println!("- {}", o);
+            println!("+ {}", n);
+            changes += 1;
+            if changes >= max_changes {
+                println!("... (more changes omitted)");
+                break;
+            }
+        }
+    }
+    if changes == 0 {
+        println!("No substantive changes detected");
     }
 }
 
@@ -429,177 +553,10 @@ impl ComponentComposer {
     ///
     /// Returns filtered content with only relevant language sections
     fn filter_language_sections(content: &str, language: &str) -> String {
-        let mut output = String::new();
-        let lines = content.lines();
-        let mut in_language_section = false;
-        let mut skip_current_section = false;
-
-        for line in lines {
-            // Check for language section start marker
-            if line.trim().starts_with("<!-- LANG:") {
-                in_language_section = true;
-                let lang = line
-                    .trim()
-                    .strip_prefix("<!-- LANG:")
-                    .and_then(|s| s.strip_suffix("-->"))
-                    .map(|s| s.trim().to_lowercase())
-                    .unwrap_or_default();
-
-                skip_current_section = lang != language;
-                continue; // Don't output the marker itself
-            }
-
-            // Check for language section end marker
-            if line.trim() == "<!-- /LANG -->" {
-                in_language_section = false;
-                skip_current_section = false;
-                continue; // Don't output the marker itself
-            }
-
-            // Skip lines in non-matching language sections
-            if in_language_section && skip_current_section {
-                continue;
-            }
-
-            // Include the line
-            output.push_str(line);
-            output.push('\n');
-        }
-
-        output
-    }
-}
-
-/// Parses README.md for project metadata
-pub struct ReadmeParser;
-
-impl ReadmeParser {
-    /// Parses README.md file
-    ///
-    /// # Arguments
-    ///
-    /// * `path` - Path to README.md
-    ///
-    /// # Returns
-    ///
-    /// Returns ProjectMetadata extracted from README
-    ///
-    /// # Errors
-    ///
-    /// Returns an error if the file cannot be read
-    pub fn parse(path: impl AsRef<Path>) -> Result<ProjectMetadata> {
-        let content = fs::read_to_string(path.as_ref())
-            .map_err(|e| Error::file_io(path.as_ref().to_path_buf(), e))?;
-
-        let mut metadata = ProjectMetadata::default();
-
-        // Extract project name from first heading
-        if let Some(name) = Self::extract_first_heading(&content) {
-            metadata.project_name = name;
-        }
-
-        // Detect language from code blocks or badges
-        metadata.language = Self::detect_language(&content);
-
-        // Detect project type from keywords
-        metadata.project_type = Self::infer_project_type(&content);
-
-        // Extract description from first paragraph
-        if let Some(desc) = Self::extract_description(&content) {
-            metadata.description = Some(desc);
-        }
-
-        Ok(metadata)
-    }
-
-    /// Extracts the first heading from content
-    fn extract_first_heading(content: &str) -> Option<String> {
-        for line in content.lines() {
-            let trimmed = line.trim();
-            if trimmed.starts_with("# ") {
-                return Some(trimmed.trim_start_matches("# ").trim().to_string());
-            }
-        }
-        None
-    }
-
-    /// Detects primary language from content
-    fn detect_language(content: &str) -> String {
-        let content_lower = content.to_lowercase();
-
-        // Check for language badges or mentions
-        if content_lower.contains("rust") || content_lower.contains("cargo.toml") {
-            return "rust".to_string();
-        }
-        if content_lower.contains("python") || content_lower.contains("setup.py") {
-            return "python".to_string();
-        }
-        if content_lower.contains("javascript") || content_lower.contains("package.json") {
-            return "javascript".to_string();
-        }
-        if content_lower.contains("typescript") {
-            return "typescript".to_string();
-        }
-        if content_lower.contains("go") || content_lower.contains("go.mod") {
-            return "go".to_string();
-        }
-
-        "unknown".to_string()
-    }
-
-    /// Infers project type from content
-    fn infer_project_type(content: &str) -> String {
-        let content_lower = content.to_lowercase();
-
-        if content_lower.contains("cli") || content_lower.contains("command-line") {
-            return "cli".to_string();
-        }
-        if content_lower.contains("web")
-            || content_lower.contains("api")
-            || content_lower.contains("server")
-        {
-            return "web-service".to_string();
-        }
-        if content_lower.contains("library") || content_lower.contains("crate") {
-            return "library".to_string();
-        }
-
-        "application".to_string()
-    }
-
-    /// Extracts description from first paragraph after heading
-    fn extract_description(content: &str) -> Option<String> {
-        let mut found_heading = false;
-        let mut description = String::new();
-
-        for line in content.lines() {
-            let trimmed = line.trim();
-
-            if trimmed.starts_with('#') {
-                found_heading = true;
-                continue;
-            }
-
-            if found_heading && !trimmed.is_empty() && !trimmed.starts_with('[') {
-                description.push_str(trimmed);
-                description.push(' ');
-
-                // Stop at next heading or empty line
-                if description.len() > 200 {
-                    break;
-                }
-            }
-
-            if found_heading && !description.is_empty() && trimmed.is_empty() {
-                break;
-            }
-        }
-
-        if description.is_empty() {
-            None
-        } else {
-            Some(description.trim().to_string())
-        }
+        let filter = LanguageFilter::with_fallback(language, true);
+        filter
+            .filter_content(content)
+            .unwrap_or_else(|_| content.to_string())
     }
 }
 
@@ -979,12 +936,18 @@ impl InteractivePrompt {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::fs;
+    use std::path::PathBuf;
+    use tempfile::TempDir;
 
     #[test]
     fn test_create_command_new() {
         let cmd = CreateCommand::new(
             PathBuf::from("AGENTS.md"),
             Some("rust-binary".to_string()),
+            false,
+            false,
+            crate::cli::Tier::Essential,
             false,
             false,
         );
@@ -1033,90 +996,6 @@ mod tests {
     }
 
     #[test]
-    fn test_filter_language_sections_rust_only() {
-        let content = r#"Common content here
-
-<!-- LANG:rust -->
-Rust-specific content
-<!-- /LANG -->
-
-<!-- LANG:python -->
-Python-specific content
-<!-- /LANG -->
-
-More common content"#;
-
-        let filtered = ComponentComposer::filter_language_sections(content, "rust");
-
-        assert!(filtered.contains("Common content here"));
-        assert!(filtered.contains("Rust-specific content"));
-        assert!(!filtered.contains("Python-specific content"));
-        assert!(filtered.contains("More common content"));
-    }
-
-    #[test]
-    fn test_filter_language_sections_python_only() {
-        let content = r#"<!-- LANG:rust -->
-Rust content
-<!-- /LANG -->
-
-<!-- LANG:python -->
-Python content
-<!-- /LANG -->"#;
-
-        let filtered = ComponentComposer::filter_language_sections(content, "python");
-
-        assert!(!filtered.contains("Rust content"));
-        assert!(filtered.contains("Python content"));
-    }
-
-    #[test]
-    fn test_filter_language_sections_no_markers() {
-        let content = "Just plain content without markers";
-        let filtered = ComponentComposer::filter_language_sections(content, "rust");
-        assert_eq!(filtered.trim(), content);
-    }
-
-    #[test]
-    fn test_readme_parser_detect_language() {
-        let content = "# My Project\n\nA Rust project using Cargo.toml";
-        assert_eq!(ReadmeParser::detect_language(content), "rust");
-
-        let content2 = "# Python App\n\nInstall with setup.py";
-        assert_eq!(ReadmeParser::detect_language(content2), "python");
-
-        let content3 = "# Unknown Project";
-        assert_eq!(ReadmeParser::detect_language(content3), "unknown");
-    }
-
-    #[test]
-    fn test_readme_parser_infer_project_type() {
-        let content = "# CLI Tool\n\nA command-line interface";
-        assert_eq!(ReadmeParser::infer_project_type(content), "cli");
-
-        let content2 = "# Web API\n\nA REST API server";
-        assert_eq!(ReadmeParser::infer_project_type(content2), "web-service");
-
-        let content3 = "# Library\n\nA reusable crate";
-        assert_eq!(ReadmeParser::infer_project_type(content3), "library");
-    }
-
-    #[test]
-    fn test_readme_parser_extract_first_heading() {
-        let content = "# My Project\n\nDescription here";
-        assert_eq!(
-            ReadmeParser::extract_first_heading(content),
-            Some("My Project".to_string())
-        );
-
-        let content2 = "Some text\n## Not First\n# First Heading";
-        assert_eq!(
-            ReadmeParser::extract_first_heading(content2),
-            Some("First Heading".to_string())
-        );
-    }
-
-    #[test]
     fn test_file_creator_get_backup_path() {
         let path = Path::new("AGENTS.md");
         let backup = FileCreator::get_backup_path(path);
@@ -1152,5 +1031,105 @@ Python content
         assert!(content.contains("Hello World"));
         assert!(content.contains("Version 1.0.0"));
         assert!(content.contains("---"));
+    }
+
+    #[test]
+    fn test_create_dry_run_does_not_write() {
+        let temp_dir = TempDir::new().unwrap();
+        let templates_dir = temp_dir.path().join("templates");
+        let components_dir = temp_dir.path().join("components");
+
+        // create directories
+        fs::create_dir_all(templates_dir.as_path()).unwrap();
+        fs::create_dir_all(components_dir.join("core")).unwrap();
+        fs::create_dir_all(components_dir.join("languages")).unwrap();
+
+        // create simple component files
+        fs::write(
+            components_dir.join("core").join("quick_reference.md"),
+            "# Quick Reference\n\nShort guidance",
+        )
+        .unwrap();
+
+        fs::write(
+            components_dir.join("languages").join("rust_essential.md"),
+            "# Rust Essential\n\nImportant rules",
+        )
+        .unwrap();
+
+        // create a simple toml template
+        let toml = r#"
+name = "dryrun"
+description = "dry-run test"
+
+[[components]]
+type = "core"
+name = "quick_reference"
+required = true
+
+[[components]]
+type = "languages"
+name = "rust"
+required = true
+"#;
+
+        fs::write(templates_dir.join("dryrun.toml"), toml).unwrap();
+
+        let cmd = CreateCommand::new(
+            PathBuf::from(temp_dir.path()).join("AGENTS.md"),
+            Some("dryrun".to_string()),
+            false,
+            false,
+            crate::cli::Tier::Essential,
+            true, // dry-run
+            false,
+        );
+
+        let config = CreateConfig {
+            file: PathBuf::from(temp_dir.path()).join("AGENTS.md"),
+            template: Some("dryrun".to_string()),
+            force: false,
+            interactive: false,
+            tier: crate::cli::Tier::Essential,
+            dry_run: true,
+            diff: false,
+            template_dir: templates_dir.clone(),
+            component_dir: components_dir.clone(),
+            verbose: false,
+        };
+
+        // should succeed and not create the file
+        let res = cmd.execute(&config);
+        assert!(res.is_ok());
+        assert!(!config.file.exists());
+    }
+
+    #[test]
+    fn test_compose_multi_component_heading_hierarchy() {
+        let component1 = Component {
+            name: "first".to_string(),
+            component_type: ComponentType::Core,
+            content: "# Root One\n\nSome content".to_string(),
+            metadata: Default::default(),
+        };
+
+        let component2 = Component {
+            name: "second".to_string(),
+            component_type: ComponentType::Core,
+            content: "# Root Two\n\nMore content\n## Subsection".to_string(),
+            metadata: Default::default(),
+        };
+
+        let placeholders: HashMap<String, String> = HashMap::new();
+
+        let composed =
+            ComponentComposer::compose(&[component1, component2], &placeholders).unwrap();
+
+        // first root should remain level 1
+        assert!(composed.contains("# Root One"));
+
+        // second root originally level 1 must be normalized to level 2 when merged
+        assert!(composed.contains("## Root Two"));
+        assert!(!composed.lines().any(|l| l.trim() == "# Root Two"));
     }
 }

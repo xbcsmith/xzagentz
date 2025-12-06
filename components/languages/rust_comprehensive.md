@@ -1,11 +1,12 @@
 ---
 component:
-    name: rust
-    category: languages
-    version: "1.0"
-    description: Rust-specific development guidelines, patterns, and best practices
-    languages:
-        - rust
+  name: rust_comprehensive
+  category: languages
+  version: "1.0"
+  description: Comprehensive Rust development guidelines, patterns, and best practices
+  tier: comprehensive
+  languages:
+    - rust
 ---
 
 # Rust Language Guidelines
@@ -19,12 +20,14 @@ This section provides Rust-specific guidelines, patterns, and best practices for
 **Required**: Rust stable (latest)
 
 Check your version:
+
 ```bash
 rustc --version
 cargo --version
 ```
 
 Update Rust:
+
 ```bash
 rustup update stable
 ```
@@ -36,11 +39,13 @@ rustup update stable
 ### Formatting Rules
 
 **ALWAYS use rustfmt:**
+
 ```bash
 cargo fmt --all
 ```
 
 **Standard settings** (enforced by rustfmt.toml):
+
 - Indentation: 4 spaces
 - Max line width: 100 characters
 - Use trailing commas in multi-line expressions
@@ -49,18 +54,22 @@ cargo fmt --all
 ### Naming Conventions
 
 **Types and Traits**
+
 - Use `PascalCase` for types, traits, and enum variants
 - Examples: `ConfigLoader`, `PromptGenerator`, `Error`
 
 **Functions and Variables**
+
 - Use `snake_case` for functions, methods, and variables
 - Examples: `load_config`, `parse_template`, `user_input`
 
 **Constants**
+
 - Use `SCREAMING_SNAKE_CASE` for constants
 - Examples: `MAX_RETRIES`, `DEFAULT_TIMEOUT`, `VERSION`
 
 **Modules**
+
 - Use `snake_case` for module names
 - Examples: `mod component_loader;`, `mod error_handler;`
 
@@ -71,6 +80,7 @@ cargo fmt --all
 ### Using Result and thiserror
 
 **Define custom error types:**
+
 ```rust
 use thiserror::Error;
 
@@ -95,6 +105,7 @@ pub type Result<T> = std::result::Result<T, ComponentError>;
 ### Error Propagation
 
 **Use the ? operator:**
+
 ```rust
 pub fn load_and_parse(path: &Path) -> Result<Component> {
     let content = std::fs::read_to_string(path)?;
@@ -107,6 +118,7 @@ pub fn load_and_parse(path: &Path) -> Result<Component> {
 ### Error Context
 
 **Add context with map_err:**
+
 ```rust
 let config = std::fs::read_to_string(path)
     .map_err(|e| Error::FileIo {
@@ -122,6 +134,7 @@ let config = std::fs::read_to_string(path)
 ### Prefer Borrowing
 
 **Use references when you don't need ownership:**
+
 ```rust
 // Good - accepts borrowed data
 fn validate_config(config: &Config) -> Result<()> {
@@ -139,6 +152,7 @@ fn validate_config(config: Config) -> Result<()> {
 ### String Slices vs String
 
 **Function parameters should prefer &str:**
+
 ```rust
 // Preferred - more flexible
 fn create_component(name: &str) -> Component {
@@ -156,6 +170,7 @@ fn create_component(name: String) -> Component {
 ### Clone Judiciously
 
 **Only clone when necessary:**
+
 ```rust
 // Avoid unnecessary clones
 let name = config.name.clone(); // Only if you need ownership
@@ -171,6 +186,7 @@ let name = &config.name;
 ### Use NewType Pattern
 
 **Wrap primitive types for type safety:**
+
 ```rust
 pub struct ComponentName(String);
 
@@ -192,6 +208,7 @@ impl ComponentName {
 ### Use Enums for States
 
 **Model states explicitly:**
+
 ```rust
 pub enum LoadState {
     NotLoaded,
@@ -208,6 +225,7 @@ pub enum LoadState {
 ### Exhaustive Matching
 
 **Always handle all cases:**
+
 ```rust
 match result {
     Ok(value) => process(value),
@@ -218,6 +236,7 @@ match result {
 ### Use if let for Single Cases
 
 **Cleaner than match for single patterns:**
+
 ```rust
 // Good
 if let Some(config) = load_config()? {
@@ -238,6 +257,7 @@ match load_config()? {
 ### Prefer Iterators
 
 **Use iterator chains instead of loops:**
+
 ```rust
 // Preferred
 let valid_components: Vec<_> = components
@@ -281,6 +301,7 @@ let (valid, invalid): (Vec<_>, Vec<_>) = items
 ### Derive When Possible
 
 **Use derive for common traits:**
+
 ```rust
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Component {
@@ -355,6 +376,7 @@ mod tests {
 ### Integration Tests
 
 Place in `tests/` directory:
+
 ```rust
 use xzagentz::component::ComponentLoader;
 
@@ -388,7 +410,7 @@ mod test_helpers {
 
 ### Module Documentation
 
-```rust
+````rust
 //! Component loading and validation module
 //!
 //! This module provides functionality for loading component files
@@ -402,11 +424,11 @@ mod test_helpers {
 //! let loader = ComponentLoader::new();
 //! let component = loader.load("components/core/header.md")?;
 //! ```
-```
+````
 
 ### Function Documentation
 
-```rust
+````rust
 /// Loads a component from the specified path
 ///
 /// # Arguments
@@ -435,7 +457,7 @@ mod test_helpers {
 pub fn load_component(path: &Path) -> Result<Component> {
     // Implementation
 }
-```
+````
 
 ---
 
@@ -531,6 +553,7 @@ impl Component {
 ### Enable Clippy Lints
 
 Run with warnings as errors:
+
 ```bash
 cargo clippy --all-targets --all-features -- -D warnings
 ```
@@ -538,6 +561,7 @@ cargo clippy --all-targets --all-features -- -D warnings
 ### Common Clippy Fixes
 
 **field_reassign_with_default**
+
 ```rust
 // Bad
 let mut config = Config::default();
@@ -551,6 +575,7 @@ let config = Config {
 ```
 
 **needless_return**
+
 ```rust
 // Bad
 fn get_name() -> String {
@@ -570,6 +595,7 @@ fn get_name() -> String {
 **Avoid unsafe unless absolutely necessary**
 
 If you must use unsafe:
+
 1. Document why it's needed
 2. Document safety invariants
 3. Minimize unsafe scope

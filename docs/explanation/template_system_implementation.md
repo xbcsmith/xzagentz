@@ -47,4 +47,3 @@ Implemented Phase 3: improved template discovery, parsing, and CLI listing.
 
 - Normalize headings when assembling AGENTS.md (Phase 4)
 - Split language components into essential/comprehensive tiers and add `--comprehensive` flag (Phase 5)
-

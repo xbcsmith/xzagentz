@@ -127,6 +127,18 @@ pub enum Commands {
         /// Interactive mode
         #[arg(short, long)]
         interactive: bool,
+
+        /// Tier to use for language components (essential or comprehensive)
+        #[arg(long, value_enum, default_value_t = Tier::Essential)]
+        tier: Tier,
+
+        /// Dry-run: show selections and excerpts without writing file
+        #[arg(long)]
+        dry_run: bool,
+
+        /// Show a small composed diff against existing target file (when present)
+        #[arg(long)]
+        diff: bool,
     },
 
     /// Update an existing AGENTS.md file
@@ -177,6 +189,9 @@ pub enum ListTarget {
         /// Filter by category
         #[arg(short, long)]
         category: Option<String>,
+        /// List components of a particular tier
+        #[arg(long)]
+        tier: Option<Tier>,
     },
 
     /// List available templates
@@ -184,7 +199,22 @@ pub enum ListTarget {
         /// Show template details
         #[arg(short, long)]
         detailed: bool,
+        /// Filter key=value on template metadata (repeatable)
+        #[arg(long, short = 'f')]
+        filter: Vec<String>,
+        /// Filter by technology (matches metadata 'technologies')
+        #[arg(long)]
+        tech: Option<String>,
     },
+}
+
+/// Tier for components
+#[derive(Debug, Clone, Copy, PartialEq, Eq, ValueEnum)]
+pub enum Tier {
+    /// Essential (smaller) components
+    Essential,
+    /// Comprehensive (verbose) components
+    Comprehensive,
 }
 
 impl Cli {
@@ -270,12 +300,15 @@ mod tests {
             template,
             force,
             interactive,
+            tier,
+            ..
         } = cli.command
         {
             assert_eq!(file, PathBuf::from("my-agents.md"));
             assert_eq!(template, None);
             assert!(!force);
             assert!(!interactive);
+            assert_eq!(tier, Tier::Essential);
         } else {
             panic!("Expected Create command");
         }
@@ -284,8 +317,9 @@ mod tests {
     #[test]
     fn test_parse_create_default_file() {
         let cli = Cli::parse_from(["xzagentz", "create"]);
-        if let Commands::Create { file, .. } = cli.command {
+        if let Commands::Create { file, tier, .. } = cli.command {
             assert_eq!(file, PathBuf::from("AGENTS.md"));
+            assert_eq!(tier, Tier::Essential);
         } else {
             panic!("Expected Create command");
         }
@@ -297,6 +331,17 @@ mod tests {
         if let Commands::Create { file, template, .. } = cli.command {
             assert_eq!(file, PathBuf::from("custom.md"));
             assert_eq!(template, Some("rust".to_string()));
+        } else {
+            panic!("Expected Create command");
+        }
+    }
+
+    #[test]
+    fn test_parse_create_with_comprehensive_flag() {
+        let cli = Cli::parse_from(["xzagentz", "create", "--tier", "comprehensive"]);
+        if let Commands::Create { tier, .. } = cli.command {
+            use super::Tier;
+            assert_eq!(tier, Tier::Comprehensive);
         } else {
             panic!("Expected Create command");
         }

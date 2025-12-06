@@ -1,9 +1,10 @@
 ---
 component:
-  name: typescript
+  name: typescript_comprehensive
   category: languages
   version: 2.0.0
-  description: TypeScript language guidelines, patterns, and best practices
+  description: Comprehensive TypeScript language guidelines, patterns, and best practices
+  tier: comprehensive
   languages:
     - typescript
   sections:
@@ -602,7 +603,7 @@ const colors1 = ["red", "green", "blue"]; // string[]
 // With const assertion
 const colors2 = ["red", "green", "blue"] as const; // readonly ["red", "green", "blue"]
 
-type Color = typeof colors2[number]; // "red" | "green" | "blue"
+type Color = (typeof colors2)[number]; // "red" | "green" | "blue"
 
 // Object const assertion
 const config = {

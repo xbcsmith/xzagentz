@@ -102,26 +102,108 @@ impl ComponentLoader {
     /// # Ok::<(), xzagentz::Error>(())
     /// ```
     pub fn load(&self, name: &str, component_type: ComponentType) -> Result<Component> {
-        // Check cache first
-        let cache_key = format!("{}:{}", component_type.as_str(), name);
-        if let Some(cached) = self.cache.borrow().get(&cache_key) {
+        self.load_with_tier(name, component_type, false)
+    }
+
+    /// Loads a component by name and type with tier support
+    ///
+    /// # Arguments
+    ///
+    /// * `name` - Component name (without .md extension)
+    /// * `component_type` - Component category
+    /// * `comprehensive` - If true, prefer comprehensive tier, otherwise essential
+    ///
+    /// # Returns
+    ///
+    /// Returns the loaded `Component` or an error if not found
+    ///
+    /// # Resolution Order
+    ///
+    /// If `comprehensive` is true:
+    /// 1. Try `{name}_comprehensive.md`
+    /// 2. Fall back to `{name}.md`
+    ///
+    /// If `comprehensive` is false (default):
+    /// 1. Try `{name}_essential.md`
+    /// 2. Fall back to `{name}.md`
+    ///
+    /// # Errors
+    ///
+    /// Returns `Error::ComponentNotFound` if no variant exists
+    ///
+    /// # Examples
+    ///
+    /// ```rust,no_run
+    /// use xzagentz::components::ComponentLoader;
+    /// use xzagentz::core::ComponentType;
+    ///
+    /// let loader = ComponentLoader::new(None);
+    /// // Load essential version
+    /// let essential = loader.load_with_tier("rust", ComponentType::Languages, false)?;
+    /// // Load comprehensive version
+    /// let comprehensive = loader.load_with_tier("rust", ComponentType::Languages, true)?;
+    /// # Ok::<(), xzagentz::Error>(())
+    /// ```
+    pub fn load_with_tier(
+        &self,
+        name: &str,
+        component_type: ComponentType,
+        comprehensive: bool,
+    ) -> Result<Component> {
+        // Determine tier suffix based on comprehensive flag
+        let tier_suffix = if comprehensive {
+            "_comprehensive"
+        } else {
+            "_essential"
+        };
+
+        // Try tiered version first
+        let tiered_name = format!("{}{}", name, tier_suffix);
+
+        // Check cache for tiered version
+        let tiered_cache_key = format!("{}:{}", component_type.as_str(), tiered_name);
+        if let Some(cached) = self.cache.borrow().get(&tiered_cache_key) {
             return Ok(cached.clone());
         }
 
-        // Build file path
-        let path = self.component_path(name, component_type);
-
-        // Check if file exists
-        if !path.exists() {
-            return Err(Error::component_not_found(format!(
-                "{} (type: {})",
-                name,
-                component_type.as_str()
-            )));
+        // Try to load tiered version
+        let tiered_path = self.component_path(&tiered_name, component_type);
+        if tiered_path.exists() {
+            return self.load_from_path(&tiered_name, component_type, &tiered_path);
         }
 
+        // Fall back to base name
+        let base_cache_key = format!("{}:{}", component_type.as_str(), name);
+        if let Some(cached) = self.cache.borrow().get(&base_cache_key) {
+            return Ok(cached.clone());
+        }
+
+        let base_path = self.component_path(name, component_type);
+        if base_path.exists() {
+            return self.load_from_path(name, component_type, &base_path);
+        }
+
+        // Neither tiered nor base version found
+        Err(Error::component_not_found(format!(
+            "{} (tried: {}, {}) (type: {})",
+            name,
+            tiered_name,
+            name,
+            component_type.as_str()
+        )))
+    }
+
+    /// Internal method to load a component from a specific path
+    fn load_from_path(
+        &self,
+        name: &str,
+        component_type: ComponentType,
+        path: &PathBuf,
+    ) -> Result<Component> {
+        let cache_key = format!("{}:{}", component_type.as_str(), name);
+
         // Read file content
-        let raw_content = fs::read_to_string(&path).map_err(|e| Error::file_io(path.clone(), e))?;
+        let raw_content = fs::read_to_string(path).map_err(|e| Error::file_io(path.clone(), e))?;
 
         // Parse YAML frontmatter if present and capture metadata
         let (content, metadata_map) = if ComponentMetadata::has_frontmatter(&raw_content) {
@@ -521,6 +603,67 @@ mod tests {
         assert_eq!(core_component.component_type, ComponentType::Core);
         assert_eq!(lang_component.component_type, ComponentType::Languages);
         assert_eq!(loader.cache_size(), 2);
+    }
+
+    #[test]
+    fn test_load_with_tier_prefers_essential_then_fallback() {
+        let temp_dir = TempDir::new().unwrap();
+        // create languages directory and both essential/comprehensive files
+        let languages_dir = temp_dir.path().join("languages");
+        fs::create_dir_all(&languages_dir).unwrap();
+
+        fs::write(
+            languages_dir.join("rust_essential.md"),
+            "# Rust Essential\n\nEssential content",
+        )
+        .unwrap();
+
+        fs::write(
+            languages_dir.join("rust_comprehensive.md"),
+            "# Rust Comprehensive\n\nComprehensive content",
+        )
+        .unwrap();
+
+        let loader = ComponentLoader::new(Some(temp_dir.path().to_path_buf()));
+
+        // default (comprehensive=false) should pick essential
+        let comp = loader
+            .load_with_tier("rust", ComponentType::Languages, false)
+            .unwrap();
+        assert!(comp.content.contains("Essential content"));
+
+        // comprehensive=true should pick comprehensive variant
+        let comp2 = loader
+            .load_with_tier("rust", ComponentType::Languages, true)
+            .unwrap();
+        assert!(comp2.content.contains("Comprehensive content"));
+    }
+
+    #[test]
+    fn test_load_with_tier_fallback_to_base() {
+        let temp_dir = TempDir::new().unwrap();
+        let languages_dir = temp_dir.path().join("languages");
+        fs::create_dir_all(&languages_dir).unwrap();
+
+        // only base exists
+        fs::write(
+            languages_dir.join("python.md"),
+            "# Python Base\n\nBase content",
+        )
+        .unwrap();
+
+        let loader = ComponentLoader::new(Some(temp_dir.path().to_path_buf()));
+
+        // both comprehensive and essential should fall back to base
+        let comp = loader
+            .load_with_tier("python", ComponentType::Languages, false)
+            .unwrap();
+        assert!(comp.content.contains("Base content"));
+
+        let comp2 = loader
+            .load_with_tier("python", ComponentType::Languages, true)
+            .unwrap();
+        assert!(comp2.content.contains("Base content"));
     }
 
     #[test]

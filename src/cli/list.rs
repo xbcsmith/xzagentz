@@ -182,12 +182,21 @@ pub fn execute(
     output::print_verbose(verbose, &format!("Template dir: {:?}", template_dir));
 
     match target {
-        ListTarget::Components { category } => {
-            list_components(component_dir, category.as_deref(), format, verbose)
+        ListTarget::Components { category, tier } => {
+            list_components(component_dir, category.as_deref(), *tier, format, verbose)
         }
-        ListTarget::Templates { detailed } => {
-            list_templates(template_dir, *detailed, format, verbose)
-        }
+        ListTarget::Templates {
+            detailed,
+            filter,
+            tech,
+        } => list_templates(
+            template_dir,
+            *detailed,
+            filter,
+            tech.as_deref(),
+            format,
+            verbose,
+        ),
     }
 }
 
@@ -195,6 +204,7 @@ pub fn execute(
 fn list_components(
     component_dir: &Path,
     category_filter: Option<&str>,
+    tier_filter: Option<super::Tier>,
     format: OutputFormat,
     verbose: bool,
 ) -> Result<(), Error> {
@@ -216,14 +226,38 @@ fn list_components(
     };
 
     // Load all components
+    // Instead of load_all (which applies tier resolution), enumerate names and apply tier filtering
     let mut all_components = Vec::new();
     for comp_type in types_to_load {
-        match loader.load_all(comp_type) {
-            Ok(mut components) => all_components.append(&mut components),
-            Err(e) if verbose => {
-                eprintln!("Warning: Could not load {:?} components: {}", comp_type, e);
+        match loader.list(comp_type) {
+            Ok(names) => {
+                for name in names {
+                    // Skip unwanted tier variants if a tier filter is applied
+                    if let Some(tfilter) = tier_filter {
+                        let is_comprehensive = name.ends_with("_comprehensive");
+                        let is_essential = name.ends_with("_essential");
+
+                        let keep = match tfilter {
+                            super::Tier::Essential => is_essential || !is_comprehensive,
+                            super::Tier::Comprehensive => is_comprehensive || !is_essential,
+                        };
+
+                        if !keep {
+                            continue;
+                        }
+                    }
+
+                    // Try to load component to extract metadata/summary
+                    if let Ok(c) = loader.load(&name, comp_type) {
+                        all_components.push(c);
+                    }
+                }
             }
-            Err(_) => {} // Silently skip missing directories if not verbose
+            Err(e) if verbose => eprintln!(
+                "Warning: Could not read directory for {:?}: {}",
+                comp_type, e
+            ),
+            Err(_) => {}
         }
     }
 
@@ -274,6 +308,8 @@ fn list_components(
 fn list_templates(
     template_dir: &Path,
     detailed: bool,
+    filters: &Vec<String>,
+    tech: Option<&str>,
     format: OutputFormat,
     verbose: bool,
 ) -> Result<(), Error> {
@@ -298,30 +334,62 @@ fn list_templates(
 
     // Load template details if requested
     let template_infos: Vec<TemplateInfo> = if detailed {
-        template_names
-            .iter()
-            .filter_map(|name| {
-                loader.load(name).ok().map(|tmpl| {
-                    let mut desc = tmpl.description.clone();
-                    if let Some(c) = tmpl.metadata.get("complexity") {
-                        if !c.is_empty() {
-                            desc = format!("{} [{}]", desc, c);
+        let mut infos = Vec::new();
+        for name in &template_names {
+            if let Ok(tmpl) = loader.load(name) {
+                // apply filters: each filter must match key=value in tmpl.metadata
+                let mut skip = false;
+                for f in filters {
+                    if let Some((k, v)) = f.split_once('=') {
+                        if let Some(val) = tmpl.metadata.get(k) {
+                            if val.to_lowercase() != v.to_lowercase() {
+                                skip = true;
+                                break;
+                            }
+                        } else {
+                            skip = true;
+                            break;
                         }
                     }
-                    if let Some(t) = tmpl.metadata.get("technologies") {
-                        if !t.is_empty() {
-                            desc = format!("{} ({})", desc, t);
-                        }
-                    }
+                }
 
-                    TemplateInfo {
-                        name: name.clone(),
-                        description: desc,
-                        component_count: tmpl.components.len(),
+                if skip {
+                    continue;
+                }
+
+                // tech filter checks 'technologies' metadata substring
+                if let Some(tech_q) = tech {
+                    let tech_q = tech_q.to_lowercase();
+                    if let Some(t) = tmpl.metadata.get("technologies") {
+                        if !t.to_lowercase().contains(&tech_q) {
+                            continue;
+                        }
+                    } else {
+                        continue;
                     }
-                })
-            })
-            .collect()
+                }
+
+                let mut desc = tmpl.description.clone();
+                if let Some(c) = tmpl.metadata.get("complexity") {
+                    if !c.is_empty() {
+                        desc = format!("{} [{}]", desc, c);
+                    }
+                }
+                if let Some(t) = tmpl.metadata.get("technologies") {
+                    if !t.is_empty() {
+                        desc = format!("{} ({})", desc, t);
+                    }
+                }
+
+                infos.push(TemplateInfo {
+                    name: name.clone(),
+                    description: desc,
+                    component_count: tmpl.components.len(),
+                });
+            }
+        }
+
+        infos
     } else {
         template_names
             .iter()
@@ -383,7 +451,7 @@ required = true
             "# Test 1\n\nTest component 1",
         );
 
-        let result = list_components(temp_dir.path(), None, OutputFormat::Human, false);
+        let result = list_components(temp_dir.path(), None, None, OutputFormat::Human, false);
         assert!(result.is_ok());
     }
 
@@ -392,8 +460,88 @@ required = true
         let temp_dir = TempDir::new().unwrap();
         create_test_template(temp_dir.path(), "rust_binary");
 
-        let result = list_templates(temp_dir.path(), false, OutputFormat::Human, false);
+        let result = list_templates(
+            temp_dir.path(),
+            false,
+            &Vec::new(),
+            None,
+            OutputFormat::Human,
+            false,
+        );
         assert!(result.is_ok());
+    }
+
+    #[test]
+    fn test_list_components_tier_filter() {
+        let temp_dir = TempDir::new().unwrap();
+        // create language component variants
+        create_test_component(
+            temp_dir.path(),
+            "languages",
+            "rust_essential",
+            "# Rust Essential\n\nEssential content",
+        );
+        create_test_component(
+            temp_dir.path(),
+            "languages",
+            "rust_comprehensive",
+            "# Rust Comprehensive\n\nComprehensive content",
+        );
+
+        // Essential tier should include the essential variant
+        let res1 = list_components(
+            temp_dir.path(),
+            Some("languages"),
+            Some(crate::cli::Tier::Essential),
+            OutputFormat::Human,
+            false,
+        );
+        assert!(res1.is_ok());
+
+        // Comprehensive tier should include the comprehensive variant
+        let res2 = list_components(
+            temp_dir.path(),
+            Some("languages"),
+            Some(crate::cli::Tier::Comprehensive),
+            OutputFormat::Human,
+            false,
+        );
+        assert!(res2.is_ok());
+    }
+
+    #[test]
+    fn test_list_templates_filter_and_tech() {
+        let temp_dir = TempDir::new().unwrap();
+
+        // create a toml template with metadata
+        let content = r#"
+name = "filter_test"
+description = "A template with metadata"
+
+[metadata]
+complexity = "advanced"
+technologies = "Rust,Tokio"
+
+[[components]]
+type = "core"
+name = "quick_reference"
+required = true
+"#;
+
+        let file_path = temp_dir.path().join("filter_test.toml");
+        fs::write(&file_path, content).unwrap();
+
+        // detailed with matching filter should succeed
+        let res = list_templates(
+            temp_dir.path(),
+            true,
+            &vec!["complexity=advanced".to_string()],
+            Some("Rust"),
+            OutputFormat::Human,
+            false,
+        );
+
+        assert!(res.is_ok());
     }
 
     #[test]

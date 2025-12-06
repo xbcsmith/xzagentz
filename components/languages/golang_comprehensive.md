@@ -1,11 +1,12 @@
 ---
 component:
-    name: golang
-    category: languages
-    version: "1.0"
-    description: Go-specific development guidelines and best practices
-    languages:
-        - golang
+  name: golang_comprehensive
+  category: languages
+  version: "1.0"
+  description: Comprehensive Go development guidelines and best practices
+  tier: comprehensive
+  languages:
+    - golang
 ---
 
 # Go Language Guidelines
@@ -19,11 +20,13 @@ This section provides Go-specific guidelines for projects that include Go compon
 **Recommended**: Go 1.19 or later
 
 Check your version:
+
 ```bash
 go version
 ```
 
 Update Go:
+
 ```bash
 # Using package manager (e.g., brew on macOS)
 brew upgrade go
@@ -38,11 +41,13 @@ brew upgrade go
 ### Use gofmt
 
 **Auto-format code:**
+
 ```bash
 gofmt -w .
 ```
 
 **Or use goimports (preferred):**
+
 ```bash
 goimports -w .
 ```
@@ -81,6 +86,7 @@ myproject/
 ```
 
 **Directory purposes:**
+
 - `cmd/` - Main applications
 - `internal/` - Private application code
 - `pkg/` - Public library code
@@ -170,6 +176,7 @@ func LoadComponent(path string) error {
 ### Error Wrapping
 
 **Use fmt.Errorf with %w:**
+
 ```go
 if err := validateComponent(comp); err != nil {
     return fmt.Errorf("validation failed: %w", err)
@@ -177,6 +184,7 @@ if err := validateComponent(comp); err != nil {
 ```
 
 **Check wrapped errors:**
+
 ```go
 if errors.Is(err, ErrNotFound) {
     // Handle not found
@@ -195,6 +203,7 @@ if errors.As(err, &compErr) {
 ### Small Interfaces
 
 **Prefer small, focused interfaces:**
+
 ```go
 // Good
 type Reader interface {
@@ -261,6 +270,7 @@ func NewComponent(name, content string) *Component {
 ### Method Receivers
 
 **Use pointer receivers when:**
+
 - Method modifies the receiver
 - Receiver is a large struct
 - Consistency (if some methods need pointer, use for all)
@@ -284,6 +294,7 @@ func (c Component) IsValid() bool {
 ### Goroutines
 
 **Use goroutines for concurrent operations:**
+
 ```go
 func ProcessComponents(paths []string) ([]*Component, error) {
     results := make(chan *Component, len(paths))
@@ -480,21 +491,25 @@ func LoadComponent(path string) (*Component, error) {
 ### Go Modules
 
 **Initialize module:**
+
 ```bash
 go mod init github.com/username/project
 ```
 
 **Add dependency:**
+
 ```bash
 go get github.com/spf13/cobra
 ```
 
 **Tidy dependencies:**
+
 ```bash
 go mod tidy
 ```
 
 **Vendor dependencies:**
+
 ```bash
 go mod vendor
 ```
@@ -555,6 +570,7 @@ func ProcessFile(path string) error {
 ### Zero Values
 
 **Design structs to have useful zero values:**
+
 ```go
 type Config struct {
     MaxRetries int    // 0 is reasonable default
@@ -569,6 +585,7 @@ var config Config
 ### Avoid Init Functions
 
 **Prefer explicit initialization:**
+
 ```go
 // Less ideal
 func init() {

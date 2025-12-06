@@ -98,6 +98,9 @@ fn run(cli: Cli) -> Result<(), Error> {
             template,
             force,
             interactive,
+            tier,
+            dry_run,
+            diff,
         } => {
             use xzagentz::cli::create::{CreateCommand, CreateConfig};
 
@@ -106,12 +109,15 @@ fn run(cli: Cli) -> Result<(), Error> {
                 template: template.clone(),
                 force,
                 interactive,
+                tier,
+                dry_run,
+                diff,
                 template_dir,
                 component_dir,
                 verbose: cli.verbose,
             };
 
-            let cmd = CreateCommand::new(file, template, force, interactive);
+            let cmd = CreateCommand::new(file, template, force, interactive, tier, dry_run, diff);
             cmd.execute(&config)?;
         }
         Commands::Update {

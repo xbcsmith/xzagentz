@@ -1,11 +1,12 @@
 ---
 component:
-    name: python
-    category: languages
-    version: "1.0"
-    description: Python-specific development guidelines and best practices
-    languages:
-        - python
+  name: python_comprehensive
+  category: languages
+  version: "1.0"
+  description: Comprehensive Python development guidelines and best practices
+  tier: comprehensive
+  languages:
+    - python
 ---
 
 # Python Language Guidelines
@@ -19,6 +20,7 @@ This section provides Python-specific guidelines for projects that include Pytho
 **Recommended**: Python 3.9 or later
 
 Check your version:
+
 ```bash
 python --version
 python3 --version
@@ -31,11 +33,13 @@ python3 --version
 ### Use Black for Formatting
 
 **Auto-format code:**
+
 ```bash
 black .
 ```
 
 **Configuration** (pyproject.toml):
+
 ```toml
 [tool.black]
 line-length = 100
@@ -45,6 +49,7 @@ target-version = ['py39']
 ### PEP 8 Compliance
 
 Follow PEP 8 style guide:
+
 - Indentation: 4 spaces
 - Max line length: 100 characters (configurable)
 - Imports: grouped and sorted
@@ -53,16 +58,19 @@ Follow PEP 8 style guide:
 ### Import Organization
 
 **Use isort:**
+
 ```bash
 isort .
 ```
 
 **Import order:**
+
 1. Standard library imports
 2. Third-party imports
 3. Local application imports
 
 **Example:**
+
 ```python
 import os
 import sys
@@ -82,6 +90,7 @@ from myproject.utils import helpers
 ### Use Type Annotations
 
 **Function signatures:**
+
 ```python
 from typing import List, Optional, Dict, Any
 
@@ -104,6 +113,7 @@ mypy .
 ```
 
 **Configuration** (mypy.ini):
+
 ```ini
 [mypy]
 python_version = 3.9
@@ -166,6 +176,7 @@ def load_component(path: str) -> str:
 ### Use pytest
 
 **Test structure:**
+
 ```python
 import pytest
 from myproject.component import Component
@@ -193,6 +204,7 @@ def test_with_fixture(sample_component):
 ### Test Coverage
 
 **Run tests with coverage:**
+
 ```bash
 pytest --cov=myproject --cov-report=html
 ```
@@ -206,6 +218,7 @@ pytest --cov=myproject --cov-report=html
 ### Docstrings
 
 **Use Google-style docstrings:**
+
 ```python
 def process_template(template: str, context: Dict[str, Any]) -> str:
     """Process template with given context.
@@ -250,11 +263,13 @@ Example:
 ### Use venv or virtualenv
 
 **Create environment:**
+
 ```bash
 python -m venv venv
 ```
 
 **Activate:**
+
 ```bash
 # Unix/MacOS
 source venv/bin/activate
@@ -266,6 +281,7 @@ venv\Scripts\activate
 ### Requirements Management
 
 **requirements.txt:**
+
 ```text
 click>=8.0.0
 pyyaml>=6.0
@@ -273,6 +289,7 @@ jinja2>=3.0.0
 ```
 
 **Development requirements:**
+
 ```text
 -r requirements.txt
 pytest>=7.0.0
@@ -289,6 +306,7 @@ mypy>=0.950
 ### Context Managers
 
 **Use with statements:**
+
 ```python
 # Good
 with open('file.txt', 'r') as f:
@@ -303,6 +321,7 @@ f.close()
 ### List Comprehensions
 
 **Prefer comprehensions for simple transformations:**
+
 ```python
 # Good
 names = [item.name for item in items if item.is_active]
@@ -317,6 +336,7 @@ for item in items:
 ### Pathlib Over os.path
 
 **Use pathlib for path operations:**
+
 ```python
 from pathlib import Path
 
@@ -340,11 +360,13 @@ if os.path.exists(config_path):
 ### Linting
 
 **flake8:**
+
 ```bash
 flake8 .
 ```
 
 **pylint:**
+
 ```bash
 pylint myproject
 ```
@@ -352,11 +374,13 @@ pylint myproject
 ### Code Formatting
 
 **black:**
+
 ```bash
 black .
 ```
 
 **isort:**
+
 ```bash
 isort .
 ```
@@ -364,6 +388,7 @@ isort .
 ### Type Checking
 
 **mypy:**
+
 ```bash
 mypy .
 ```
